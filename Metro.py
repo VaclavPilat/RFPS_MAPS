@@ -97,12 +97,18 @@ class Metro(Map):
         H = UNDERPASS_HALLWAY_HEIGHT + UNDERPASS_HALLWAY_DEPTH
         L = UNDERPASS_ENTRANCE_STAIRS - UNDERPASS_ENTRANCE_BORDER
         C = round((H/UNDERPASS_STEP_HEIGHT + L/UNDERPASS_STEP_LENGTH)/2)
-        for x, z in [(c, c+1) for c in range(C)]:
-            print("x:", x/C, "; z:", z/C)
-            TLSB = TLIF + (x/C*L) * V.RIGHT + ((z-1)/C*H) * V.UP
-            BLSB = BLIF + (x/C*L) * V.RIGHT + ((z-1)/C*H) * V.UP
-            TLST = TLSB + (z/C*H) * V.UP - ((z-1)/C*H) * V.UP
-            BLST = BLSB + (z/C*H) * V.UP - ((z-1)/C*H) * V.UP
-            self.face([TLSB, BLSB, BLST, TLST])
+        for c in range(C):
+            TS = TLIF + (c/C*L) * V.RIGHT + ((c+1)/C*H) * V.UP
+            BS = BLIF + (c/C*L) * V.RIGHT + ((c+1)/C*H) * V.UP
+            self.face([
+                TLIF + (c/C*L) * V.RIGHT + (c/C*H) * V.UP,
+                BLIF + (c/C*L) * V.RIGHT + (c/C*H) * V.UP,
+                BS, TS
+            ])
+            self.face([
+                TLIF + ((c+1)/C*L) * V.RIGHT + ((c+1)/C*H) * V.UP,
+                BLIF + ((c+1)/C*L) * V.RIGHT + ((c+1)/C*H) * V.UP,
+                BS, TS
+            ][::-1])
 
 Metro()
