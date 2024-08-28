@@ -16,11 +16,14 @@ UNDERPASS_ENTRANCE_WIDTH = 3
 UNDERPASS_ENTRANCE_SLOPE = 10
 UNDERPASS_ENTRANCE_STAIRS = 5
 
+UNDERPASS_STEP_LENGTH = 0.3
+UNDERPASS_STEP_HEIGHT = 0.2
+
 class Metro(Map):
     def __init__(self) -> None:
         super().__init__()
         Scene.clear()
-        self.UNDERPASS_SLOPE(V.LEFT * (UNDERPASS_HALLWAY_WIDTH/2))
+        #self.UNDERPASS_SLOPE(V.LEFT * (UNDERPASS_HALLWAY_WIDTH/2))
         self.UNDERPASS_STAIRS(V.RIGHT * (UNDERPASS_HALLWAY_WIDTH/2))
         self.create("Metro")
     def UNDERPASS_SLOPE(self, S: V = V(0, 0, 0)) -> None:
@@ -56,8 +59,8 @@ class Metro(Map):
         BROF = BROC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
         self.face([TLI1, TLI, TRIF, TROF, TROC, TRIC, TRI1])
         self.face([BLI, BLI1, BRI1, BRIC, BROC, BROF, BRIF])
-        self.face([TRIF, TROF, BROF, BRIF][::-1])
-        self.face([TRIC, TROC, BROC, BRIC])
+        self.face([TRIF, TROF, BROF, BRIF][::-1]) #####
+        self.face([TRIC, TROC, BROC, BRIC]) #####
     def UNDERPASS_STAIRS(self, S: V = (0, 0, 0)) -> None:
         # Outer points
         TLO = S
@@ -88,7 +91,18 @@ class Metro(Map):
         TLOF = TLOC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
         BLOC = BLO + UNDERPASS_ENTRANCE_BORDER * V.FORWARD + UNDERPASS_HALLWAY_DEPTH * V.DOWN
         BLOF = BLOC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
-        self.face([TLIF, TLOF, BLOF, BLIF])
-        self.face([TLIC, TLOC, BLOC, BLIC][::-1])
+        self.face([TLIF, TLOF, BLOF, BLIF]) #####
+        self.face([TLIC, TLOC, BLOC, BLIC][::-1]) #####
+        # Steps
+        H = UNDERPASS_HALLWAY_HEIGHT + UNDERPASS_HALLWAY_DEPTH
+        L = UNDERPASS_ENTRANCE_STAIRS - UNDERPASS_ENTRANCE_BORDER
+        C = round((H/UNDERPASS_STEP_HEIGHT + L/UNDERPASS_STEP_LENGTH)/2)
+        for x, z in [(c, c+1) for c in range(C)]:
+            print("x:", x/C, "; z:", z/C)
+            TLSB = TLIF + (x/C*L) * V.RIGHT + ((z-1)/C*H) * V.UP
+            BLSB = BLIF + (x/C*L) * V.RIGHT + ((z-1)/C*H) * V.UP
+            TLST = TLSB + (z/C*H) * V.UP - ((z-1)/C*H) * V.UP
+            BLST = BLSB + (z/C*H) * V.UP - ((z-1)/C*H) * V.UP
+            self.face([TLSB, BLSB, BLST, TLST])
 
 Metro()
