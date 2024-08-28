@@ -139,5 +139,17 @@ class Metro(Map):
         TRCF = S + (UNDERPASS_HALLWAY_DEPTH + UNDERPASS_HALLWAY_HEIGHT) * V.DOWN + UNDERPASS_ENTRANCE_BORDER * V.BACKWARD + UNDERPASS_HALLWAY_WIDTH * V.RIGHT
         TRCC = S + UNDERPASS_HALLWAY_DEPTH * V.DOWN + UNDERPASS_ENTRANCE_BORDER * V.BACKWARD + UNDERPASS_HALLWAY_WIDTH * V.RIGHT
         self.face([TRF, TRC, TRCC, TRCF][::-1])
+        # Floor & ceiling
+        CEIL = [
+            BLF, BLCF,
+            BLCF + UNDERPASS_ENTRANCE_BORDER * V.LEFT,
+            TLCF + UNDERPASS_ENTRANCE_BORDER * V.LEFT,
+            TLCF, TLF, TRF, TRCF,
+            TRCF + UNDERPASS_ENTRANCE_BORDER * V.RIGHT,
+            BRCF + UNDERPASS_ENTRANCE_BORDER * V.RIGHT,
+            BRCF, BRF
+        ]
+        self.face([x + UNDERPASS_HALLWAY_HEIGHT * V.UP for x in CEIL])
+        self.face(CEIL[::-1])
 
 Metro()
