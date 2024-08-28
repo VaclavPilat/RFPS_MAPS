@@ -37,6 +37,6 @@ def underpass(S: V = V(0, 0, 0)):
     metro.face([BLO, BLI, BLI1, BLO1])
 
 Scene.clear()
-metro = Model()
+metro = Map()
 underpass()
 metro.create("Metro")

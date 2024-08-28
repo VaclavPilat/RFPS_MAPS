@@ -16,19 +16,23 @@ class Scene:
         for collection in bpy.context.scene.collection.children:
             bpy.context.scene.collection.children.unlink(collection)
 
-class Model:
+class Map:
     def __init__(self) -> None:
         self.bmesh = bmesh.new()
+        self.vertices = {}
 
-    def vertex(self, vertex: list|tuple) -> list|tuple:
-        self.bmesh.verts.new(tuple(vertex))
+    def vertex(self, v: "V"):
+        if v in self.vertices:
+            return self.vertices[v]
+        vertex = self.bmesh.verts.new(tuple(v))
+        self.vertices[v] = vertex
         return vertex
     
     def face(self, vertices: list|tuple) -> list|tuple:
-        self.bmesh.faces.new([self.bmesh.verts.new(tuple(v)) for v in vertices])
+        self.bmesh.faces.new([self.vertex(tuple(v)) for v in vertices])
         return vertices
 
-    def create(self, name: str = "Model") -> None:
+    def create(self, name: str = "Map") -> None:
         mesh = bpy.data.meshes.new(name)
         self.bmesh.to_mesh(mesh)
         obj = bpy.data.objects.new(name, mesh)

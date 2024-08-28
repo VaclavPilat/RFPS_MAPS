@@ -15,6 +15,15 @@ class V:
         return self.__mul__(other)
     def __iter__(self):
         return iter(self.args)
+    def __hash__(self):
+        return hash(self.args)
+    def __eq__(self, other: "V"):
+        if not isinstance(other, self.__class__):
+            return False
+        for a, b in zip(self.args, other.args):
+            if a != b:
+                return False
+        return True
 
 V.ZERO = V(0, 0, 0)
 V.ONE = V(1, 1, 1)
@@ -35,3 +44,7 @@ if __name__ == "__main__":
     print(V(1, 2, 3) * 3)
     print(3 * V(1, 2, 3))
     print(*V(1, 2, 3))
+    print(V(1, 2, 3) == V(1, 2, 3))
+    print(V(1, 2, 3) == V(1, 2, 0))
+    print(V(1, 2, 3) in (V(1, 2, 3), V(1, 2, 4)))
+    print(V(1, 0, 3) in (V(1, 2, 3), V(1, 2, 4)))
