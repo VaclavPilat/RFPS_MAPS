@@ -27,6 +27,3 @@ class Model:
         mesh.update()
         obj = bpy.data.objects.new(name, mesh)
         bpy.context.scene.collection.objects.link(obj)
-
-Scene.clear()
-Model([(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0)]).create("test")
