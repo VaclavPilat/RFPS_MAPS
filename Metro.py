@@ -23,13 +23,13 @@ class Metro(Map):
     def __init__(self) -> None:
         super().__init__()
         Scene.clear()
-        #self.UNDERPASS_SLOPE(V.LEFT * (UNDERPASS_HALLWAY_WIDTH/2))
-        self.UNDERPASS_STAIRS(V.RIGHT * (UNDERPASS_HALLWAY_WIDTH/2))
+        self.UNDERPASS_SLOPE(V.LEFT * UNDERPASS_ENTRANCE_SLOPE)
+        self.UNDERPASS_STAIRS(V.RIGHT * UNDERPASS_HALLWAY_WIDTH)
         self.create("Metro")
     def UNDERPASS_SLOPE(self, S: V = V(0, 0, 0)) -> None:
         # Outer points
-        TRO = S
-        TLO = TRO + UNDERPASS_ENTRANCE_SLOPE * V.LEFT
+        TLO = S
+        TRO = TLO + UNDERPASS_ENTRANCE_SLOPE * V.RIGHT
         BRO = TRO + UNDERPASS_ENTRANCE_WIDTH * V.BACKWARD
         BLO = BRO + UNDERPASS_ENTRANCE_SLOPE * V.LEFT
         # Inner points
@@ -59,8 +59,8 @@ class Metro(Map):
         BROF = BROC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
         self.face([TLI1, TLI, TRIF, TROF, TROC, TRIC, TRI1])
         self.face([BLI, BLI1, BRI1, BRIC, BROC, BROF, BRIF])
-        self.face([TRIF, TROF, BROF, BRIF][::-1]) #####
-        self.face([TRIC, TROC, BROC, BRIC]) #####
+        #self.face([TRIF, TROF, BROF, BRIF][::-1]) #####
+        #self.face([TRIC, TROC, BROC, BRIC]) #####
     def UNDERPASS_STAIRS(self, S: V = (0, 0, 0)) -> None:
         # Outer points
         TLO = S
@@ -91,8 +91,8 @@ class Metro(Map):
         TLOF = TLOC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
         BLOC = BLO + UNDERPASS_ENTRANCE_BORDER * V.FORWARD + UNDERPASS_HALLWAY_DEPTH * V.DOWN
         BLOF = BLOC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
-        self.face([TLIF, TLOF, BLOF, BLIF]) #####
-        self.face([TLIC, TLOC, BLOC, BLIC][::-1]) #####
+        #self.face([TLIF, TLOF, BLOF, BLIF]) #####
+        #self.face([TLIC, TLOC, BLOC, BLIC][::-1]) #####
         # Steps
         H = UNDERPASS_HALLWAY_HEIGHT + UNDERPASS_HALLWAY_DEPTH
         L = UNDERPASS_ENTRANCE_STAIRS - UNDERPASS_ENTRANCE_BORDER
@@ -114,5 +114,7 @@ class Metro(Map):
             B += [BL, BS]
         self.face(T + [TRI, TRI1, TLI1, TLIC, TLOC, TLOF])
         self.face((B + [BRI, BRI1, BLI1, BLIC, BLOC, BLOF])[::-1])
+    def UNDERPASS_HALL(self, S: V = (0, 0, 0)) -> None:
+        pass
 
 Metro()
