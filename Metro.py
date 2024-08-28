@@ -28,13 +28,13 @@ def underpass(S: V = V(0, 0, 0)):
     BLI = BLO + UNDERPASS_ENTRANCE_BORDER * V.FORWARD
     # Upper points
     TRO1, TLO1, BRO1, BLO1, TRI1, TLI1, BRI1, BLI1 = (x + UNDERPASS_ENTRANCE_TOP * V.UP for x in (TRO, TLO, BRO, BLO, TRI, TLI, BRI, BLI))
-    metro.face([TLO1, TRO1, BRO1, BLO1, BLI1, BRI1, TRI1, TLI1])
+    metro.face([TLO1, TRO1, BRO1, BLO1, BLI1, BRI1, TRI1, TLI1][::-1])
     # Outer walls
     metro.face([TLO, TLI, TLI1, TLO1])
-    metro.face([TLO, TRO, TRO1, TLO1])
-    metro.face([TRO, BRO, BRO1, TRO1])
+    metro.face([TLO, TRO, TRO1, TLO1][::-1])
+    metro.face([TRO, BRO, BRO1, TRO1][::-1])
     metro.face([BLO, BRO, BRO1, BLO1])
-    metro.face([BLO, BLI, BLI1, BLO1])
+    metro.face([BLO, BLI, BLI1, BLO1][::-1])
 
 Scene.clear()
 metro = Map()
