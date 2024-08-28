@@ -13,6 +13,8 @@ class V:
         return V(*(a * b for a, b in zip(self.args, other.args)))
     def __rmul__(self, other: int|float) -> "V":
         return self.__mul__(other)
+    def __iter__(self):
+        return iter(self.args)
 
 V.ZERO = V(0, 0, 0)
 V.ONE = V(1, 1, 1)
@@ -32,3 +34,4 @@ if __name__ == "__main__":
     print(V(1, 2, 3) * V.LEFT)
     print(V(1, 2, 3) * 3)
     print(3 * V(1, 2, 3))
+    print(*V(1, 2, 3))
