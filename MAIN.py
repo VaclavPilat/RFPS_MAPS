@@ -1,4 +1,4 @@
-import enum, bpy
+import enum, bpy, bmesh
 
 bpy.context.preferences.view.show_splash = False
 
@@ -17,13 +17,19 @@ class Scene:
             bpy.context.scene.collection.children.unlink(collection)
 
 class Model:
-    def __init__(self, vertices: list = [], edges: list = [], faces: list = []) -> None:
-        self.vertices = vertices
-        self.edges = edges
-        self.faces = faces
+    def __init__(self) -> None:
+        self.bmesh = bmesh.new()
+
+    def vertice(self, vertice: list|tuple) -> list|tuple:
+        self.bmesh.verts.new(vertice)
+        return vertice
+    
+    def face(self, vertices: list|tuple) -> list|tuple:
+        self.bmesh.faces.new([self.bmesh.verts.new(v) for v in vertices])
+        return vertices
+
     def create(self, name: str = "Model") -> None:
         mesh = bpy.data.meshes.new(name)
-        mesh.from_pydata(self.vertices, self.edges, self.faces)
-        mesh.update()
+        self.bmesh.to_mesh(mesh)
         obj = bpy.data.objects.new(name, mesh)
         bpy.context.scene.collection.objects.link(obj)
