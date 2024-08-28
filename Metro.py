@@ -16,7 +16,7 @@ UNDERPASS_ENTRANCE_WIDTH = 3
 UNDERPASS_ENTRANCE_SLOPE = 10
 UNDERPASS_ENTRANCE_STAIRS = 5
 
-class Station(Map):
+class Metro(Map):
     def __init__(self) -> None:
         super().__init__()
         Scene.clear()
@@ -42,5 +42,20 @@ class Station(Map):
         self.face([TRO, BRO, BRO1, TRO1][::-1])
         self.face([BLO, BRO, BRO1, BLO1])
         self.face([BLO, BLI, BLI1, BLO1][::-1])
+        # Lower points
+        TRIC = TRI + UNDERPASS_HALLWAY_DEPTH * V.DOWN
+        TRIF = TRIC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
+        BRIC = BRI + UNDERPASS_HALLWAY_DEPTH * V.DOWN
+        BRIF = BRIC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
+        self.face([BLI, TLI, TRIF, BRIF][::-1])
+        self.face([TRI1, BRI1, BRIC, TRIC][::-1])
+        TROC = TRO + UNDERPASS_ENTRANCE_BORDER * V.BACKWARD + UNDERPASS_HALLWAY_DEPTH * V.DOWN
+        TROF = TROC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
+        BROC = BRO + UNDERPASS_ENTRANCE_BORDER * V.FORWARD + UNDERPASS_HALLWAY_DEPTH * V.DOWN
+        BROF = BROC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
+        self.face([TLI1, TLI, TRIF, TROF, TROC, TRIC, TRI1])
+        self.face([BLI, BLI1, BRI1, BRIC, BROC, BROF, BRIF])
+        self.face([TRIF, TROF, BROF, BRIF][::-1])
+        self.face([TRIC, TROC, BROC, BRIC])
 
-Station()
+Metro()
