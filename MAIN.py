@@ -20,12 +20,12 @@ class Model:
     def __init__(self) -> None:
         self.bmesh = bmesh.new()
 
-    def vertice(self, vertice: list|tuple) -> list|tuple:
-        self.bmesh.verts.new(vertice)
-        return vertice
+    def vertex(self, vertex: list|tuple) -> list|tuple:
+        self.bmesh.verts.new(tuple(vertex))
+        return vertex
     
     def face(self, vertices: list|tuple) -> list|tuple:
-        self.bmesh.faces.new([self.bmesh.verts.new(v) for v in vertices])
+        self.bmesh.faces.new([self.bmesh.verts.new(tuple(v)) for v in vertices])
         return vertices
 
     def create(self, name: str = "Model") -> None:
