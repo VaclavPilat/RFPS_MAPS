@@ -20,6 +20,9 @@ STREET_SIDEWALK_WIDTH = 3
 STREET_CURB_WIDTH = 0.3
 STREET_CURB_HEIGHT = 0.2
 STREET_LANE_WIDTH = 4
+STREET_BUS_START = 15
+STREET_BUS_LENGTH = 20
+STREET_BUS_END = 10
 
 class Metro(Map):
     def __init__(self) -> None:
@@ -157,6 +160,7 @@ class Metro(Map):
         self.face([x + UNDERPASS_HALLWAY_HEIGHT * V.UP for x in CEIL])
         self.face(CEIL[::-1])
     def UNDERPASS_SIDEWALK(self, S: V = (0, 0, 0)) -> None:
+        # Sidewalk
         TLO = S
         TLI = TLO + STREET_SIDEWALK_WIDTH * V.BACKWARD
         TLIC = TLI + UNDERPASS_ENTRANCE_SLOPE * V.RIGHT
@@ -170,6 +174,7 @@ class Metro(Map):
         TRI = TRIC + UNDERPASS_ENTRANCE_STAIRS * V.RIGHT
         TRO = TRI + STREET_SIDEWALK_WIDTH * V.FORWARD
         self.face([TLO, TLI, TLIC, BLIC, BLI, BLO, BRO, BRI, BRIC, TRIC, TRI, TRO])
+        # Curb
         BLC = S + (STREET_LANE_WIDTH + STREET_SIDEWALK_WIDTH) * V.BACKWARD
         BLCC = BLC + STREET_CURB_HEIGHT * V.DOWN
         BRC = BLC + (UNDERPASS_ENTRANCE_SLOPE + UNDERPASS_HALLWAY_WIDTH + UNDERPASS_ENTRANCE_STAIRS) * V.RIGHT
@@ -177,6 +182,16 @@ class Metro(Map):
         self.face([BLO, BLC, BRC, BRO])
         self.face([BLC, BLCC, BRCC, BRC])
     def BUS_STOP(self, S: V = (0, 0, 0)) -> None:
-        pass
+        # Sidewalk
+        TL = S
+        BL = TL + (STREET_SIDEWALK_WIDTH + STREET_LANE_WIDTH) * V.BACKWARD
+        BLI = BL + STREET_CURB_WIDTH * V.FORWARD
+        TR = TL + (STREET_BUS_START + STREET_BUS_LENGTH + STREET_BUS_END) * V.RIGHT
+        BR = TR + (STREET_SIDEWALK_WIDTH + STREET_LANE_WIDTH) * V.BACKWARD
+        BRI = BR + STREET_CURB_WIDTH * V.FORWARD
+        LCI = TL + STREET_BUS_END * V.RIGHT + STREET_SIDEWALK_WIDTH * V.BACKWARD
+        RCI = TR + STREET_BUS_START * V.LEFT + STREET_SIDEWALK_WIDTH * V.BACKWARD
+        self.face([TL, TR, BRI, RCI, LCI, BLI][::-1])
+        # Curb
 
 Metro()
