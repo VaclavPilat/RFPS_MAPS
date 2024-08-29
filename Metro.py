@@ -193,5 +193,8 @@ class Metro(Map):
         RCI = TR + STREET_BUS_START * V.LEFT + STREET_SIDEWALK_WIDTH * V.BACKWARD
         self.face([TL, TR, BRI, RCI, LCI, BLI][::-1])
         # Curb
+        LCO = LCI + STREET_CURB_WIDTH * V.BACKWARD
+        RCO = RCI + STREET_CURB_WIDTH * V.BACKWARD
+        self.face([BLI, LCI, RCI, BRI, BR, RCO, LCO, BL][::-1])
 
 Metro()
