@@ -196,5 +196,11 @@ class Metro(Map):
         LCO = LCI + STREET_CURB_WIDTH * V.BACKWARD
         RCO = RCI + STREET_CURB_WIDTH * V.BACKWARD
         self.face([BLI, LCI, RCI, BRI, BR, RCO, LCO, BL][::-1])
+        BL1, LC1, RC1, BR1 = [x + STREET_CURB_HEIGHT * V.DOWN for x in [BL, LCO, RCO, BR]]
+        self.face([BL, LCO, LC1, BL1][::-1])
+        self.face([LCO, RCO, RC1, LC1][::-1])
+        self.face([RCO, BR, BR1, RC1][::-1])
+        self.face([BL1, LC1, RC1, BR1][::-1])
+
 
 Metro()
