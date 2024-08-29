@@ -28,11 +28,11 @@ class Metro(Map):
     def __init__(self) -> None:
         super().__init__()
         Scene.clear()
-        self.UNDERPASS_SLOPE(V.LEFT * UNDERPASS_ENTRANCE_SLOPE)
-        self.UNDERPASS_STAIRS(V.RIGHT * UNDERPASS_HALLWAY_WIDTH)
-        self.UNDERPASS_HALL(V.ZERO)
-        self.UNDERPASS_SIDEWALK(V.LEFT * UNDERPASS_ENTRANCE_SLOPE + V.FORWARD * STREET_SIDEWALK_WIDTH)
-        self.BUS_STOP(V.FORWARD * STREET_SIDEWALK_WIDTH + V.RIGHT * (UNDERPASS_HALLWAY_WIDTH + UNDERPASS_ENTRANCE_STAIRS))
+        S = V.BACKWARD * STREET_SIDEWALK_WIDTH
+        self.UNDERPASS_SLOPE(S)
+        self.UNDERPASS_HALL(S := S + V.RIGHT * UNDERPASS_ENTRANCE_SLOPE)
+        self.UNDERPASS_STAIRS(S := S + V.RIGHT * UNDERPASS_HALLWAY_WIDTH)
+        self.BUS_STOP(S := S + V.RIGHT * UNDERPASS_ENTRANCE_STAIRS)
         self.create("Metro")
     def UNDERPASS_SLOPE(self, S: V = V(0, 0, 0)) -> None:
         # Outer points
@@ -67,8 +67,8 @@ class Metro(Map):
         BROF = BROC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
         self.face([TLI1, TLI, TRIF, TROF, TROC, TRIC, TRI1])
         self.face([BLI, BLI1, BRI1, BRIC, BROC, BROF, BRIF])
-        #self.face([TRIF, TROF, BROF, BRIF][::-1]) #####
-        #self.face([TRIC, TROC, BROC, BRIC]) #####
+        self.face([TRIF, TROF, BROF, BRIF][::-1])
+        self.face([TRIC, TROC, BROC, BRIC])
     def UNDERPASS_STAIRS(self, S: V = (0, 0, 0)) -> None:
         # Outer points
         TLO = S
@@ -99,8 +99,8 @@ class Metro(Map):
         TLOF = TLOC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
         BLOC = BLO + UNDERPASS_ENTRANCE_BORDER * V.FORWARD + UNDERPASS_HALLWAY_DEPTH * V.DOWN
         BLOF = BLOC + UNDERPASS_HALLWAY_HEIGHT * V.DOWN
-        #self.face([TLIF, TLOF, BLOF, BLIF]) #####
-        #self.face([TLIC, TLOC, BLOC, BLIC][::-1]) #####
+        self.face([TLIF, TLOF, BLOF, BLIF])
+        self.face([TLIC, TLOC, BLOC, BLIC][::-1])
         # Steps
         H = UNDERPASS_HALLWAY_HEIGHT + UNDERPASS_HALLWAY_DEPTH
         L = UNDERPASS_ENTRANCE_STAIRS - UNDERPASS_ENTRANCE_BORDER
@@ -150,37 +150,11 @@ class Metro(Map):
         # Floor & ceiling
         CEIL = [
             BLF, BLCF,
-            BLCF + UNDERPASS_ENTRANCE_BORDER * V.LEFT,
-            TLCF + UNDERPASS_ENTRANCE_BORDER * V.LEFT,
             TLCF, TLF, TRF, TRCF,
-            TRCF + UNDERPASS_ENTRANCE_BORDER * V.RIGHT,
-            BRCF + UNDERPASS_ENTRANCE_BORDER * V.RIGHT,
             BRCF, BRF
         ]
         self.face([x + UNDERPASS_HALLWAY_HEIGHT * V.UP for x in CEIL])
         self.face(CEIL[::-1])
-    def UNDERPASS_SIDEWALK(self, S: V = (0, 0, 0)) -> None:
-        # Sidewalk
-        TLO = S
-        TLI = TLO + STREET_SIDEWALK_WIDTH * V.BACKWARD
-        TLIC = TLI + UNDERPASS_ENTRANCE_SLOPE * V.RIGHT
-        BLIC = TLIC + UNDERPASS_ENTRANCE_WIDTH * V.BACKWARD
-        BLI = BLIC + UNDERPASS_ENTRANCE_SLOPE * V.LEFT
-        BLO = BLI + (STREET_LANE_WIDTH - UNDERPASS_ENTRANCE_WIDTH - STREET_CURB_WIDTH) * V.BACKWARD
-        BRO = BLO + (UNDERPASS_ENTRANCE_SLOPE + UNDERPASS_HALLWAY_WIDTH + UNDERPASS_ENTRANCE_STAIRS) * V.RIGHT
-        BRI = BRO + (STREET_LANE_WIDTH - UNDERPASS_ENTRANCE_WIDTH - STREET_CURB_WIDTH) * V.FORWARD
-        BRIC = BRI + UNDERPASS_ENTRANCE_STAIRS * V.LEFT
-        TRIC = BRIC + UNDERPASS_ENTRANCE_WIDTH * V.FORWARD
-        TRI = TRIC + UNDERPASS_ENTRANCE_STAIRS * V.RIGHT
-        TRO = TRI + STREET_SIDEWALK_WIDTH * V.FORWARD
-        self.face([TLO, TLI, TLIC, BLIC, BLI, BLO, BRO, BRI, BRIC, TRIC, TRI, TRO])
-        # Curb
-        BLC = S + (STREET_LANE_WIDTH + STREET_SIDEWALK_WIDTH) * V.BACKWARD
-        BLCC = BLC + STREET_CURB_HEIGHT * V.DOWN
-        BRC = BLC + (UNDERPASS_ENTRANCE_SLOPE + UNDERPASS_HALLWAY_WIDTH + UNDERPASS_ENTRANCE_STAIRS) * V.RIGHT
-        BRCC = BRC + STREET_CURB_HEIGHT * V.DOWN
-        self.face([BLO, BLC, BRC, BRO])
-        self.face([BLC, BLCC, BRCC, BRC])
     def BUS_STOP(self, S: V = (0, 0, 0)) -> None:
         # Sidewalk
         TL = S
