@@ -3,11 +3,12 @@ import enum, bpy, bmesh
 bpy.context.preferences.view.show_splash = False
 
 for area in bpy.context.screen.areas:
-    if area.type == 'VIEW_3D':
+    if area.type == "VIEW_3D":
         for space in area.spaces:
-            if space.type == 'VIEW_3D':
+            if space.type == "VIEW_3D":
                 space.overlay.show_stats = True
                 space.overlay.show_face_orientation = not space.overlay.show_face_orientation
+                space.shading.type = "MATERIAL"
                 break
 
 class Scene:

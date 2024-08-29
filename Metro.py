@@ -19,7 +19,7 @@ UNDERPASS_STEP_HEIGHT = 0.2
 STREET_SIDEWALK_WIDTH = 3
 STREET_CURB_WIDTH = 0.3
 STREET_CURB_HEIGHT = 0.2
-STREET_LANE_WIDTH = 5
+STREET_LANE_WIDTH = 4
 
 class Metro(Map):
     def __init__(self) -> None:
@@ -29,6 +29,7 @@ class Metro(Map):
         self.UNDERPASS_STAIRS(V.RIGHT * UNDERPASS_HALLWAY_WIDTH)
         self.UNDERPASS_HALL(V.ZERO)
         self.UNDERPASS_SIDEWALK(V.LEFT * UNDERPASS_ENTRANCE_SLOPE + V.FORWARD * STREET_SIDEWALK_WIDTH)
+        self.BUS_STOP(V.FORWARD * STREET_SIDEWALK_WIDTH + V.RIGHT * (UNDERPASS_HALLWAY_WIDTH + UNDERPASS_ENTRANCE_STAIRS))
         self.create("Metro")
     def UNDERPASS_SLOPE(self, S: V = V(0, 0, 0)) -> None:
         # Outer points
@@ -175,5 +176,7 @@ class Metro(Map):
         BRCC = BRC + STREET_CURB_HEIGHT * V.DOWN
         self.face([BLO, BLC, BRC, BRO])
         self.face([BLC, BLCC, BRCC, BRC])
+    def BUS_STOP(self, S: V = (0, 0, 0)) -> None:
+        pass
 
 Metro()
