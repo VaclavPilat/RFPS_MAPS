@@ -95,6 +95,8 @@ class V3:
             return V3(*([other * a for a in self]))
         raise ValueError("Other value is not a vector or a number")
 
+
+
 V3.ZERO = V3()
 V3.ONE = V3(1, 1, 1)
 V3.FORWARD = V3(x=1)
@@ -103,6 +105,8 @@ V3.LEFT = V3(y=1)
 V3.RIGHT = V3(y=-1)
 V3.UP = V3(z=1)
 V3.DOWN = V3(z=-1)
+
+
 
 if __name__ == "__main__":
     import unittest
