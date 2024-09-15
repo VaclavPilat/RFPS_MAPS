@@ -10,14 +10,35 @@ from MAIN import *
 class Metro(Map):
     def __init__(self):
         super().__init__()
-        self.load(Arrow, V3.ZERO, (2, 2))
+        self.load(UnderpassSlopeEntrance, V3.ZERO, (3, 5))
 
 
 
-class Arrow(Tile):
+class UnderpassSlopeEntrance(Tile):
+    """Outdoor slope entrance to an underpass hall
+    """
+
+    CURB_HEIGHT = 0.1
+    CURB_WIDTH = 0.25
+
     def __init__(self, *args):
+        """Generating tile
+        """
         super().__init__(*args)
-        self.face([self.BL, self.C, self.BR, self.C+(self.TL-self.BL)/2])
+        # Outer walls without inner vertices
+        TL1, BL1, TR1, BR1 = (a+self.CURB_HEIGHT*V3.UP for a in (self.TL, self.BL, self.TR, self.BR))
+        self.face([self.TL, TL1, TR1, self.TR])
+        self.face([self.TR, TR1, BR1, self.BR])
+        self.face([self.BR, BR1, BL1, self.BL])
+        # Outer walls with inner vertices
+        TLI = self.TL + self.CURB_WIDTH*V3.BACKWARD
+        BLI = self.BL + self.CURB_WIDTH*V3.FORWARD
+        TRI = self.TR + self.CURB_WIDTH*V3.BACKWARD + self.CURB_WIDTH*V3.LEFT
+        BRI = self.BR + self.CURB_WIDTH*V3.FORWARD + self.CURB_WIDTH*V3.LEFT
+        TLI1, BLI1, TRI1, BRI1 = (a+self.CURB_HEIGHT*V3.UP for a in (TLI, BLI, TRI, BRI))
+        self.face([TL1, self.TL, TLI, TLI1])
+        self.face([BLI1, BLI, self.BL, BL1])
+        self.face([TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1, TR1])
 
 
 
