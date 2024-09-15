@@ -10,8 +10,7 @@ from MAIN import *
 class Metro(Map):
     def __init__(self):
         super().__init__()
-        self.load(Arrow, V3.ZERO, (1, 1))
-        self.load(Arrow, V3.FORWARD, (1, 1))
+        self.load(Arrow, V3.ZERO, (2, 2))
 
 
 

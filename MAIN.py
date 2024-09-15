@@ -42,6 +42,7 @@ class Pivot(enum.Enum):
     """Tile pivot position
     """
     CENTER = 1
+    TOP_LEFT = 2
 
 
 
@@ -78,7 +79,7 @@ class Map:
         """
         self.bmesh.faces.new([self.vertex(tuple(v)) for v in vertices])
     
-    def load(self, tile: "Tile", position: V3, size: list|tuple, pivot: Pivot = Pivot.CENTER):
+    def load(self, tile: "Tile", position: V3, size: list|tuple, pivot: Pivot = Pivot.TOP_LEFT):
         """Loading a tile into the mesh
 
         Args:
@@ -114,6 +115,12 @@ class Tile:
             self.TR = position + size[0]/2 * V3.FORWARD + size[1]/2 * V3.RIGHT
             self.BL = position + size[0]/2 * V3.BACKWARD + size[1]/2 * V3.LEFT
             self.BR = position + size[0]/2 * V3.BACKWARD + size[1]/2 * V3.RIGHT
+        elif pivot == Pivot.TOP_LEFT:
+            self.TL = position
+            self.TR = position + size[1] * V3.RIGHT
+            self.BL = position + size[0] * V3.BACKWARD
+            self.BR = position + size[1] * V3.RIGHT + size[0] * V3.BACKWARD
+            self.C = position + size[1]/2 * V3.RIGHT + size[0]/2 * V3.BACKWARD
         else:
             raise ValueError("Unknown Pivot value")
     
