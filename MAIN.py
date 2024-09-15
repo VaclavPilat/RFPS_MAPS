@@ -79,7 +79,7 @@ class Map:
         """
         self.bmesh.faces.new([self.vertex(tuple(v)) for v in vertices])
     
-    def load(self, tile: "Tile", position: V3, size: list|tuple, pivot: Pivot = Pivot.TOP_LEFT):
+    def load(self, tile: "Tile", position: V3, size: list|tuple, pivot: Pivot = Pivot.TOP_LEFT) -> None:
         """Loading a tile into the mesh
 
         Args:
