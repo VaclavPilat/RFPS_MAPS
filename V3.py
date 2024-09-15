@@ -95,20 +95,23 @@ class V3:
             return V3(*([other * a for a in self]))
         raise ValueError("Other value is not a vector or a number")
 
-V3.ZERO = V3(0, 0, 0)
+V3.ZERO = V3()
 V3.ONE = V3(1, 1, 1)
-V3.FORWARD = V3(1, 0, 0)
-V3.BACKWARD = V3(-1, 0, 0)
-V3.LEFT = V3(0, 1, 0)
-V3.RIGHT = V3(0, -1, 0)
-V3.UP = V3(0, 0, 1)
-V3.DOWN = V3(0, 0, -1)
+V3.FORWARD = V3(x=1)
+V3.BACKWARD = V3(x=-1)
+V3.LEFT = V3(y=1)
+V3.RIGHT = V3(y=-1)
+V3.UP = V3(z=1)
+V3.DOWN = V3(z=-1)
 
 if __name__ == "__main__":
     import unittest
     class V3Test(unittest.TestCase):
         def test_constructor(self):
             self.assertEqual(tuple(V3(1, 2, 3)), (1, 2, 3))
+            self.assertEqual(V3(1, 2, 3).x, 1)
+            self.assertEqual(V3(1, 2, 3).y, 2)
+            self.assertEqual(V3(1, 2, 3).z, 3)
         def test_tostring(self):
             self.assertEqual(str(V3(1, 2, 3)), "(1, 2, 3)")
         def test_addition(self):
