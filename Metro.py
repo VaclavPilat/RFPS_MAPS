@@ -10,7 +10,15 @@ from MAIN import *
 class Metro(Map):
     def __init__(self):
         super().__init__()
-        self.face([V3.ZERO, V3.RIGHT, V3.RIGHT+V3.FORWARD, V3.FORWARD])
+        self.load(Arrow, V3.ZERO, (1, 1))
+        self.load(Arrow, V3.FORWARD, (1, 1))
+
+
+
+class Arrow(Tile):
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.face([self.BL, self.C, self.BR, self.C+(self.TL-self.BL)/2])
 
 
 
