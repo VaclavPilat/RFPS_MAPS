@@ -94,6 +94,30 @@ class V3:
         if type(other) in (int, float):
             return V3(*([other * a for a in self]))
         raise ValueError("Other value is not a vector or a number")
+    
+    def __rmul__(self, other: int|float) -> "V3":
+        """Multiplication of a vector by a number
+
+        Args:
+            other (int | float): Number to multiply by
+
+        Returns:
+            V3: Product of this vector and the number
+        """
+        return self.__mul__(other)
+    
+    def __truediv__(self, other: int|float) -> "V3":
+        """Division of a vector by a number
+
+        Args:
+            other (int | float): Number to divide by
+
+        Returns:
+            V3: Quotient of this vector and the number
+        """
+        if type(other) in (int, float):
+            return V3(*([a / other for a in self]))
+        raise ValueError("Other value is not a number")
 
 
 
@@ -125,6 +149,9 @@ if __name__ == "__main__":
         def test_multiplication(self):
             self.assertEqual(V3(1, 2, 3) * V3(4, 5, 6), V3(4, 10, 18))
             self.assertEqual(V3(1, 2, 3) * 3, V3(3, 6, 9))
+            self.assertEqual(3 * V3(1, 2, 3), V3(3, 6, 9))
+        def test_division(self):
+            self.assertEqual(V3(1, 2, 3) / 2, V3(0.5, 1, 1.5))
         def test_presets(self):
             self.assertEqual(V3(1, 2, 3) * V3.LEFT, V3(0, 2, 0))
     unittest.main()
