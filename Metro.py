@@ -20,6 +20,8 @@ class UnderpassSlopeEntrance(Tile):
 
     CURB_HEIGHT = 0.1
     CURB_WIDTH = 0.25
+    HALLWAY_DEPTH = 2
+    HALLWAY_HEIGHT = 3
 
     def __init__(self, *args):
         """Generating tile
@@ -42,6 +44,17 @@ class UnderpassSlopeEntrance(Tile):
         self.face([TLI1, TLI, TRI, TRI1])
         self.face([TRI1, TRI, BRI, BRI1])
         self.face([BRI1, BRI, BLI, BLI1])
+        # Lower walls
+        TRIC, BRIC = (a+self.HALLWAY_DEPTH*V3.DOWN for a in (TRI, BRI))
+        self.face([TRI, TRIC, BRIC, BRI])
+        TRC = self.TR+self.HALLWAY_DEPTH*V3.DOWN + self.CURB_WIDTH*V3.BACKWARD
+        BRC = self.BR+self.HALLWAY_DEPTH*V3.DOWN + self.CURB_WIDTH*V3.FORWARD
+        self.face([TRIC, TRC, BRC, BRIC])
+        TRIF, BRIF, TRF, BRF = (a+self.HALLWAY_HEIGHT*V3.DOWN for a in (TRIC, BRIC, TRC, BRC))
+        self.face([TLI, TRIF, TRF, TRC, TRIC, TRI])
+        self.face([BRI, BRIC, BRC, BRF, BRIF, BLI])
+        self.face([TLI, BLI, BRIF, TRIF])
+        self.face([TRIF, BRIF, BRF, TRF])
 
 
 
