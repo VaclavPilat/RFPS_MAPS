@@ -118,6 +118,35 @@ class V3:
         if type(other) in (int, float):
             return V3(*([a / other for a in self]))
         raise ValueError("Other value is not a number")
+    
+    def __rshift__(self, index: int) -> "V3":
+        """Rotating the vector on Z axis, clockwise
+
+        Args:
+            index (int): Rotation index
+
+        Returns:
+            V3: Rotated vector
+        """
+        index = index % 4
+        if index == 1:
+            return V3(self.y, -self.x, self.z)
+        if index == 2:
+            return V3(-self.x, -self.y, self.z)
+        if index == 3:
+            return V3(-self.y, self.x, self.z)
+        return self
+    
+    def __lshift__(self, index: int) -> "V3":
+        """Rotating the vector on Z axis, counter-clockwise
+
+        Args:
+            index (int): Rotation index
+
+        Returns:
+            V3: Rotated vector
+        """
+        return self.__rshift__(-index)
 
 
 
@@ -137,37 +166,47 @@ if __name__ == "__main__":
     class V3Test(unittest.TestCase):
         """Class for testing V3 implementation
         """
-        def test_constructor(self):
+        def test_constructor(self) -> None:
             """Testing __init__ and __iter__ functionality
             """
             self.assertEqual(tuple(V3(1, 2, 3)), (1, 2, 3))
             self.assertEqual(V3(1, 2, 3).x, 1)
             self.assertEqual(V3(1, 2, 3).y, 2)
             self.assertEqual(V3(1, 2, 3).z, 3)
-        def test_tostring(self):
+        def test_tostring(self) -> None:
             """Testing __str__ implementation
             """
             self.assertEqual(str(V3(1, 2, 3)), "(1, 2, 3)")
-        def test_addition(self):
+        def test_addition(self) -> None:
             """Testing __add__ implementation
             """
             self.assertEqual(V3(1, 2, 3) + V3(4, 5, 6), V3(5, 7, 9))
-        def test_subtraction(self):
+        def test_subtraction(self) -> None:
             """Testing __sub__ implementation
             """
             self.assertEqual(V3(1, 2, 3) - V3(4, 5, 6), V3(-3, -3, -3))
-        def test_multiplication(self):
+        def test_multiplication(self) -> None:
             """Testing __mul__ and __rmul__ implementation
             """
             self.assertEqual(V3(1, 2, 3) * V3(4, 5, 6), V3(4, 10, 18))
             self.assertEqual(V3(1, 2, 3) * 3, V3(3, 6, 9))
             self.assertEqual(3 * V3(1, 2, 3), V3(3, 6, 9))
-        def test_division(self):
+        def test_division(self) -> None:
             """Testing __truediv__ implementation
             """
             self.assertEqual(V3(1, 2, 3) / 2, V3(0.5, 1, 1.5))
-        def test_presets(self):
+        def test_presets(self) -> None:
             """Testing custom presets
             """
             self.assertEqual(V3(1, 2, 3) * V3.LEFT, V3(0, 2, 0))
+        def test_rotation(self) -> None:
+            """Testing __rshift__ and __lshift__ implementation
+            """
+            self.assertEqual(V3.FORWARD >> 1, V3.RIGHT)
+            self.assertEqual(V3.RIGHT << 2, V3.LEFT)
+            self.assertEqual(V3.LEFT >> 7, V3.BACKWARD)
+            self.assertEqual(V3(2, 1, 3) >> 1, V3(1, -2, 3))
+            self.assertEqual(V3(1, -2, 3) >> 1, V3(-2, -1, 3))
+            self.assertEqual(V3(-2, -1, 3) >> 1, V3(-1, 2, 3))
+            self.assertEqual(V3(-1, 2, 3) >> 1, V3(2, 1, 3))
     unittest.main()
