@@ -24,7 +24,8 @@ class Metro(Map):
         """Generating map
         """
         super().__init__()
-        self.load(UnderpassSlopeEntrance, V3.ZERO, (3, 5))
+        self.load(UnderpassSlopeEntrance, 5 * V3.LEFT, (3, 5), Pivot.TOP_LEFT, 0)
+        self.load(UnderpassSlopeEntrance, V3(-3, -6, 0), (3, 5), Pivot.TOP_LEFT, 2)
 
 
 

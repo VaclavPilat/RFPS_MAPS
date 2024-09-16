@@ -88,16 +88,17 @@ class Map:
                 self.materials[material] = [self.faces]
         self.faces += 1
     
-    def load(self, tile: "Tile", position: V3, size: list|tuple, pivot: Pivot = Pivot.TOP_LEFT) -> None:
+    def load(self, tile: "Tile", position: V3 = V3.ZERO, size: list|tuple = (1, 1), pivot: Pivot = Pivot.TOP_LEFT, rotation: int = 0) -> None:
         """Loading a tile into the mesh
 
         Args:
             tile (Tile): Tile class type
-            position (V3): Position as a 3D vector
-            size (list | tuple): List of sizes in X and Y axis
-            pivot (Pivot, optional): Pivot point. Defaults to Pivot.CENTER.
+            position (V3, optional): Tile position. Defaults to V3.ZERO.
+            size (list | tuple, optional): Tile size (x,y). Defaults to (1, 1).
+            pivot (Pivot, optional): Pivot position. Defaults to Pivot.TOP_LEFT.
+            rotation (int, optional): Rotation index. Defaults to 0.
         """
-        tile(self, position, size, pivot)
+        tile(self, position, size, pivot, rotation)
 
     def create(self, name: str = "Map") -> None:
         """Creating an object from the mesh
@@ -141,8 +142,22 @@ class Tile:
     """Class for representing a single tile inside of a Map mesh
     """
 
-    def __init__(self, mesh: Map, position: V3, size: list|tuple, pivot: Pivot) -> None:
+    def __init__(self, mesh: Map, position: V3 = V3.ZERO, size: list|tuple = (1, 1), pivot: Pivot = Pivot.TOP_LEFT, rotation: int = 0) -> None:
+        """Preparing variables for tile generation
+
+        Args:
+            mesh (Map): Map object
+            position (V3, optional): Tile position. Defaults to V3.ZERO.
+            size (list | tuple, optional): Tile size (x,y). Defaults to (1, 1).
+            pivot (Pivot, optional): Pivot position. Defaults to Pivot.TOP_LEFT.
+            rotation (int, optional): Rotation index. Defaults to 0.
+
+        Raises:
+            ValueError: Thrown if unknown Pivot value was provided
+        """
         self.mesh = mesh
+        self.position = position
+        self.rotation = rotation
         if pivot == Pivot.CENTER:
             self.C = position
             self.TL = position + size[0]/2 * V3.FORWARD + size[1]/2 * V3.LEFT
@@ -158,10 +173,27 @@ class Tile:
         else:
             raise ValueError("Unknown Pivot value")
     
-    def face(self, *args) -> None:
+    def face(self, vertices: list|tuple, material: list|tuple = None) -> None:
         """Creating a face from a list of vertices
+
+        Args:
+            vertices (list[V3] | tuple): Collection of vertices
+            material (list|tuple, optional): Material (Class/method, *args). Defaults to None.
         """
-        self.mesh.face(*args)
+        self.mesh.face((self.rotate(a) for a in vertices), material)
+    
+    def rotate(self, vertex: V3) -> V3:
+        """Updating vertex position based on self rotation
+
+        Args:
+            vertex (V3): Position of a vertex
+
+        Returns:
+            V3: Rotated vertex position
+        """
+        difference = vertex - self.position
+        difference >>= self.rotation
+        return self.position + difference
 
 
 
