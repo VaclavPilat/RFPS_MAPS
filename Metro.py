@@ -1,3 +1,8 @@
+## \file
+# Classes for generating a Metro map
+
+
+
 if __name__ == "__main__":
     import os, sys, bpy
     directory = os.path.dirname(bpy.data.filepath)
