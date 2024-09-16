@@ -25,12 +25,12 @@ class UnderpassSlopeEntrance(Tile):
         """Generating tile
         """
         super().__init__(*args)
-        # Outer walls without inner vertices
+        # Upper walls without inner vertices
         TL1, BL1, TR1, BR1 = (a+self.CURB_HEIGHT*V3.UP for a in (self.TL, self.BL, self.TR, self.BR))
         self.face([self.TL, TL1, TR1, self.TR])
         self.face([self.TR, TR1, BR1, self.BR])
         self.face([self.BR, BR1, BL1, self.BL])
-        # Outer walls with inner vertices
+        # Upper walls with inner vertices
         TLI = self.TL + self.CURB_WIDTH*V3.BACKWARD
         BLI = self.BL + self.CURB_WIDTH*V3.FORWARD
         TRI = self.TR + self.CURB_WIDTH*V3.BACKWARD + self.CURB_WIDTH*V3.LEFT
@@ -39,6 +39,9 @@ class UnderpassSlopeEntrance(Tile):
         self.face([TL1, self.TL, TLI, TLI1])
         self.face([BLI1, BLI, self.BL, BL1])
         self.face([TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1, TR1])
+        self.face([TLI1, TLI, TRI, TRI1])
+        self.face([TRI1, TRI, BRI, BRI1])
+        self.face([BRI1, BRI, BLI, BLI1])
 
 
 
