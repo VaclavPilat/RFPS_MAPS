@@ -55,6 +55,8 @@ class Map:
         """
         self.bmesh = bmesh.new()
         self.vertices = {}
+        self.faces = 0
+        self.materials = {}
 
     def vertex(self, position: V3) -> "BMVert":
         """Creating a vertex (if it does not exist yet)
@@ -71,13 +73,20 @@ class Map:
         self.vertices[position] = vertex
         return vertex
     
-    def face(self, vertices: list|tuple) -> None:
+    def face(self, vertices: list|tuple, material: list|tuple = None) -> None:
         """Creating a face from a list of vertices
 
         Args:
             vertices (list[V3] | tuple): Collection of vertices
+            material (list|tuple, optional): Material (Class/method, *args). Defaults to None.
         """
         self.bmesh.faces.new([self.vertex(tuple(v)) for v in vertices])
+        if material is not None:
+            if material in self.materials:
+                self.materials[material].append(self.faces)
+            else:
+                self.materials[material] = [self.faces]
+        self.faces += 1
     
     def load(self, tile: "Tile", position: V3, size: list|tuple, pivot: Pivot = Pivot.TOP_LEFT) -> None:
         """Loading a tile into the mesh
@@ -100,6 +109,31 @@ class Map:
         self.bmesh.to_mesh(mesh)
         obj = bpy.data.objects.new(name, mesh)
         bpy.context.scene.collection.objects.link(obj)
+        for index, material in enumerate(self.materials):
+            obj.data.materials.append(material[0](*material[1:]))
+            for i in self.materials[material]:
+                obj.data.polygons[i].material_index = index
+
+
+
+class Material:
+    """Class for generating custom materials
+    """
+
+    @staticmethod
+    def color(name: str, color: list|tuple):
+        """Creating a simple material with a diffuse color
+
+        Args:
+            name (str): Material name
+            color (list | tuple): Color (r,g,b,a)
+
+        Returns:
+            Created Blender material
+        """
+        material = bpy.data.materials.new(name=name)
+        material.diffuse_color = color
+        return material
 
 
 
@@ -124,13 +158,10 @@ class Tile:
         else:
             raise ValueError("Unknown Pivot value")
     
-    def face(self, vertices: list|tuple) -> None:
+    def face(self, *args) -> None:
         """Creating a face from a list of vertices
-
-        Args:
-            vertices (list[V3] | tuple): Collection of vertices
         """
-        self.mesh.face(vertices)
+        self.mesh.face(*args)
 
 
 
