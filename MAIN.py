@@ -162,6 +162,8 @@ class Tile:
         """
         self.mesh = mesh
         self.position = position
+        self.size = size
+        self.pivot = pivot
         self.rotation = rotation
         if pivot == Pivot.CENTER:
             self.C = position
@@ -177,6 +179,26 @@ class Tile:
             self.C = position + size[1]/2 * V3.RIGHT + size[0]/2 * V3.BACKWARD
         else:
             raise ValueError("Unknown Pivot value")
+    
+    def load(self, tile: "Tile", position: V3 = None, size: list|tuple = None, pivot: Pivot = None, rotation: int = None) -> None:
+        """Loading a tile into the mesh
+
+        Args:
+            tile (Tile): Tile class type
+            position (V3, optional): Tile position. Defaults to None.
+            size (list | tuple, optional): Tile size (x,y). Defaults to None.
+            pivot (Pivot, optional): Pivot position. Defaults to None.
+            rotation (int, optional): Rotation index. Defaults to None.
+        """
+        if position is None:
+            position = self.position
+        if size is None:
+            size = self.size
+        if pivot is None:
+            pivot = self.pivot
+        if rotation is None:
+            rotation = self.rotation
+        return tile(self.mesh, position, size, pivot, rotation)
     
     def face(self, vertices: list|tuple, material: list|tuple = None) -> None:
         """Creating a face from a list of vertices
