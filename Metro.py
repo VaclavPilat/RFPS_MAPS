@@ -18,6 +18,7 @@ class Metro(Map):
 
     HALLWAY_DEPTH = 1
     HALLWAY_HEIGHT = 3
+    HALLWAY_WIDTH = 4
 
     CONCRETE = (Material.color, "Smooth concrete", (0.2, 0.2, 0.2, 1))
     WALL = (Material.color, "White plaster", (0.9, 0.9, 0.9, 1))
@@ -28,6 +29,7 @@ class Metro(Map):
         """
         super().__init__()
         self.load(UnderpassSlopeEntrance, V3.LEFT*30, (3, 30))
+        self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 15), rotation=2)
 
 
 
@@ -83,6 +85,18 @@ class UnderpassSlopeEntrance(Tile):
         self.face([t.TLI, t.TRIF, t.TRF, t.TRC, t.TRIC, t.TRI], Metro.WALL)
         self.face([t.BRI, t.BRIC, t.BRC, t.BRF, t.BRIF, t.BLI], Metro.WALL)
         self.face([t.TLI, t.BLI, t.BRIF, t.TRIF], Metro.TILES)
+
+
+
+class UnderpassStairsEntrance(Tile):
+    """Outdoor stairs entrance to an underpass hall
+    """
+
+    def __init__(self, *args):
+        """Generating tile
+        """
+        super().__init__(*args)
+        t = self.load(UnderpassEntrance)
 
 
 
