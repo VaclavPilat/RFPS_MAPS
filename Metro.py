@@ -18,7 +18,7 @@ class Metro(Map):
 
     CURB_HEIGHT = 0.1
     CURB_WIDTH = 0.25
-    HALLWAY_DEPTH = 2
+    HALLWAY_DEPTH = 1
     HALLWAY_HEIGHT = 3
 
     CONCRETE = (Material.color, "Smooth concrete", (0.2, 0.2, 0.2, 1))
@@ -29,8 +29,7 @@ class Metro(Map):
         """Generating map
         """
         super().__init__()
-        self.load(UnderpassSlopeEntrance, 5 * V3.LEFT, (3, 5), Pivot.TOP_LEFT, 0)
-        self.load(UnderpassSlopeEntrance, V3(-3, -6, 0), (3, 5), Pivot.TOP_LEFT, 2)
+        self.load(UnderpassSlopeEntrance, V3.ZERO, (3, 30))
 
 
 
