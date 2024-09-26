@@ -68,6 +68,8 @@ class UnderpassEntrance(Tile):
         self.BRC = self.BR+Metro.HALLWAY_DEPTH*V3.DOWN + self.CURB_WIDTH*V3.FORWARD
         self.face([self.TRIC, self.TRC, self.BRC, self.BRIC], Metro.WALL)
         self.TRIF, self.BRIF, self.TRF, self.BRF = (a+Metro.HALLWAY_HEIGHT*V3.DOWN for a in (self.TRIC, self.BRIC, self.TRC, self.BRC))
+        self.face([self.TRC, self.TRIC, self.TRIF, self.TRF], Metro.WALL)
+        self.face([self.BRIC, self.BRC, self.BRF, self.BRIF], Metro.WALL)
         self.face([self.TRIF, self.BRIF, self.BRF, self.TRF], Metro.TILES)
 
 
@@ -82,8 +84,8 @@ class UnderpassSlopeEntrance(Tile):
         super().__init__(*args)
         t = self.load(UnderpassEntrance)
         # Lower walls and floors
-        self.face([t.TLI, t.TRIF, t.TRF, t.TRC, t.TRIC, t.TRI], Metro.WALL)
-        self.face([t.BRI, t.BRIC, t.BRC, t.BRF, t.BRIF, t.BLI], Metro.WALL)
+        self.face([t.TLI, t.TRIF, t.TRIC, t.TRI], Metro.WALL)
+        self.face([t.BRI, t.BRIC, t.BRIF, t.BLI], Metro.WALL)
         self.face([t.TLI, t.BLI, t.BRIF, t.TRIF], Metro.TILES)
 
 
