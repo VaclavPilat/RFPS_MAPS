@@ -212,15 +212,17 @@ class Tile:
     def rotate(self, vertex: V3) -> V3:
         """Updating vertex position based on self rotation
 
+        Rotating vertex around tile center
+
         Args:
             vertex (V3): Position of a vertex
 
         Returns:
             V3: Rotated vertex position
         """
-        difference = vertex - self.position
+        difference = vertex - self.C
         difference >>= self.rotation
-        return self.position + difference
+        return self.C + difference
 
 
 
