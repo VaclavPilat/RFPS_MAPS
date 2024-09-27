@@ -8,3 +8,4 @@ Blender version **3.0.1** was used.
 
 ## Documentation
 - **Create documentation** : `doxygen Doxyfile`
+- **Count lines of code** : `cloc . --include-lang=Python`
