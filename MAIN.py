@@ -30,7 +30,7 @@ class Scene:
                 for space in area.spaces:
                     if space.type == "VIEW_3D":
                         space.overlay.show_stats = True
-                        #space.overlay.show_face_orientation = not space.overlay.show_face_orientation
+                        space.overlay.show_face_orientation = not space.overlay.show_face_orientation
                         space.shading.type = "MATERIAL"
                         break
 

@@ -41,7 +41,7 @@ class UnderpassEntrance(Tile):
     CURB_WIDTH = 0.25
 
     def __init__(self, *args):
-        """Generating t
+        """Generating tile
         """
         super().__init__(*args)
         # Upper walls without inner vertices
@@ -83,7 +83,6 @@ class UnderpassSlopeEntrance(Tile):
         """
         super().__init__(*args)
         t = self.load(UnderpassEntrance)
-        # Lower walls and floors
         self.face([t.TLI, t.TRIF, t.TRIC, t.TRI], Metro.WALL)
         self.face([t.BRI, t.BRIC, t.BRIF, t.BLI], Metro.WALL)
         self.face([t.TLI, t.BLI, t.BRIF, t.TRIF], Metro.TILES)
@@ -94,11 +93,26 @@ class UnderpassStairsEntrance(Tile):
     """Outdoor stairs entrance to an underpass hall
     """
 
+    STEP_LENGTH = 0.3
+    STEP_HEIGHT = 0.15
+    STEP_GROUPS = 3
+
     def __init__(self, *args):
         """Generating tile
         """
         super().__init__(*args)
         t = self.load(UnderpassEntrance)
+        stairCount = round((Metro.HALLWAY_DEPTH+Metro.HALLWAY_HEIGHT)/self.STEP_HEIGHT)
+        TL = t.TLI
+        BL = t.BLI
+        for i in range(stairCount, 0, -1):
+            # Horizontal offset
+            TL1, BL1 = (a + V3.RIGHT*self.STEP_LENGTH for a in (TL, BL))
+            self.face([TL, BL, BL1, TL1], Metro.TILES)
+            TL = TL1
+            BL = BL1
+            # Vertical offset
+        #Y = ((a, a+1) for a in range(stairCount))
 
 
 
