@@ -28,9 +28,8 @@ class Metro(Map):
         """Generating map
         """
         super().__init__()
-        #self.load(UnderpassSlopeEntrance, V3.LEFT*30, (3, 30))
-        #self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 10), rotation=2)
-        self.load(UnderpassStairsEntrance, V3.ZERO, (3, 10), rotation=2, pivot=Pivot.CENTER)
+        self.load(UnderpassSlopeEntrance, V3.LEFT*30, (3, 30))
+        self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 10), rotation=2)
 
 
 
