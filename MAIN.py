@@ -56,6 +56,8 @@ class LitCamera:
         """
         bpy.context.scene.camera = self.cam
         bpy.context.scene.render.filepath = filepath
+        bpy.context.scene.render.engine = "BLENDER_EEVEE"
+        bpy.context.scene.render.film_transparent = True
         bpy.ops.render.render(write_still=True)
 
     def destroy(self) -> None:
