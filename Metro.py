@@ -107,6 +107,8 @@ class UnderpassStairsEntrance(Tile):
         steps = round(height/self.STEP_HEIGHT)
         depths = list(height*a/steps for a in range(1, steps+1))
         # Generating stairs
+        TW = [t.TRIF, t.TRIC, t.TRI]
+        BW = [t.BRI, t.BRIC, t.BRIF]
         TL = t.TLI
         BL = t.BLI
         group = 1
@@ -120,12 +122,19 @@ class UnderpassStairsEntrance(Tile):
             self.face([TL, BL, BL1, TL1], Metro.TILES)
             TL = TL1
             BL = BL1
+            TW.append(TL)
+            BW.insert(0, BL)
             # Vertical face
             TL1, BL1 = (V3(a.x, a.y, (t.TLI+V3.DOWN*depths[i]).z) for a in (TL, BL))
             self.face([TL, BL, BL1, TL1], Metro.TILES)
             TL = TL1
             BL = BL1
+            TW.append(TL)
+            BW.insert(0, BL)
         self.face([TL, BL, t.BRIF, t.TRIF], Metro.TILES)
+        # Adding walls
+        self.face(TW, Metro.WALL)
+        self.face(BW, Metro.WALL)
 
 
 
