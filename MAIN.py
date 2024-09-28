@@ -17,6 +17,55 @@ from VECTOR import *
 
 
 
+class LitCamera:
+    """Camera with a sun behind it
+    """
+
+    def __init__(self, position: list|tuple = (0, 0, 0), rotation: list|tuple = (0, 0, 0), strength: int|float = 3) -> None:
+        """Creating a lit camera with a sun light behind it
+
+        Args:
+            position (list | tuple, optional): Camera position. Defaults to (0, 0, 0).
+            rotation (list | tuple, optional): Camera euler rotation. Defaults to (0, 0, 0).
+            strength (list | tuple, optional): Camera light strength. Defaults to 3.
+        """
+        self.cam = bpy.data.objects.new("Camera", bpy.data.cameras.new("Camera"))
+        self.cam.location = position
+        self.cam.rotation_euler = rotation
+        bpy.context.scene.collection.objects.link(self.cam)
+        self.light = bpy.data.objects.new("Light", bpy.data.lights.new("Light", type="SUN"))
+        self.light.location = position
+        self.light.rotation_euler = rotation
+        bpy.context.scene.collection.objects.link(self.light)
+        self.light.data.energy = strength
+
+    def isometric(self, scale: int) -> None:
+        """Making the camera isometric
+
+        Args:
+            scale (int): Ortho scale
+        """
+        self.cam.data.type = 'ORTHO'
+        self.cam.data.ortho_scale = scale
+    
+    def render(self, filepath: str = "render.png") -> None:
+        """Rendering an image from camera
+
+        Args:
+            filepath (str, optional): Image file path. Defaults to "render.png".
+        """
+        bpy.context.scene.camera = self.cam
+        bpy.context.scene.render.filepath = filepath
+        bpy.ops.render.render(write_still=True)
+
+    def destroy(self) -> None:
+        """Removing used objects from scene
+        """
+        bpy.data.objects.remove(self.cam)
+        bpy.data.objects.remove(self.light)
+
+
+
 class Scene:
     """Class for managing objects in scene
     """
@@ -37,17 +86,11 @@ class Scene:
     
     @staticmethod
     def topIsoRender() -> None:
-        cam = bpy.data.cameras.new("Camera")
-        obj = bpy.data.objects.new("Camera", cam)
-        obj.location = (0, 0, 100)
-        obj.data.type = 'ORTHO'
-        obj.data.ortho_scale = 50
-        obj.rotation_euler = mathutils.Euler((0, 0, math.radians(90)))
-        bpy.context.scene.collection.objects.link(obj)
-        bpy.context.scene.camera = obj
-        bpy.context.scene.render.filepath = "render.png"
-        bpy.ops.render.render(write_still=True)
-        bpy.data.objects.remove(obj)
+        camera = LitCamera((0, 0, 100), mathutils.Euler((0, 0, math.radians(90))))
+        camera.cam.data.type = 'ORTHO'
+        camera.cam.data.ortho_scale = 50
+        camera.render()
+        camera.destroy()
 
     @staticmethod
     def clear() -> None:
