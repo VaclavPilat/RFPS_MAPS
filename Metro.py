@@ -28,8 +28,9 @@ class Metro(Map):
         """Generating map
         """
         super().__init__()
-        self.load(UnderpassSlopeEntrance, V3.LEFT*30, (3, 30))
-        self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 10), rotation=2)
+        #self.load(UnderpassSlopeEntrance, V3.LEFT*30, (3, 30))
+        #self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 10), rotation=2)
+        self.load(UnderpassStairsEntrance, V3.ZERO, (3, 10), rotation=2, pivot=Pivot.CENTER)
 
 
 
@@ -105,12 +106,20 @@ class UnderpassStairsEntrance(Tile):
         height = Metro.HALLWAY_DEPTH + Metro.HALLWAY_HEIGHT
         steps = round(height/self.STEP_HEIGHT)
         depths = list(height*a/steps for a in range(1, steps+1))
+        length = self.size[1] - UnderpassEntrance.CURB_WIDTH
         # Generating stairs
         TL = t.TLI
         BL = t.BLI
+        group = 1
         for i in range(steps):
             # Horizontal face
-            TL1, BL1 = (a + V3.RIGHT*self.STEP_LENGTH for a in (TL, BL))
+            if i/steps >= group/self.STEP_GROUPS:
+                TL1, BL1 = (V3(a.x, (t.TLI+V3.RIGHT*(length*group/self.STEP_GROUPS+self.STEP_LENGTH)).y, a.z) for a in (TL, BL))
+                print(length*group/self.STEP_GROUPS)
+                group += 1
+            else:
+                TL1, BL1 = (a + V3.RIGHT*self.STEP_LENGTH for a in (TL, BL))
+            print(i, ":", group, "::", i/steps, ":", group/self.STEP_GROUPS)
             self.face([TL, BL, BL1, TL1], Metro.TILES)
             TL = TL1
             BL = BL1
