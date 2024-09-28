@@ -1,6 +1,8 @@
 ## \file
 # Functionality for generating object meshes
-# \todo Convert Tile subclasses to injectable methods, just like in RFPS_ICONS
+# \todo Finish Metro map
+# \todo Create Babel map
+# \todo Create Warehouse map
 
 
 
@@ -153,17 +155,23 @@ class Map:
                 self.materials[material] = [self.faces]
         self.faces += 1
     
-    def load(self, tile: "Tile", position: V3 = V3.ZERO, size: list|tuple = (1, 1), pivot: Pivot = Pivot.TOP_LEFT, rotation: int = 0) -> None:
+    def load(self, func, position: V3 = V3.ZERO, size: list|tuple = (1, 1), pivot: Pivot = Pivot.TOP_LEFT, rotation: int = 0) -> "Tile":
         """Loading a tile into the mesh
 
         Args:
-            tile (Tile): Tile class type
+            func (func): Tile func type
             position (V3, optional): Tile position. Defaults to V3.ZERO.
             size (list | tuple, optional): Tile size (x,y). Defaults to (1, 1).
             pivot (Pivot, optional): Pivot position. Defaults to Pivot.TOP_LEFT.
             rotation (int, optional): Rotation index. Defaults to 0.
+
+        Returns:
+            Tile: Loaded tile instance
         """
-        tile(self, position, size, pivot, rotation)
+        loaded = Tile(self, position, size, pivot, rotation)
+        loaded.create = func
+        loaded.create(loaded)
+        return loaded
 
     def create(self, name: str = "Map") -> None:
         """Creating an object from the mesh
@@ -240,11 +248,19 @@ class Tile:
         else:
             raise ValueError("Unknown Pivot value")
     
-    def load(self, tile: "Tile", position: V3 = None, size: list|tuple = None, pivot: Pivot = None, rotation: int = None) -> None:
+    def create(self) -> None:
+        """Drawing an image
+
+        Raises:
+            NotImplemented: Thrown if not overriden
+        """
+        raise NotImplemented
+    
+    def load(self, func, position: V3 = None, size: list|tuple = None, pivot: Pivot = None, rotation: int = None) -> None:
         """Loading a tile into the mesh
 
         Args:
-            tile (Tile): Tile class type
+            func (func): Tile func type
             position (V3, optional): Tile position. Defaults to None.
             size (list | tuple, optional): Tile size (x,y). Defaults to None.
             pivot (Pivot, optional): Pivot position. Defaults to None.
@@ -258,7 +274,7 @@ class Tile:
             pivot = self.pivot
         if rotation is None:
             rotation = self.rotation
-        return tile(self.mesh, position, size, pivot, rotation)
+        return self.mesh.load(func, position, size, pivot, rotation)
     
     def face(self, vertices: list|tuple, material: list|tuple = None) -> None:
         """Creating a face from a list of vertices
