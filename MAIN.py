@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
 
 
-import bpy, bmesh, enum
+import bpy, bmesh, enum, math, mathutils
 from VECTOR import *
 
 
@@ -34,6 +34,20 @@ class Scene:
                         space.overlay.show_face_orientation = not space.overlay.show_face_orientation
                         space.shading.type = "MATERIAL"
                         break
+    
+    @staticmethod
+    def topIsoRender() -> None:
+        cam = bpy.data.cameras.new("Camera")
+        obj = bpy.data.objects.new("Camera", cam)
+        obj.location = (0, 0, 100)
+        obj.data.type = 'ORTHO'
+        obj.data.ortho_scale = 50
+        obj.rotation_euler = mathutils.Euler((0, 0, math.radians(90)))
+        bpy.context.scene.collection.objects.link(obj)
+        bpy.context.scene.camera = obj
+        bpy.context.scene.render.filepath = "render.png"
+        bpy.ops.render.render(write_still=True)
+        bpy.data.objects.remove(obj)
 
     @staticmethod
     def clear() -> None:
