@@ -29,7 +29,7 @@ class Metro(Map):
         """
         super().__init__()
         self.load(UnderpassSlopeEntrance, V3.LEFT*30, (3, 30))
-        self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 15), rotation=2)
+        self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 10), rotation=2)
 
 
 
@@ -102,17 +102,24 @@ class UnderpassStairsEntrance(Tile):
         """
         super().__init__(*args)
         t = self.load(UnderpassEntrance)
-        stairCount = round((Metro.HALLWAY_DEPTH+Metro.HALLWAY_HEIGHT)/self.STEP_HEIGHT)
+        height = Metro.HALLWAY_DEPTH + Metro.HALLWAY_HEIGHT
+        steps = round(height/self.STEP_HEIGHT)
+        depths = list(height*a/steps for a in range(1, steps+1))
+        # Generating stairs
         TL = t.TLI
         BL = t.BLI
-        for i in range(stairCount, 0, -1):
-            # Horizontal offset
+        for i in range(steps):
+            # Horizontal face
             TL1, BL1 = (a + V3.RIGHT*self.STEP_LENGTH for a in (TL, BL))
             self.face([TL, BL, BL1, TL1], Metro.TILES)
             TL = TL1
             BL = BL1
-            # Vertical offset
-        #Y = ((a, a+1) for a in range(stairCount))
+            # Vertical face
+            TL1, BL1 = (V3(a.x, a.y, (t.TLI+V3.DOWN*depths[i]).z) for a in (TL, BL))
+            self.face([TL, BL, BL1, TL1], Metro.TILES)
+            TL = TL1
+            BL = BL1
+        self.face([TL, BL, t.BRIF, t.TRIF], Metro.TILES)
 
 
 

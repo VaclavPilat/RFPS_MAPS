@@ -1,5 +1,6 @@
 ## \file
 # Functionality for generating object meshes
+# \todo Convert Tile subclasses to injectable methods, just like in RFPS_ICONS
 
 
 
