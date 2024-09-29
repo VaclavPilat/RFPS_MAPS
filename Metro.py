@@ -29,7 +29,7 @@ class Metro(Map):
         """
         super().__init__()
         self.load(UnderpassSlopeEntrance, V3.LEFT*30, (3, 30))
-        self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 10), rotation=2)
+        self.load(UnderpassStairsEntrance, V3.RIGHT*self.HALLWAY_WIDTH, (3, 11), rotation=2)
 
 def UnderpassEntrance(self):
     """Common structure for an underpass entrance
@@ -67,7 +67,7 @@ def UnderpassSlopeEntrance(self):
     """
     t = self.load(UnderpassEntrance)
     # Variables
-    SLOPE_COUNT = 3
+    SLOPE_COUNT = 4
     SLOPE_GAP = 1.5
     SLOPE_LENGTH = (abs(t.TLI.y - t.TRIF.y) - (SLOPE_COUNT-1)*SLOPE_GAP) / SLOPE_COUNT
     SLOPE_HEIGHT = (Metro.HALLWAY_DEPTH + Metro.HALLWAY_HEIGHT) / SLOPE_COUNT
@@ -101,6 +101,8 @@ def UnderpassStairsEntrance(self):
     STEP_GAP = (abs(t.TLI.y - t.TRI.y) - STEP_COUNT * STEP_LENGTH) / (STEP_GROUPS-1)
     # Generating mesh
     TL, BL = (t.TLI, t.BLI)
+    TW = [t.TRF, t.TRC, t.TRIC, t.TRI]
+    BW = [t.BRI, t.BRIC, t.BRC, t.BRF]
     for i in range(STEP_GROUPS):
         for j in range(round(i/STEP_GROUPS*STEP_COUNT), round((i+1)/STEP_GROUPS*STEP_COUNT)):
             if i > 0 and j == round(i/STEP_GROUPS*STEP_COUNT):
@@ -112,9 +114,16 @@ def UnderpassStairsEntrance(self):
                 TL1, BL1 = (a + V3.RIGHT*STEP_LENGTH for a in (TL, BL))
             self.face([TL, BL, BL1, TL1], Metro.TILES)
             TL, BL = (TL1, BL1)
+            TW.append(TL1)
+            BW.insert(0, BL1)
             TL1, BL1 = (V3(a.x, a.y, (t.TLI+V3.DOWN*(j+1)/STEP_COUNT*(Metro.HALLWAY_DEPTH+Metro.HALLWAY_HEIGHT)).z) for a in (TL, BL))
             self.face([TL, BL, BL1, TL1], Metro.TILES)
             TL, BL = (TL1, BL1)
+            TW.append(TL1)
+            BW.insert(0, BL1)
+    # Creating side walls
+    self.face(TW, Metro.WALL)
+    self.face(BW, Metro.WALL)
 
 
 
