@@ -60,21 +60,41 @@ def UnderpassEntrance(self):
     self.BRC = self.BR+Metro.HALLWAY_DEPTH*V3.DOWN + CURB_WIDTH*V3.FORWARD
     self.face([self.TRIC, self.TRC, self.BRC, self.BRIC], Metro.WALL)
     self.TRIF, self.BRIF, self.TRF, self.BRF = (a+Metro.HALLWAY_HEIGHT*V3.DOWN for a in (self.TRIC, self.BRIC, self.TRC, self.BRC))
-    self.face([self.TRC, self.TRIC, self.TRIF, self.TRF], Metro.WALL)
-    self.face([self.BRIC, self.BRC, self.BRF, self.BRIF], Metro.WALL)
+    #self.face([self.TRC, self.TRIC, self.TRIF, self.TRF], Metro.WALL)
+    #self.face([self.BRIC, self.BRC, self.BRF, self.BRIF], Metro.WALL)
     self.face([self.TRIF, self.BRIF, self.BRF, self.TRF], Metro.TILES)
 
 def UnderpassSlopeEntrance(self):
     """Outdoor slope entrance to an underpass hall
     """
     t = self.load(UnderpassEntrance)
-    self.face([t.TLI, t.TRIF, t.TRIC, t.TRI], Metro.WALL)
-    self.face([t.BRI, t.BRIC, t.BRIF, t.BLI], Metro.WALL)
-    self.face([t.TLI, t.BLI, t.BRIF, t.TRIF], Metro.TILES)
+    # Constants
+    SLOPE_COUNT = 3
+    SLOPE_GAP = 1.5
+    SLOPE_LENGTH = (abs(t.TLI.y - t.TRIF.y) - (SLOPE_COUNT-1)*SLOPE_GAP) / SLOPE_COUNT
+    SLOPE_HEIGHT = (Metro.HALLWAY_DEPTH + Metro.HALLWAY_HEIGHT) / SLOPE_COUNT
+    # Generating mesh
+    TL, BL = (t.TLI, t.BLI)
+    TW = [t.TRIF, t.TRF, t.TRC, t.TRIC, t.TRI, t.TLI]
+    BW = [t.BLI, t.BRI, t.BRIC, t.BRC, t.BRF, t.BRIF]
+    for i in range((SLOPE_COUNT-1)*2):
+        if i % 2 == 0:
+            TL1, BL1 = (a + SLOPE_LENGTH*V3.RIGHT + SLOPE_HEIGHT*V3.DOWN for a in (TL, BL))
+        else:
+            TL1, BL1 = (a + SLOPE_GAP*V3.RIGHT for a in (TL, BL))
+        self.face([TL, BL, BL1, TL1], Metro.TILES)
+        TL, BL = (TL1, BL1)
+        TW.append(TL1)
+        BW.insert(0, BL1)
+    self.face([TL, BL, t.BRIF, t.TRIF], Metro.TILES)
+    # Creating side walls
+    self.face(TW, Metro.WALL)
+    self.face(BW, Metro.WALL)
 
 def UnderpassStairsEntrance(self):
     """Outdoor stairs entrance to an underpass hall
     """
+    ## \todo Remove gap at start
     STEP_LENGTH = 0.3
     STEP_HEIGHT = 0.15
     STEP_GROUPS = 3
@@ -92,7 +112,7 @@ def UnderpassStairsEntrance(self):
     for i in range(steps):
         # Horizontal face
         if i/steps >= group/STEP_GROUPS:
-            TL1, BL1 = (V3(a.x, (t.TLI+V3.RIGHT*(self.size[1]*group/STEP_GROUPS+STEP_LENGTH)).y, a.z) for a in (TL, BL))
+            TL1, BL1 = (V3(a.x, (t.TLI+V3.RIGHT*(self.size[1]*group/STEP_GROUPS)).y, a.z) for a in (TL, BL))
             group += 1
         else:
             TL1, BL1 = (a + V3.RIGHT*STEP_LENGTH for a in (TL, BL))
