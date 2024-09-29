@@ -98,21 +98,23 @@ def UnderpassStairsEntrance(self):
     STEP_LENGTH = 0.3
     STEP_HEIGHT = 0.15
     STEP_COUNT = round((Metro.HALLWAY_DEPTH + Metro.HALLWAY_HEIGHT) / STEP_HEIGHT)
+    STEP_GAP = (abs(t.TLI.y - t.TRI.y) - STEP_COUNT * STEP_LENGTH) / (STEP_GROUPS-1)
     # Generating mesh
     TL, BL = (t.TLI, t.BLI)
-    for i in range(STEP_GROUPS*2-1):
-        if i % 2 == 0:
-            group = i // 2
-            for j in range(round(group/STEP_GROUPS*STEP_COUNT), round((group+1)/STEP_GROUPS*STEP_COUNT)):
+    for i in range(STEP_GROUPS):
+        for j in range(round(i/STEP_GROUPS*STEP_COUNT), round((i+1)/STEP_GROUPS*STEP_COUNT)):
+            if i > 0 and j == round(i/STEP_GROUPS*STEP_COUNT):
+                TL1, BL1 = (a + V3.RIGHT*(STEP_LENGTH+STEP_GAP) for a in (TL, BL))
+            elif j == STEP_COUNT - 1:
+                TL1 = V3(TL.x, t.TRIC.y, TL.z)
+                BL1 = V3(BL.x, t.BRIC.y, BL.z)
+            else:
                 TL1, BL1 = (a + V3.RIGHT*STEP_LENGTH for a in (TL, BL))
-                self.face([TL, BL, BL1, TL1], Metro.TILES)
-                TL, BL = (TL1, BL1)
-                TL1, BL1 = (V3(a.x, a.y, (t.TLI+V3.DOWN*(j+1)/STEP_COUNT*(Metro.HALLWAY_DEPTH+Metro.HALLWAY_HEIGHT)).z) for a in (TL, BL))
-                self.face([TL, BL, BL1, TL1], Metro.TILES)
-                TL, BL = (TL1, BL1)
-        else:
-            pass
-
+            self.face([TL, BL, BL1, TL1], Metro.TILES)
+            TL, BL = (TL1, BL1)
+            TL1, BL1 = (V3(a.x, a.y, (t.TLI+V3.DOWN*(j+1)/STEP_COUNT*(Metro.HALLWAY_DEPTH+Metro.HALLWAY_HEIGHT)).z) for a in (TL, BL))
+            self.face([TL, BL, BL1, TL1], Metro.TILES)
+            TL, BL = (TL1, BL1)
 
 
 
