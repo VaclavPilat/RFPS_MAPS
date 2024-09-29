@@ -60,15 +60,13 @@ def UnderpassEntrance(self):
     self.BRC = self.BR+Metro.HALLWAY_DEPTH*V3.DOWN + CURB_WIDTH*V3.FORWARD
     self.face([self.TRIC, self.TRC, self.BRC, self.BRIC], Metro.WALL)
     self.TRIF, self.BRIF, self.TRF, self.BRF = (a+Metro.HALLWAY_HEIGHT*V3.DOWN for a in (self.TRIC, self.BRIC, self.TRC, self.BRC))
-    #self.face([self.TRC, self.TRIC, self.TRIF, self.TRF], Metro.WALL)
-    #self.face([self.BRIC, self.BRC, self.BRF, self.BRIF], Metro.WALL)
     self.face([self.TRIF, self.BRIF, self.BRF, self.TRF], Metro.TILES)
 
 def UnderpassSlopeEntrance(self):
     """Outdoor slope entrance to an underpass hall
     """
     t = self.load(UnderpassEntrance)
-    # Constants
+    # Variables
     SLOPE_COUNT = 3
     SLOPE_GAP = 1.5
     SLOPE_LENGTH = (abs(t.TLI.y - t.TRIF.y) - (SLOPE_COUNT-1)*SLOPE_GAP) / SLOPE_COUNT
@@ -94,44 +92,27 @@ def UnderpassSlopeEntrance(self):
 def UnderpassStairsEntrance(self):
     """Outdoor stairs entrance to an underpass hall
     """
-    ## \todo Remove gap at start
+    t = self.load(UnderpassEntrance)
+    # Variables
+    STEP_GROUPS = 3
     STEP_LENGTH = 0.3
     STEP_HEIGHT = 0.15
-    STEP_GROUPS = 3
-    # Variables
-    t = self.load(UnderpassEntrance)
-    height = Metro.HALLWAY_DEPTH + Metro.HALLWAY_HEIGHT
-    steps = round(height/STEP_HEIGHT)
-    depths = list(height*a/steps for a in range(1, steps+1))
-    # Generating stairs
-    TW = [t.TRIF, t.TRIC, t.TRI]
-    BW = [t.BRI, t.BRIC, t.BRIF]
-    TL = t.TLI
-    BL = t.BLI
-    group = 1
-    for i in range(steps):
-        # Horizontal face
-        if i/steps >= group/STEP_GROUPS:
-            TL1, BL1 = (V3(a.x, (t.TLI+V3.RIGHT*(self.size[1]*group/STEP_GROUPS)).y, a.z) for a in (TL, BL))
-            group += 1
+    STEP_COUNT = round((Metro.HALLWAY_DEPTH + Metro.HALLWAY_HEIGHT) / STEP_HEIGHT)
+    # Generating mesh
+    TL, BL = (t.TLI, t.BLI)
+    for i in range(STEP_GROUPS*2-1):
+        if i % 2 == 0:
+            group = i // 2
+            for j in range(round(group/STEP_GROUPS*STEP_COUNT), round((group+1)/STEP_GROUPS*STEP_COUNT)):
+                TL1, BL1 = (a + V3.RIGHT*STEP_LENGTH for a in (TL, BL))
+                self.face([TL, BL, BL1, TL1], Metro.TILES)
+                TL, BL = (TL1, BL1)
+                TL1, BL1 = (V3(a.x, a.y, (t.TLI+V3.DOWN*(j+1)/STEP_COUNT*(Metro.HALLWAY_DEPTH+Metro.HALLWAY_HEIGHT)).z) for a in (TL, BL))
+                self.face([TL, BL, BL1, TL1], Metro.TILES)
+                TL, BL = (TL1, BL1)
         else:
-            TL1, BL1 = (a + V3.RIGHT*STEP_LENGTH for a in (TL, BL))
-        self.face([TL, BL, BL1, TL1], Metro.TILES)
-        TL = TL1
-        BL = BL1
-        TW.append(TL)
-        BW.insert(0, BL)
-        # Vertical face
-        TL1, BL1 = (V3(a.x, a.y, (t.TLI+V3.DOWN*depths[i]).z) for a in (TL, BL))
-        self.face([TL, BL, BL1, TL1], Metro.TILES)
-        TL = TL1
-        BL = BL1
-        TW.append(TL)
-        BW.insert(0, BL)
-    self.face([TL, BL, t.BRIF, t.TRIF], Metro.TILES)
-    # Adding walls
-    self.face(TW, Metro.WALL)
-    self.face(BW, Metro.WALL)
+            pass
+
 
 
 
