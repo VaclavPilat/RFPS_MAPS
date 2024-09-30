@@ -132,13 +132,18 @@ def UnderpassStairsEntrance(self):
 def UnderpassEntranceSidewalk(self):
     """Sidewalk between and around underpass entrances
     """
+    # SIdewalk
     TLI1, TRI1 = (a + V3.BACKWARD * STREET_SIDEWALK_WIDTH for a in (self.TL, self.TR))
     TLI2 = TLI1 + V3.RIGHT * UNDERPASS_STAIRS_LENGTH
     TRI2 = TRI1 + V3.LEFT * UNDERPASS_SLOPE_LENGTH
     BLI2, BRI2 = (a + V3.BACKWARD * UNDERPASS_ENTRANCE_WIDTH for a in (TLI2, TRI2))
     BLI1, BRI1 = (a + V3.BACKWARD * UNDERPASS_ENTRANCE_WIDTH for a in (TLI1, TRI1))
     BL, BR = (a + V3.FORWARD * STREET_CURB_WIDTH for a in (self.BL, self.BR))
-    self.face([self.TL, TLI1, TLI2, BLI2, BLI1, BL, BR, BRI1, BRI2, TRI2, TRI1, self.TR])
+    self.face([self.TL, TLI1, TLI2, BLI2, BLI1, BL, BR, BRI1, BRI2, TRI2, TRI1, self.TR], TILES) ########
+    # Curb
+    self.face([BR, BL, self.BL, self.BR], CONCRETE) #####
+    BLU, BRU = (a + V3.DOWN * STREET_CURB_HEIGHT for a in (self.BL, self.BR))
+    self.face([self.BR, self.BL, BLU, BRU], CONCRETE) #####
 
 if __name__ == "__main__":
     Scene.setup()
