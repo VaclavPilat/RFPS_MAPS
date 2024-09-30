@@ -35,6 +35,14 @@ class V3:
         """
         return "(" + ", ".join([str(a) for a in list(self)]) + ")"
     
+    def __repr__(self) -> str:
+        """Getting string representation of the object
+
+        Returns:
+            str: String representing the object's values
+        """
+        return self.__class__.__name__ + self.__str__()
+    
     def __hash__(self):
         """Getting the hash of this vector
 
@@ -153,6 +161,25 @@ class V3:
         """
         return self.__rshift__(-index)
 
+    def __call__(self, x: int|float = None, y: int|float = None, z: int|float = None) -> "V3":
+        """Making a copy of self (with new values)
+
+        Args:
+            x (int | float, optional): New X value. Defaults to self.x
+            y (int | float, optional): New Y value. Defaults to self.y
+            z (int | float, optional): New Z value. Defaults to self.z
+
+        Returns:
+            V3: Copy of this vector (with new values)
+        """
+        if x is None:
+            x = self.x
+        if y is None:
+            y = self.y
+        if z is None:
+            z = self.z
+        return V3(x, y, z)
+
 
 
 V3.ZERO = V3()
@@ -214,4 +241,23 @@ if __name__ == "__main__":
             self.assertEqual(V3(1, -2, 3) >> 1, V3(-2, -1, 3))
             self.assertEqual(V3(-2, -1, 3) >> 1, V3(-1, 2, 3))
             self.assertEqual(V3(-1, 2, 3) >> 1, V3(2, 1, 3))
+        def test_equality(self) -> None:
+            """Testing __eq__ implementation
+            """
+            a = V3(1, 2, 3)
+            b = a
+            self.assertEqual(a, b)
+            a.x = 5
+            self.assertEqual(a.x, 5)
+            self.assertEqual(a, b)
+        def test_copy(self) -> None:
+            """Testing __call__ operator for making vector copies
+            """
+            self.assertEqual(V3(2, 1, 3)(), V3(2, 1, 3))
+            self.assertEqual(V3(2, 1, 3)(1, 2), V3(1, 2, 3))
+            a = V3(1, 2, 3)
+            b = a()
+            self.assertEqual(a, b)
+            a.x = 5
+            self.assertNotEqual(a, b)
     unittest.main()
