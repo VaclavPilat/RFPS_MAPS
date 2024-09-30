@@ -22,13 +22,15 @@ UNDERPASS_HALLWAY_DEPTH = 1
 UNDERPASS_HALLWAY_HEIGHT = 3
 UNDERPASS_HALLWAY_WIDTH = 4
 STREET_SIDEWALK_WIDTH = 3
-STREET_LANE_WIDTH = 4
+STREET_LANE_WIDTH = 3.5
+STREET_LANE_COUNT = 2
 STREET_CURB_WIDTH = 0.3
 STREET_CURB_HEIGHT = 0.2
 
 CONCRETE = (Material.color, "Smooth concrete", (0.2, 0.2, 0.2, 1))
 WALL = (Material.color, "White plaster", (0.9, 0.9, 0.9, 1))
 TILES = (Material.color, "Floor tiles", (0.4, 0.35, 0.25, 1))
+ASPHALT = (Material.color, "Road asphalt", (0, 0, 0, 1))
 
 class Metro(Map):
     """Metro station map
@@ -41,6 +43,9 @@ class Metro(Map):
         self.load(UnderpassEntranceSidewalk, V3.ZERO, (STREET_SIDEWALK_WIDTH+STREET_LANE_WIDTH, UNDERPASS_SLOPE_LENGTH+UNDERPASS_HALLWAY_WIDTH+UNDERPASS_STAIRS_LENGTH))
         self.load(UnderpassStairsEntrance, V3.BACKWARD*STREET_SIDEWALK_WIDTH, (UNDERPASS_ENTRANCE_WIDTH, UNDERPASS_STAIRS_LENGTH))
         self.load(UnderpassSlopeEntrance, V3.BACKWARD*STREET_SIDEWALK_WIDTH+V3.RIGHT*(UNDERPASS_HALLWAY_WIDTH+UNDERPASS_STAIRS_LENGTH), (UNDERPASS_ENTRANCE_WIDTH, UNDERPASS_SLOPE_LENGTH), rotation=2)
+        self.load(StreetRoad, V3.BACKWARD*(STREET_SIDEWALK_WIDTH+STREET_LANE_WIDTH)+V3.DOWN*STREET_CURB_HEIGHT, (STREET_LANE_WIDTH*STREET_LANE_COUNT, UNDERPASS_SLOPE_LENGTH+UNDERPASS_HALLWAY_WIDTH+UNDERPASS_STAIRS_LENGTH))
+        self.load(UnderpassStairsEntrance, V3.BACKWARD*(STREET_SIDEWALK_WIDTH+STREET_LANE_WIDTH*(STREET_LANE_COUNT+2)-UNDERPASS_ENTRANCE_WIDTH), (UNDERPASS_ENTRANCE_WIDTH, UNDERPASS_STAIRS_LENGTH))
+        self.load(UnderpassSlopeEntrance, V3.BACKWARD*(STREET_SIDEWALK_WIDTH+STREET_LANE_WIDTH*(STREET_LANE_COUNT+2)-UNDERPASS_ENTRANCE_WIDTH)+V3.RIGHT*(UNDERPASS_HALLWAY_WIDTH+UNDERPASS_STAIRS_LENGTH), (UNDERPASS_ENTRANCE_WIDTH, UNDERPASS_SLOPE_LENGTH), rotation=2)
 
 def UnderpassEntrance(self):
     """Common structure for an underpass entrance
@@ -132,7 +137,7 @@ def UnderpassStairsEntrance(self):
 def UnderpassEntranceSidewalk(self):
     """Sidewalk between and around underpass entrances
     """
-    # SIdewalk
+    # Sidewalk
     TLI1, TRI1 = (a + V3.BACKWARD * STREET_SIDEWALK_WIDTH for a in (self.TL, self.TR))
     TLI2 = TLI1 + V3.RIGHT * UNDERPASS_STAIRS_LENGTH
     TRI2 = TRI1 + V3.LEFT * UNDERPASS_SLOPE_LENGTH
@@ -144,6 +149,11 @@ def UnderpassEntranceSidewalk(self):
     self.face([BR, BL, self.BL, self.BR], CONCRETE) #####
     BLU, BRU = (a + V3.DOWN * STREET_CURB_HEIGHT for a in (self.BL, self.BR))
     self.face([self.BR, self.BL, BLU, BRU], CONCRETE) #####
+
+def StreetRoad(self):
+    """Asphalt road between sidewalks, above underpass
+    """
+    self.face([self.TR, self.TL, self.BL, self.BR], ASPHALT)
 
 if __name__ == "__main__":
     Scene.setup()
