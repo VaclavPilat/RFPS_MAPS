@@ -21,6 +21,10 @@ UNDERPASS_SLOPE_GAP = 1.5
 UNDERPASS_HALLWAY_DEPTH = 1
 UNDERPASS_HALLWAY_HEIGHT = 3
 UNDERPASS_HALLWAY_WIDTH = 4
+STREET_SIDEWALK_WIDTH = 3
+STREET_LANE_WIDTH = 4
+STREET_CURB_WIDTH = 0.3
+STREET_CURB_HEIGHT = 0.2
 
 CONCRETE = (Material.color, "Smooth concrete", (0.2, 0.2, 0.2, 1))
 WALL = (Material.color, "White plaster", (0.9, 0.9, 0.9, 1))
@@ -34,8 +38,9 @@ class Metro(Map):
         """Generating map
         """
         super().__init__()
-        self.load(UnderpassSlopeEntrance, V3.LEFT*UNDERPASS_SLOPE_LENGTH, (UNDERPASS_ENTRANCE_WIDTH, UNDERPASS_SLOPE_LENGTH))
-        self.load(UnderpassStairsEntrance, V3.RIGHT*UNDERPASS_HALLWAY_WIDTH, (UNDERPASS_ENTRANCE_WIDTH, UNDERPASS_STAIRS_LENGTH), rotation=2)
+        self.load(UnderpassEntranceSidewalk, V3.ZERO, (STREET_SIDEWALK_WIDTH+STREET_LANE_WIDTH, UNDERPASS_SLOPE_LENGTH+UNDERPASS_HALLWAY_WIDTH+UNDERPASS_STAIRS_LENGTH))
+        self.load(UnderpassStairsEntrance, V3.BACKWARD*STREET_SIDEWALK_WIDTH, (UNDERPASS_ENTRANCE_WIDTH, UNDERPASS_STAIRS_LENGTH))
+        self.load(UnderpassSlopeEntrance, V3.BACKWARD*STREET_SIDEWALK_WIDTH+V3.RIGHT*(UNDERPASS_HALLWAY_WIDTH+UNDERPASS_STAIRS_LENGTH), (UNDERPASS_ENTRANCE_WIDTH, UNDERPASS_SLOPE_LENGTH), rotation=2)
 
 def UnderpassEntrance(self):
     """Common structure for an underpass entrance
@@ -123,6 +128,17 @@ def UnderpassStairsEntrance(self):
     # Creating side walls
     self.face(TW, WALL)
     self.face(BW, WALL)
+
+def UnderpassEntranceSidewalk(self):
+    """Sidewalk between and around underpass entrances
+    """
+    TLI1, TRI1 = (a + V3.BACKWARD * STREET_SIDEWALK_WIDTH for a in (self.TL, self.TR))
+    TLI2 = TLI1 + V3.RIGHT * UNDERPASS_STAIRS_LENGTH
+    TRI2 = TRI1 + V3.LEFT * UNDERPASS_SLOPE_LENGTH
+    BLI2, BRI2 = (a + V3.BACKWARD * UNDERPASS_ENTRANCE_WIDTH for a in (TLI2, TRI2))
+    BLI1, BRI1 = (a + V3.BACKWARD * UNDERPASS_ENTRANCE_WIDTH for a in (TLI1, TRI1))
+    BL, BR = (a + V3.FORWARD * STREET_CURB_WIDTH for a in (self.BL, self.BR))
+    self.face([self.TL, TLI1, TLI2, BLI2, BLI1, BL, BR, BRI1, BRI2, TRI2, TRI1, self.TR])
 
 if __name__ == "__main__":
     Scene.setup()
