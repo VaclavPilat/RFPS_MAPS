@@ -58,9 +58,9 @@ def UnderpassEntrance(self):
     self.face([self.TRI, self.TRIC, self.BRIC, self.BRI], Metro.WALL)
     self.TRC = self.TR+Metro.HALLWAY_DEPTH*V3.DOWN + CURB_WIDTH*V3.BACKWARD
     self.BRC = self.BR+Metro.HALLWAY_DEPTH*V3.DOWN + CURB_WIDTH*V3.FORWARD
-    self.face([self.TRIC, self.TRC, self.BRC, self.BRIC], Metro.WALL)
+    #self.face([self.TRIC, self.TRC, self.BRC, self.BRIC], Metro.WALL)
     self.TRIF, self.BRIF, self.TRF, self.BRF = (a+Metro.HALLWAY_HEIGHT*V3.DOWN for a in (self.TRIC, self.BRIC, self.TRC, self.BRC))
-    self.face([self.TRIF, self.BRIF, self.BRF, self.TRF], Metro.TILES)
+    #self.face([self.TRIF, self.BRIF, self.BRF, self.TRF], Metro.TILES)
 
 def UnderpassSlopeEntrance(self):
     """Outdoor slope entrance to an underpass hall
@@ -131,4 +131,4 @@ if __name__ == "__main__":
     Scene.setup()
     Scene.clear()
     Metro().create("Metro station")
-    Scene.topIsoRender()
+    #Scene.topIsoRender()
