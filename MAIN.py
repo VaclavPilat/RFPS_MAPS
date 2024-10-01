@@ -282,7 +282,10 @@ class Tile:
             vertices (list[V3] | tuple): Collection of vertices
             material (list|tuple, optional): Material (Class/method, *args). Defaults to None.
         """
-        self.mesh.face((self.modify(a) for a in vertices), material)
+        vertices = list((self.modify(a) for a in vertices))
+        if list((isinstance(a, FlipX) for a in self.modifiers)).count(True) % 2 == 1:
+            vertices = vertices[::-1]
+        self.mesh.face(vertices, material)
     
     def modify(self, vertex: V3) -> V3:
         """Updating vertex position based on used modifiers
