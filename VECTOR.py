@@ -43,7 +43,7 @@ class V3:
         """
         return self.__class__.__name__ + self.__str__()
     
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Getting the hash of this vector
 
         Returns:
@@ -179,6 +179,15 @@ class V3:
         if z is None:
             z = self.z
         return V3(x, y, z)
+    
+    ## \todo Make an alternative to flip Y axis
+    def __invert__(self) -> "V3":
+        """Flipping the X axis of this vector
+
+        Returns:
+            V3: New vector with X axis value flipped
+        """
+        return self(x=-self.x)
 
 
 
@@ -260,4 +269,8 @@ if __name__ == "__main__":
             self.assertEqual(a, b)
             a.x = 5
             self.assertNotEqual(a, b)
+        def test_flipping(self)->None:
+            """Testing __invert__ operator for flipping a vector on the X axis
+            """
+            self.assertEqual(~V3(1, 2, 3), V3(-1, 2, 3))
     unittest.main()
