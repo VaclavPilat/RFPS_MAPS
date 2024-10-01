@@ -16,6 +16,7 @@ if __name__ == "__main__":
 
 import bpy, bmesh, enum, math, mathutils
 from VECTOR import *
+from MODIFIERS import *
 
 
 
@@ -155,7 +156,7 @@ class Map:
                 self.materials[material] = [self.faces]
         self.faces += 1
     
-    def load(self, func, position: V3 = V3.ZERO, size: list|tuple = (1, 1), pivot: Pivot = Pivot.TOP_LEFT, rotation: int = 0) -> "Tile":
+    def load(self, func, position: V3 = V3.ZERO, size: list|tuple = (1, 1), pivot: Pivot = Pivot.TOP_LEFT, modifiers: list|tuple = []) -> "Tile":
         """Loading a tile into the mesh
 
         Args:
@@ -163,12 +164,12 @@ class Map:
             position (V3, optional): Tile position. Defaults to V3.ZERO.
             size (list | tuple, optional): Tile size (x,y). Defaults to (1, 1).
             pivot (Pivot, optional): Pivot position. Defaults to Pivot.TOP_LEFT.
-            rotation (int, optional): Rotation index. Defaults to 0.
+            modifiers (list | tuple, optional): List of vector modifiers. Defaults to [].
 
         Returns:
             Tile: Loaded tile instance
         """
-        loaded = Tile(self, position, size, pivot, rotation)
+        loaded = Tile(self, position, size, pivot, modifiers)
         loaded.create = func
         loaded.create(loaded)
         return loaded
@@ -215,7 +216,7 @@ class Tile:
     """Class for representing a single tile inside of a Map mesh
     """
 
-    def __init__(self, mesh: Map, position: V3 = V3.ZERO, size: list|tuple = (1, 1), pivot: Pivot = Pivot.TOP_LEFT, rotation: int = 0) -> None:
+    def __init__(self, mesh: Map, position: V3 = V3.ZERO, size: list|tuple = (1, 1), pivot: Pivot = Pivot.TOP_LEFT, modifiers: list|tuple = []) -> None:
         """Preparing variables for tile generation
 
         Args:
@@ -223,7 +224,7 @@ class Tile:
             position (V3, optional): Tile position. Defaults to V3.ZERO.
             size (list | tuple, optional): Tile size (x,y). Defaults to (1, 1).
             pivot (Pivot, optional): Pivot position. Defaults to Pivot.TOP_LEFT.
-            rotation (int, optional): Rotation index. Defaults to 0.
+            modifiers (list | tuple, optional): List of vector modifiers. Defaults to [].
 
         Raises:
             ValueError: Thrown if unknown Pivot value was provided
@@ -232,7 +233,7 @@ class Tile:
         self.position = position
         self.size = size
         self.pivot = pivot
-        self.rotation = rotation
+        self.modifiers = modifiers
         if pivot == Pivot.CENTER:
             self.C = position
             self.TL = position + size[0]/2 * V3.FORWARD + size[1]/2 * V3.LEFT
@@ -256,7 +257,7 @@ class Tile:
         """
         raise NotImplemented
     
-    def load(self, func, position: V3 = None, size: list|tuple = None, pivot: Pivot = None, rotation: int = None) -> None:
+    def load(self, func, position: V3 = None, size: list|tuple = None, pivot: Pivot = None, modifiers: int = []) -> None:
         """Loading a tile into the mesh
 
         Args:
@@ -264,7 +265,7 @@ class Tile:
             position (V3, optional): Tile position. Defaults to None.
             size (list | tuple, optional): Tile size (x,y). Defaults to None.
             pivot (Pivot, optional): Pivot position. Defaults to None.
-            rotation (int, optional): Rotation index. Defaults to None.
+            modifiers (list | tuple, optional): List of vector modifiers. Defaults to [].
         """
         if position is None:
             position = self.position
@@ -272,9 +273,7 @@ class Tile:
             size = self.size
         if pivot is None:
             pivot = self.pivot
-        if rotation is None:
-            rotation = self.rotation
-        return self.mesh.load(func, position, size, pivot, rotation)
+        return self.mesh.load(func, position, size, pivot, self.modifiers + modifiers)
     
     def face(self, vertices: list|tuple, material: list|tuple = None) -> None:
         """Creating a face from a list of vertices
@@ -283,21 +282,20 @@ class Tile:
             vertices (list[V3] | tuple): Collection of vertices
             material (list|tuple, optional): Material (Class/method, *args). Defaults to None.
         """
-        self.mesh.face((self.rotate(a) for a in vertices), material)
+        self.mesh.face((self.modify(a) for a in vertices), material)
     
-    def rotate(self, vertex: V3) -> V3:
-        """Updating vertex position based on self rotation
-
-        Rotating vertex around tile center
+    def modify(self, vertex: V3) -> V3:
+        """Updating vertex position based on used modifiers
 
         Args:
             vertex (V3): Position of a vertex
 
         Returns:
-            V3: Rotated vertex position
+            V3: Modified vertex position
         """
         difference = vertex - self.C
-        difference >>= self.rotation
+        for modifier in self.modifiers:
+            difference = modifier.execute(difference)
         return self.C + difference
 
 
