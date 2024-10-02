@@ -180,4 +180,5 @@ if __name__ == "__main__":
     Scene.setup()
     Scene.clear()
     Metro().create("Metro station")
-    #Scene.topIsoRender()
+    Scene.forceDepthMaterial()
+    Scene.topIsoRender()

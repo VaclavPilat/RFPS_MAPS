@@ -90,7 +90,19 @@ class Scene:
                         break
     
     @staticmethod
+    def forceDepthMaterial() -> None:
+        """Assigning a "depth" material to all objects in scene
+        """
+        for obj in bpy.data.objects:
+            index = len(obj.data.materials)
+            obj.data.materials.append(Material.depth())
+            for polygon in obj.data.polygons:
+                polygon.material_index = index
+    
+    @staticmethod
     def topIsoRender() -> None:
+        """Creating an isometric top-down view of the scene
+        """
         camera = LitCamera((0, 0, 100), mathutils.Euler((0, 0, math.radians(90))))
         camera.cam.data.type = 'ORTHO'
         camera.cam.data.ortho_scale = 50
@@ -102,6 +114,8 @@ class Scene:
         """Clearing all objects in scene
         """
         for collection in bpy.context.scene.collection.children:
+            for obj in collection.objects:
+                bpy.data.objects.remove(obj)
             bpy.context.scene.collection.children.unlink(collection)
 
 
@@ -328,13 +342,8 @@ class Tile:
 
 
 if __name__ == "__main__":
-    """import inspect
-    cls = bpy.types.ShaderNodeTexCoord
-    attributes = inspect.getmembers(cls, lambda a:not(inspect.isroutine(a)))
-    [print(a) for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
-    exit(0)"""
     Scene.setup()
     Scene.clear()
     model = Map()
-    model.face([V3.ZERO, V3.RIGHT, V3.FORWARD+V3.RIGHT, V3.FORWARD], (Material.depth,))
+    model.face([V3.ZERO, V3.RIGHT, V3.FORWARD+V3.RIGHT, V3.FORWARD])
     model.create("Square")
