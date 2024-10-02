@@ -210,6 +210,30 @@ class Material:
         material.diffuse_color = color
         return material
 
+    @staticmethod
+    def depth(name: str = "Depth material"):
+        """Creating a depth material using nodes
+
+        Args:
+            name (str, optional): Material name. Defaults to "Depth material".
+
+        Returns:
+            Created Blender material
+        """
+        material = bpy.data.materials.new(name=name)
+        material.use_nodes = True
+        nodes = material.node_tree.nodes
+        nodes.clear()
+        texture = nodes.new("ShaderNodeTexCoord")
+        separate = nodes.new("ShaderNodeSeparateXYZ")
+        ramp = nodes.new("ShaderNodeValToRGB")
+        output = nodes.new("ShaderNodeOutputMaterial")
+        material.node_tree.links.new(output.inputs[0], ramp.outputs[0])
+        material.node_tree.links.new(ramp.inputs[0], separate.outputs[2])
+        material.node_tree.links.new(separate.inputs[0], texture.outputs[0])
+        ramp.color_ramp.interpolation = "EASE"
+        return material
+
 
 
 class Tile:
@@ -304,8 +328,13 @@ class Tile:
 
 
 if __name__ == "__main__":
+    """import inspect
+    cls = bpy.types.ShaderNodeTexCoord
+    attributes = inspect.getmembers(cls, lambda a:not(inspect.isroutine(a)))
+    [print(a) for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
+    exit(0)"""
     Scene.setup()
     Scene.clear()
     model = Map()
-    model.face([V3.ZERO, V3.RIGHT, V3.FORWARD+V3.RIGHT, V3.FORWARD])
+    model.face([V3.ZERO, V3.RIGHT, V3.FORWARD+V3.RIGHT, V3.FORWARD], (Material.depth,))
     model.create("Square")
