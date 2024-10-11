@@ -36,17 +36,18 @@ class Babel(Map):
             pillar_floor[-CENTRAL_STAIRCASE_FLOOR:] + pillar_floor[:CENTRAL_STAIRCASE_FLOOR+1]
             + wall_inner[:CENTRAL_STAIRCASE_FLOOR+1][::-1] + wall_inner[-CENTRAL_STAIRCASE_FLOOR:][::-1]
         )
-        """self.face(
+        self.central_steps(pillar_floor, wall_inner, CENTRAL_STAIRCASE_FLOOR)
+        self.face([i + V3.UP * TOWER_FLOOR_HEIGHT / 2 for i in
             pillar_floor[CENTRAL_PILLAR_SEGMENTS//2-CENTRAL_STAIRCASE_FLOOR:CENTRAL_PILLAR_SEGMENTS//2+CENTRAL_STAIRCASE_FLOOR+1]
             + wall_inner[CENTRAL_PILLAR_SEGMENTS//2-CENTRAL_STAIRCASE_FLOOR:CENTRAL_PILLAR_SEGMENTS//2+CENTRAL_STAIRCASE_FLOOR+1][::-1]
-        )"""
-        self.central_steps(pillar_floor, wall_inner, CENTRAL_STAIRCASE_FLOOR)
+        ])
+        self.central_steps(pillar_floor, wall_inner, CENTRAL_PILLAR_SEGMENTS//2 + CENTRAL_STAIRCASE_FLOOR, TOWER_FLOOR_HEIGHT/2)
     
-    def central_steps(self, inner: list|tuple, outer: list|tuple, start: int) -> None:
-        steps = CENTRAL_PILLAR_SEGMENTS - CENTRAL_STAIRCASE_FLOOR*2 + 1
-        heights = [TOWER_FLOOR_HEIGHT * a/(steps) for a in range(1, steps + 1)]
+    def central_steps(self, inner: list|tuple, outer: list|tuple, start: int, offset: int|float = 0) -> None:
+        steps = CENTRAL_PILLAR_SEGMENTS//2 - CENTRAL_STAIRCASE_FLOOR*2 + 1
+        heights = [TOWER_FLOOR_HEIGHT/2 * a/(steps) + offset for a in range(1, steps + 1)]
         print(steps, "::", heights, "::", len(heights))
-        self.face([x + V3.UP * heights[0]for x in [inner[start], outer[start]]] + [outer[start], inner[start]])
+        self.face([x + V3.UP * heights[0]for x in [inner[start], outer[start]]] + [x + V3.UP * offset for x in [outer[start], inner[start]]])
         for (index, (a, b)) in enumerate([(i%CENTRAL_PILLAR_SEGMENTS, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(start, start+steps-1)]):
             self.face([x + V3.UP * heights[index]for x in [inner[a], inner[b], outer[b], outer[a]]])
             self.face(
@@ -67,5 +68,5 @@ if __name__ == "__main__":
     Scene.setup()
     Scene.clear()
     Babel().create("Tower of Babel")
-    #Scene.forceDepthMaterial()
-    #Scene.topIsoRender()
+    Scene.forceDepthMaterial()
+    Scene.topIsoRender()
