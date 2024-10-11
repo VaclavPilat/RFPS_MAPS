@@ -18,10 +18,11 @@ class Babel(Map):
     """Tower of Babel
     """
 
-    def __init__(self):
+    def __init__(self, origin: V3 = V3.ZERO):
         """Generating map
         """
         super().__init__()
+        self.ORIGIN = origin
         self.central_staircase()
     
     def central_staircase(self) -> None:
@@ -34,10 +35,10 @@ class Babel(Map):
         wall_inner = self.circle(CENTRAL_PILLAR_RADIUS + CENTRAL_STAIRCASE_WIDTH, CENTRAL_PILLAR_SEGMENTS)
         for i in range(2):
             self.central_steps(pillar_floor, wall_inner, i*CENTRAL_PILLAR_SEGMENTS//2 + CENTRAL_STAIRCASE_FLOOR, i*TOWER_FLOOR_HEIGHT/2)
+        # Stair cover walls
     
     def central_steps(self, inner: list|tuple, outer: list|tuple, start: int, offset: int|float = 0) -> None:
         steps = CENTRAL_PILLAR_SEGMENTS//2 - CENTRAL_STAIRCASE_FLOOR*2 + 1
-        print(steps)
         heights = [TOWER_FLOOR_HEIGHT/2 * a/(steps) + offset for a in range(1, steps + 1)]
         self.face([x + V3.UP * heights[0]for x in [inner[start], outer[start]]] + [x + V3.UP * offset for x in [outer[start], inner[start]]])
         for (index, (a, b)) in enumerate([(i%CENTRAL_PILLAR_SEGMENTS, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(start, start+steps-1)]):
@@ -58,11 +59,12 @@ class Babel(Map):
         return math.cos(math.radians(degrees)) * radius
     
     def circle(self, radius: int|float, count: int) -> list:
-        return [V3(self.sin(d, radius), self.cos(d, radius)) for d in (360*i/count for i in range(count))]
+        return [self.ORIGIN+V3.FORWARD*self.sin(d, radius)+V3.LEFT*self.cos(d, radius) for d in (360*i/count for i in range(count))]
 
 if __name__ == "__main__":
     Scene.setup()
     Scene.clear()
-    Babel().create("Tower of Babel")
+    Babel(V3.ZERO).create("Tower of Babel")
+    Babel(V3.DOWN * TOWER_FLOOR_HEIGHT).create("Tower of Babel")
     Scene.forceDepthMaterial()
     Scene.topIsoRender()
