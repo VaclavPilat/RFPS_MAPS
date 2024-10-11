@@ -36,19 +36,22 @@ class Babel(Map):
             pillar_floor[-CENTRAL_STAIRCASE_FLOOR:] + pillar_floor[:CENTRAL_STAIRCASE_FLOOR+1]
             + wall_inner[:CENTRAL_STAIRCASE_FLOOR+1][::-1] + wall_inner[-CENTRAL_STAIRCASE_FLOOR:][::-1]
         )
-        self.face(
+        """self.face(
             pillar_floor[CENTRAL_PILLAR_SEGMENTS//2-CENTRAL_STAIRCASE_FLOOR:CENTRAL_PILLAR_SEGMENTS//2+CENTRAL_STAIRCASE_FLOOR+1]
             + wall_inner[CENTRAL_PILLAR_SEGMENTS//2-CENTRAL_STAIRCASE_FLOOR:CENTRAL_PILLAR_SEGMENTS//2+CENTRAL_STAIRCASE_FLOOR+1][::-1]
-        )
+        )"""
         self.central_steps(pillar_floor, wall_inner, CENTRAL_STAIRCASE_FLOOR)
     
     def central_steps(self, inner: list|tuple, outer: list|tuple, start: int) -> None:
         steps = CENTRAL_PILLAR_SEGMENTS - CENTRAL_STAIRCASE_FLOOR*2 + 1
-        heights = [TOWER_FLOOR_HEIGHT * a/(steps) for a in range(1, steps)]
+        heights = [TOWER_FLOOR_HEIGHT * a/(steps) for a in range(1, steps + 1)]
         print(steps, "::", heights, "::", len(heights))
         for (index, (a, b)) in enumerate([(i%CENTRAL_PILLAR_SEGMENTS, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(start, start+steps-1)]):
-            self.face([x + V3.UP * heights[index]
-             for x in [inner[a], inner[b], outer[b], outer[a]]])
+            self.face([x + V3.UP * heights[index]for x in [inner[a], inner[b], outer[b], outer[a]]])
+            self.face(
+                [x + V3.UP * heights[index+1]for x in [inner[b], outer[b]]]
+                + [x + V3.UP * heights[index]for x in [outer[b], inner[b]]]
+            )
 
     
     def sin(self, degrees: int|float, radius: int|float) -> float:
