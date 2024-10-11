@@ -57,6 +57,10 @@ class Babel(Map):
             [inner[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)]
             + [outer[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)][::-1]
         ])
+        self.face([x + V3.UP * offset + V3.DOWN * TOWER_FLOOR_THICKNESS for x in
+            [outer[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2+1, start+1)]
+            + [inner[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2+1, start+1)][::-1]
+        ])
     
     def sin(self, degrees: int|float, radius: int|float) -> float:
         return math.sin(math.radians(degrees)) * radius
