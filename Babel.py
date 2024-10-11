@@ -9,10 +9,10 @@ if __name__ == "__main__":
 from MAIN import *
 
 TOWER_FLOOR_HEIGHT = 5
-CENTRAL_PILLAR_RADIUS = 0.5
-CENTRAL_PILLAR_SEGMENTS = 32
-CENTRAL_STAIRCASE_WIDTH = 1.5
-CENTRAL_STAIRCASE_FLOOR = 2
+CENTER_PILLAR_RADIUS = 0.5
+CENTER_PILLAR_SEGMENTS = 32
+CENTER_STAIRCASE_WIDTH = 1.5
+CENTER_ISLE_SEGMENTS = 2
 
 class Babel(Map):
     """Tower of Babel
@@ -27,29 +27,29 @@ class Babel(Map):
     
     def central_staircase(self) -> None:
         # Pillar
-        pillar_floor = self.circle(CENTRAL_PILLAR_RADIUS, CENTRAL_PILLAR_SEGMENTS)
+        pillar_floor = self.circle(CENTER_PILLAR_RADIUS, CENTER_PILLAR_SEGMENTS)
         pillar_ceiling = [i + V3.UP * TOWER_FLOOR_HEIGHT for i in pillar_floor]
-        for a, b in [(i, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(CENTRAL_PILLAR_SEGMENTS)]:
+        for a, b in [(i, (i+1)%CENTER_PILLAR_SEGMENTS) for i in range(CENTER_PILLAR_SEGMENTS)]:
             self.face([pillar_ceiling[a], pillar_ceiling[b], pillar_floor[b], pillar_floor[a]])
         # Steps
-        wall_inner = self.circle(CENTRAL_PILLAR_RADIUS + CENTRAL_STAIRCASE_WIDTH, CENTRAL_PILLAR_SEGMENTS)
+        wall_inner = self.circle(CENTER_PILLAR_RADIUS + CENTER_STAIRCASE_WIDTH, CENTER_PILLAR_SEGMENTS)
         for i in range(2):
-            self.central_steps(pillar_floor, wall_inner, i*CENTRAL_PILLAR_SEGMENTS//2 + CENTRAL_STAIRCASE_FLOOR, i*TOWER_FLOOR_HEIGHT/2)
+            self.central_steps(pillar_floor, wall_inner, i*CENTER_PILLAR_SEGMENTS//2 + CENTER_ISLE_SEGMENTS, i*TOWER_FLOOR_HEIGHT/2)
         # Stair cover walls
     
     def central_steps(self, inner: list|tuple, outer: list|tuple, start: int, offset: int|float = 0) -> None:
-        steps = CENTRAL_PILLAR_SEGMENTS//2 - CENTRAL_STAIRCASE_FLOOR*2 + 1
+        steps = CENTER_PILLAR_SEGMENTS//2 - CENTER_ISLE_SEGMENTS*2 + 1
         heights = [TOWER_FLOOR_HEIGHT/2 * a/(steps) + offset for a in range(1, steps + 1)]
         self.face([x + V3.UP * heights[0]for x in [inner[start], outer[start]]] + [x + V3.UP * offset for x in [outer[start], inner[start]]])
-        for (index, (a, b)) in enumerate([(i%CENTRAL_PILLAR_SEGMENTS, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(start, start+steps-1)]):
+        for (index, (a, b)) in enumerate([(i%CENTER_PILLAR_SEGMENTS, (i+1)%CENTER_PILLAR_SEGMENTS) for i in range(start, start+steps-1)]):
             self.face([x + V3.UP * heights[index]for x in [inner[a], inner[b], outer[b], outer[a]]])
             self.face(
                 [x + V3.UP * heights[index+1]for x in [inner[b], outer[b]]]
                 + [x + V3.UP * heights[index]for x in [outer[b], inner[b]]]
             )
         self.face([x + V3.UP * offset for x in
-            [inner[i%CENTRAL_PILLAR_SEGMENTS] for i in range(start-CENTRAL_STAIRCASE_FLOOR*2, start+1)]
-            + [outer[i%CENTRAL_PILLAR_SEGMENTS] for i in range(start-CENTRAL_STAIRCASE_FLOOR*2, start+1)][::-1]
+            [inner[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)]
+            + [outer[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)][::-1]
         ])
     
     def sin(self, degrees: int|float, radius: int|float) -> float:
