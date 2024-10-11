@@ -9,6 +9,7 @@ if __name__ == "__main__":
 from MAIN import *
 
 TOWER_FLOOR_HEIGHT = 5
+TOWER_FLOOR_THICKNESS = 0.5
 CENTER_PILLAR_RADIUS = 0.5
 CENTER_PILLAR_SEGMENTS = 32
 CENTER_STAIRCASE_WIDTH = 1.5
@@ -39,14 +40,19 @@ class Babel(Map):
     
     def central_steps(self, inner: list|tuple, outer: list|tuple, start: int, offset: int|float = 0) -> None:
         steps = CENTER_PILLAR_SEGMENTS//2 - CENTER_ISLE_SEGMENTS*2 + 1
-        heights = [TOWER_FLOOR_HEIGHT/2 * a/(steps) + offset for a in range(1, steps + 1)]
-        self.face([x + V3.UP * heights[0]for x in [inner[start], outer[start]]] + [x + V3.UP * offset for x in [outer[start], inner[start]]])
-        for (index, (a, b)) in enumerate([(i%CENTER_PILLAR_SEGMENTS, (i+1)%CENTER_PILLAR_SEGMENTS) for i in range(start, start+steps-1)]):
-            self.face([x + V3.UP * heights[index]for x in [inner[a], inner[b], outer[b], outer[a]]])
+        heights = [TOWER_FLOOR_HEIGHT/2 * a/(steps) + offset for a in range(steps + 1)]
+        for (index, (a, b)) in enumerate([(i%CENTER_PILLAR_SEGMENTS, (i+1)%CENTER_PILLAR_SEGMENTS) for i in range(start, start+steps)]):
             self.face(
-                [x + V3.UP * heights[index+1]for x in [inner[b], outer[b]]]
-                + [x + V3.UP * heights[index]for x in [outer[b], inner[b]]]
+                [x + V3.UP * heights[index+1] for x in [inner[a], outer[a]]]
+                + [x + V3.UP * heights[index] for x in [outer[a], inner[a]]]
             )
+            self.face([y + V3.DOWN * TOWER_FLOOR_THICKNESS for y in
+                [x + V3.UP * heights[index+1] for x in [outer[b], inner[b]]]
+                + [x + V3.UP * heights[index] for x in [inner[a], outer[a]]]
+            ])
+            if index >= steps -1:
+                break
+            self.face([x + V3.UP * heights[index+1] for x in [inner[a], inner[b], outer[b], outer[a]]])
         self.face([x + V3.UP * offset for x in
             [inner[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)]
             + [outer[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)][::-1]
