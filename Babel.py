@@ -10,7 +10,7 @@ from MAIN import *
 
 TOWER_FLOOR_HEIGHT = 5
 CENTRAL_PILLAR_RADIUS = 0.5
-CENTRAL_PILLAR_SEGMENTS = 24
+CENTRAL_PILLAR_SEGMENTS = 32
 CENTRAL_STAIRCASE_WIDTH = 1.5
 CENTRAL_STAIRCASE_FLOOR = 2
 
@@ -46,13 +46,13 @@ class Babel(Map):
         steps = CENTRAL_PILLAR_SEGMENTS - CENTRAL_STAIRCASE_FLOOR*2 + 1
         heights = [TOWER_FLOOR_HEIGHT * a/(steps) for a in range(1, steps + 1)]
         print(steps, "::", heights, "::", len(heights))
+        self.face([x + V3.UP * heights[0]for x in [inner[start], outer[start]]] + [outer[start], inner[start]])
         for (index, (a, b)) in enumerate([(i%CENTRAL_PILLAR_SEGMENTS, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(start, start+steps-1)]):
             self.face([x + V3.UP * heights[index]for x in [inner[a], inner[b], outer[b], outer[a]]])
             self.face(
                 [x + V3.UP * heights[index+1]for x in [inner[b], outer[b]]]
                 + [x + V3.UP * heights[index]for x in [outer[b], inner[b]]]
             )
-
     
     def sin(self, degrees: int|float, radius: int|float) -> float:
         return math.sin(math.radians(degrees)) * radius
