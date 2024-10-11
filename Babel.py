@@ -10,7 +10,7 @@ from MAIN import *
 
 TOWER_FLOOR_HEIGHT = 5
 CENTRAL_PILLAR_RADIUS = 0.5
-CENTRAL_PILLAR_SEGMENTS = 32
+CENTRAL_PILLAR_SEGMENTS = 24
 CENTRAL_STAIRCASE_WIDTH = 1.5
 CENTRAL_STAIRCASE_FLOOR = 2
 
@@ -32,16 +32,24 @@ class Babel(Map):
             self.face([pillar_ceiling[a], pillar_ceiling[b], pillar_floor[b], pillar_floor[a]])
         # Steps
         wall_inner = self.circle(CENTRAL_PILLAR_RADIUS + CENTRAL_STAIRCASE_WIDTH, CENTRAL_PILLAR_SEGMENTS)
-        #for a, b in [(i, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(CENTRAL_STAIRCASE_FLOOR, CENTRAL_PILLAR_SEGMENTS-CENTRAL_STAIRCASE_FLOOR)]:
-        #    self.face([pillar_floor[a], pillar_floor[b], wall_inner[b], wall_inner[a]])
         self.face(
             pillar_floor[-CENTRAL_STAIRCASE_FLOOR:] + pillar_floor[:CENTRAL_STAIRCASE_FLOOR+1]
             + wall_inner[:CENTRAL_STAIRCASE_FLOOR+1][::-1] + wall_inner[-CENTRAL_STAIRCASE_FLOOR:][::-1]
         )
         self.face(
-            pillar_floor[int(CENTRAL_PILLAR_SEGMENTS/2-CENTRAL_STAIRCASE_FLOOR):int(CENTRAL_PILLAR_SEGMENTS/2+CENTRAL_STAIRCASE_FLOOR)+1]
-            + wall_inner[int(CENTRAL_PILLAR_SEGMENTS/2-CENTRAL_STAIRCASE_FLOOR):int(CENTRAL_PILLAR_SEGMENTS/2+CENTRAL_STAIRCASE_FLOOR)+1][::-1]
+            pillar_floor[CENTRAL_PILLAR_SEGMENTS//2-CENTRAL_STAIRCASE_FLOOR:CENTRAL_PILLAR_SEGMENTS//2+CENTRAL_STAIRCASE_FLOOR+1]
+            + wall_inner[CENTRAL_PILLAR_SEGMENTS//2-CENTRAL_STAIRCASE_FLOOR:CENTRAL_PILLAR_SEGMENTS//2+CENTRAL_STAIRCASE_FLOOR+1][::-1]
         )
+        self.central_steps(pillar_floor, wall_inner, CENTRAL_STAIRCASE_FLOOR)
+    
+    def central_steps(self, inner: list|tuple, outer: list|tuple, start: int) -> None:
+        steps = CENTRAL_PILLAR_SEGMENTS - CENTRAL_STAIRCASE_FLOOR*2 + 1
+        heights = [TOWER_FLOOR_HEIGHT * a/(steps) for a in range(1, steps)]
+        print(steps, "::", heights, "::", len(heights))
+        for (index, (a, b)) in enumerate([(i%CENTRAL_PILLAR_SEGMENTS, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(start, start+steps-1)]):
+            self.face([x + V3.UP * heights[index]
+             for x in [inner[a], inner[b], outer[b], outer[a]]])
+
     
     def sin(self, degrees: int|float, radius: int|float) -> float:
         return math.sin(math.radians(degrees)) * radius
