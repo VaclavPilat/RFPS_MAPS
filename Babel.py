@@ -8,7 +8,8 @@ if __name__ == "__main__":
         sys.path.append(directory)
 from MAIN import *
 
-CENTRAL_PILLAR_RADIUS = 1
+TOWER_FLOOR_HEIGHT = 5
+CENTRAL_PILLAR_RADIUS = 0.5
 CENTRAL_PILLAR_SEGMENTS = 16
 
 class Babel(Map):
@@ -19,7 +20,14 @@ class Babel(Map):
         """Generating map
         """
         super().__init__()
-        self.face(self.circle(CENTRAL_PILLAR_RADIUS, CENTRAL_PILLAR_SEGMENTS))
+        self.central_staircase()
+    
+    def central_staircase(self) -> None:
+        # Pillar
+        pillar_floor = self.circle(CENTRAL_PILLAR_RADIUS, CENTRAL_PILLAR_SEGMENTS)
+        pillar_ceiling = [i + V3.UP * TOWER_FLOOR_HEIGHT for i in pillar_floor]
+        for a, b in [(i, (i+1)%len(pillar_floor)) for i in range(len(pillar_floor))]:
+            self.face([pillar_ceiling[a], pillar_ceiling[b], pillar_floor[b], pillar_floor[a]])
     
     def sin(self, degrees: int|float, radius: int|float) -> float:
         return math.sin(math.radians(degrees)) * radius
