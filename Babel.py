@@ -12,6 +12,7 @@ TOWER_FLOOR_HEIGHT = 5
 CENTRAL_PILLAR_RADIUS = 0.5
 CENTRAL_PILLAR_SEGMENTS = 32
 CENTRAL_STAIRCASE_WIDTH = 1.5
+CENTRAL_STAIRCASE_FLOOR = 2
 
 class Babel(Map):
     """Tower of Babel
@@ -29,10 +30,18 @@ class Babel(Map):
         pillar_ceiling = [i + V3.UP * TOWER_FLOOR_HEIGHT for i in pillar_floor]
         for a, b in [(i, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(CENTRAL_PILLAR_SEGMENTS)]:
             self.face([pillar_ceiling[a], pillar_ceiling[b], pillar_floor[b], pillar_floor[a]])
-        # Spets
+        # Steps
         wall_inner = self.circle(CENTRAL_PILLAR_RADIUS + CENTRAL_STAIRCASE_WIDTH, CENTRAL_PILLAR_SEGMENTS)
-        for a, b in [(i, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(CENTRAL_PILLAR_SEGMENTS)]:
-            self.face([pillar_floor[a], pillar_floor[b], wall_inner[b], wall_inner[a]])
+        #for a, b in [(i, (i+1)%CENTRAL_PILLAR_SEGMENTS) for i in range(CENTRAL_STAIRCASE_FLOOR, CENTRAL_PILLAR_SEGMENTS-CENTRAL_STAIRCASE_FLOOR)]:
+        #    self.face([pillar_floor[a], pillar_floor[b], wall_inner[b], wall_inner[a]])
+        self.face(
+            pillar_floor[-CENTRAL_STAIRCASE_FLOOR:] + pillar_floor[:CENTRAL_STAIRCASE_FLOOR+1]
+            + wall_inner[:CENTRAL_STAIRCASE_FLOOR+1][::-1] + wall_inner[-CENTRAL_STAIRCASE_FLOOR:][::-1]
+        )
+        self.face(
+            pillar_floor[int(CENTRAL_PILLAR_SEGMENTS/2-CENTRAL_STAIRCASE_FLOOR):int(CENTRAL_PILLAR_SEGMENTS/2+CENTRAL_STAIRCASE_FLOOR)+1]
+            + wall_inner[int(CENTRAL_PILLAR_SEGMENTS/2-CENTRAL_STAIRCASE_FLOOR):int(CENTRAL_PILLAR_SEGMENTS/2+CENTRAL_STAIRCASE_FLOOR)+1][::-1]
+        )
     
     def sin(self, degrees: int|float, radius: int|float) -> float:
         return math.sin(math.radians(degrees)) * radius
