@@ -42,21 +42,29 @@ class Babel(Map):
         steps = CENTER_PILLAR_SEGMENTS//2 - CENTER_ISLE_SEGMENTS*2 + 1
         heights = [TOWER_FLOOR_HEIGHT/2 * a/(steps) + offset for a in range(steps + 1)]
         for (index, (a, b)) in enumerate([(i%CENTER_PILLAR_SEGMENTS, (i+1)%CENTER_PILLAR_SEGMENTS) for i in range(start, start+steps)]):
+            # Vertical face
             self.face(
                 [x + V3.UP * heights[index+1] for x in [inner[a], outer[a]]]
                 + [x + V3.UP * heights[index] for x in [outer[a], inner[a]]]
             )
-            self.face([y + V3.DOWN * TOWER_FLOOR_THICKNESS for y in
-                [x + V3.UP * heights[index+1] for x in [outer[b], inner[b]]]
-                + [x + V3.UP * heights[index] for x in [inner[a], outer[a]]]
+            # Ceiling faces
+            self.face([
+                y(z=self.ORIGIN.z+(y.z-TOWER_FLOOR_THICKNESS)%TOWER_FLOOR_HEIGHT)
+                if self.ORIGIN.z+heights[index+1]-TOWER_FLOOR_THICKNESS<self.ORIGIN.z
+                else y+V3.DOWN*TOWER_FLOOR_THICKNESS for y in
+                    [x + V3.UP * heights[index+1] for x in [outer[b], inner[b]]]
+                    + [x + V3.UP * heights[index] for x in [inner[a], outer[a]]]
             ])
             if index >= steps -1:
                 break
+            # Horizontal face
             self.face([x + V3.UP * heights[index+1] for x in [inner[a], inner[b], outer[b], outer[a]]])
+        # Floor isle
         self.face([x + V3.UP * offset for x in
             [inner[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)]
             + [outer[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)][::-1]
         ])
+        # Ceiling isle
         self.face([x(z=self.ORIGIN.z + (+offset-TOWER_FLOOR_THICKNESS)%TOWER_FLOOR_HEIGHT) for x in
             [outer[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2+1, start+1)]
             + [inner[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2+1, start+1)][::-1]
