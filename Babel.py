@@ -18,6 +18,24 @@ CENTER_ISLE_SEGMENTS = 2
 class Babel(Map):
     """Tower of Babel
     """
+    
+    def face(self, vertices: list|tuple, material: list|tuple = None) -> None:
+        """Creating a face from a list of vertices.
+
+        Using modulo on faces that are under the ORIGIN's Z value.
+
+        Args:
+            vertices (list[V3] | tuple): Collection of vertices
+            material (list|tuple, optional): Material (Class/method, *args). Defaults to None.
+        """
+        under = True
+        for v in vertices:
+            if v.z > self.ORIGIN.z:
+                under = False
+                break
+        if under:
+            vertices = [v(z=self.ORIGIN.z + v.z % TOWER_FLOOR_HEIGHT) for v in vertices]
+        super().face(vertices, material)
 
     def __init__(self, origin: V3 = V3.ZERO):
         """Generating map
@@ -48,10 +66,7 @@ class Babel(Map):
                 + [x + V3.UP * heights[index] for x in [outer[a], inner[a]]]
             )
             # Ceiling faces
-            self.face([
-                y(z=self.ORIGIN.z+(y.z-TOWER_FLOOR_THICKNESS)%TOWER_FLOOR_HEIGHT)
-                if self.ORIGIN.z+heights[index+1]-TOWER_FLOOR_THICKNESS<self.ORIGIN.z
-                else y+V3.DOWN*TOWER_FLOOR_THICKNESS for y in
+            self.face([y+V3.DOWN*TOWER_FLOOR_THICKNESS for y in
                     [x + V3.UP * heights[index+1] for x in [outer[b], inner[b]]]
                     + [x + V3.UP * heights[index] for x in [inner[a], outer[a]]]
             ])
@@ -65,7 +80,7 @@ class Babel(Map):
             + [outer[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2, start+1)][::-1]
         ])
         # Ceiling isle
-        self.face([x(z=self.ORIGIN.z + (+offset-TOWER_FLOOR_THICKNESS)%TOWER_FLOOR_HEIGHT) for x in
+        self.face([x + V3.UP * (offset - TOWER_FLOOR_THICKNESS) for x in
             [outer[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2+1, start+1)]
             + [inner[i%CENTER_PILLAR_SEGMENTS] for i in range(start-CENTER_ISLE_SEGMENTS*2+1, start+1)][::-1]
         ])
