@@ -235,6 +235,7 @@ class Material:
             Created Blender material
         """
         material = bpy.data.materials.new(name=name)
+        material.use_backface_culling = True
         material.use_nodes = True
         nodes = material.node_tree.nodes
         nodes.clear()
