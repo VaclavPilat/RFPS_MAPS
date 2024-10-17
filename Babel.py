@@ -55,6 +55,10 @@ class Babel(Map):
         for i in range(2):
             self.central_steps(pillar_floor, wall_inner, i*CENTER_PILLAR_SEGMENTS//2 + CENTER_ISLE_SEGMENTS, i*TOWER_FLOOR_HEIGHT/2)
         # Stair cover walls
+        for a, b in [(i, i+1) for i in range(CENTER_ISLE_SEGMENTS, CENTER_PILLAR_SEGMENTS//2-CENTER_ISLE_SEGMENTS)]:
+            self.face([x + V3.UP * TOWER_FLOOR_HEIGHT for x in [wall_inner[b], wall_inner[a]]] + [wall_inner[a], wall_inner[b]])
+        for a, b in [(i, i+1) for i in range(CENTER_PILLAR_SEGMENTS//2+CENTER_ISLE_SEGMENTS, CENTER_PILLAR_SEGMENTS-CENTER_ISLE_SEGMENTS)]:
+            self.face([x + V3.UP * TOWER_FLOOR_HEIGHT for x in [wall_inner[b], wall_inner[a]]] + [wall_inner[a], wall_inner[b]])
     
     def central_steps(self, inner: list|tuple, outer: list|tuple, start: int, offset: int|float = 0) -> None:
         steps = CENTER_PILLAR_SEGMENTS//2 - CENTER_ISLE_SEGMENTS*2 + 1
