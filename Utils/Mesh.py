@@ -49,4 +49,11 @@ if __name__ == "__main__":
             """
             with self.assertRaises(NotImplementedError):
                 Mesh()
+        def test_overwriting(self) -> None:
+            """Overwriting the generate() method on Mesh
+            """
+            class OverwrittenMesh(Mesh):
+                def generate(self, value: int) -> None:
+                    self.value = value
+            self.assertEqual(OverwrittenMesh(value=10).value, 10)
     unittest.main()
