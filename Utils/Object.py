@@ -86,8 +86,8 @@ if __name__ == "__main__":
                 def generate(self, value: int) -> None:
                     self.value = value
             self.assertEqual(OverwrittenMesh(value=10).value, 10)
-        def test_objects(self) -> None:
-            """Counting the objects in a container
+        def test_nesting(self) -> None:
+            """Counting the nested meshes in a container
             """
             class AMesh(Mesh):
                 def generate(self) -> None:
@@ -95,10 +95,17 @@ if __name__ == "__main__":
             class BMesh(Mesh):
                 def generate(self) -> None:
                     self.load(AMesh)
+            class CMesh(Mesh):
+                def generate(self, inner: "Mesh") -> None:
+                    self.load(inner)
             a = AMesh()
             self.assertEqual(len(list(a)), 1)
             a.load(AMesh)
             self.assertEqual(len(list(a)), 2)
             a.load(BMesh)
             self.assertEqual(len(list(a)), 4)
+            a.load(CMesh, inner=AMesh)
+            self.assertEqual(len(list(a)), 6)
+            a.load(CMesh, inner=BMesh)
+            self.assertEqual(len(list(a)), 9)
     unittest.main()
