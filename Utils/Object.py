@@ -8,18 +8,11 @@ class Container:
     """Class for containing a list of meshes
     """
 
-    def __init__(self) -> None:
-        """Initializing the container
+    def __init__(self, *args, **kwargs) -> None:
+        """Initializing the container and generating its structure
         """
         self.objects = []
-
-    def load(self, mesh: "Mesh", *args, **kwargs) -> None:
-        """Creating a mesh instance using class type and its constructor arguments
-
-        Args:
-            mesh (Mesh): Mesh type to create
-        """
-        self.objects.append(mesh(*args, **kwargs))
+        self.generate(*args, **kwargs)
     
     def __iter__(self):
         """Iterating over meshes
@@ -30,6 +23,22 @@ class Container:
         yield self
         for obj in self.objects:
             yield from obj
+
+    def load(self, mesh: "Mesh", *args, **kwargs) -> None:
+        """Creating a mesh instance using class type and its constructor arguments
+
+        Args:
+            mesh (Mesh): Mesh type to create
+        """
+        self.objects.append(mesh(*args, **kwargs))
+    
+    def generate(self) -> None:
+        """Generating the mesh
+
+        Raises:
+            NotImplementedError: Thrown when not overriden
+        """
+        raise NotImplementedError("Mesh generation method was not overriden")
 
 
 
@@ -44,19 +53,10 @@ class Mesh(Container):
             name (str, optional): Mesh name. Defaults to "New mesh".
             pivot (V3, optional): Pivot positions. Defaults to V3.ZERO.
         """
-        super().__init__()
         self.name = name
         self.pivot = pivot
         self.faces = []
-        self.generate(*args, **kwargs)
-    
-    def generate(self) -> None:
-        """Generating the mesh
-
-        Raises:
-            NotImplementedError: Thrown when not overriden
-        """
-        raise NotImplementedError("Mesh generation method was not overriden")
+        super().__init__(*args, **kwargs)
 
     def face(self, vertices: list[V3]|tuple[V3], material: int = 0) -> None:
         """Creating a new face
