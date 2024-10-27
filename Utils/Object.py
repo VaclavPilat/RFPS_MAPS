@@ -20,6 +20,16 @@ class Container:
             mesh (Mesh): Mesh type to create
         """
         self.objects.append(mesh(*args, **kwargs))
+    
+    def __iter__(self):
+        """Iterating over meshes
+
+        Returns:
+            Iterator representing mesh objects
+        """
+        yield self
+        for obj in self.objects:
+            yield from obj
 
 
 
