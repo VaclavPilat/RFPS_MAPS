@@ -86,4 +86,12 @@ if __name__ == "__main__":
                 def generate(self, value: int) -> None:
                     self.value = value
             self.assertEqual(OverwrittenMesh(value=10).value, 10)
+        def test_objects(self) -> None:
+            """Counting the objects in a container
+            """
+            class AMesh(Mesh):
+                def generate(self) -> None:
+                    pass
+            a = AMesh()
+            self.assertEqual(len(list(a)), 1)
     unittest.main()
