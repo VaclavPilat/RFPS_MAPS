@@ -1,6 +1,8 @@
 ## \file
 # Implementation of the Babel map
-from Utils import *
+from Utils.Scene import Scene
+from Utils.Mesh import Mesh
+from Utils.Vector import V3
 
 
 

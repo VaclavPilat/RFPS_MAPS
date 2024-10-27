@@ -1,6 +1,9 @@
 ## \file
 # Classes for creating objects and meshes
-from Vector import V3
+try:
+    from Vector import V3
+except:
+    from Utils.Vector import V3
 
 
 

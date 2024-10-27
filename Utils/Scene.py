@@ -1,6 +1,9 @@
 ## \file
 # Class for creating a scene or a map
-from Object import Mesh, Container
+try:
+    from Mesh import Mesh, Container
+except:
+    from Utils.Mesh import Mesh, Container
 
 
 
