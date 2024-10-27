@@ -4,7 +4,26 @@ from Vector import V3
 
 
 
-class Mesh:
+class Container:
+    """Class for containing a list of meshes
+    """
+
+    def __init__(self) -> None:
+        """Initializing the container
+        """
+        self.objects = []
+
+    def load(self, mesh: "Mesh", *args, **kwargs) -> None:
+        """Creating a mesh instance using class type and its constructor arguments
+
+        Args:
+            mesh (Mesh): Mesh type to create
+        """
+        self.objects.append(mesh(*args, **kwargs))
+
+
+
+class Mesh(Container):
     """Class for representing the mesh of an object as a collection of faces
     """
 
@@ -15,6 +34,7 @@ class Mesh:
             name (str, optional): Mesh name. Defaults to "New mesh".
             pivot (V3, optional): Pivot positions. Defaults to V3.ZERO.
         """
+        super().__init__()
         self.name = name
         self.pivot = pivot
         self.faces = []
