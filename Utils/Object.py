@@ -92,6 +92,13 @@ if __name__ == "__main__":
             class AMesh(Mesh):
                 def generate(self) -> None:
                     pass
+            class BMesh(Mesh):
+                def generate(self) -> None:
+                    self.load(AMesh)
             a = AMesh()
             self.assertEqual(len(list(a)), 1)
+            a.load(AMesh)
+            self.assertEqual(len(list(a)), 2)
+            a.load(BMesh)
+            self.assertEqual(len(list(a)), 4)
     unittest.main()
