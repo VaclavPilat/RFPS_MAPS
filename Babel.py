@@ -3,6 +3,7 @@
 from Utils.Scene import Scene
 from Utils.Mesh import Mesh
 from Utils.Vector import V3
+import math
 
 
 
@@ -10,15 +11,35 @@ class Column(Mesh):
     """Cylinder mesh with vertical walls only
     """
 
-    def generate(self, height: int|float = 5, radius: int|float = 0.5, segments: int = 8) -> None:
+    def points(self, pivot: V3, radius: int|float, segments: int) -> list[V3]:
+        """Generating a list of points around a circle
+
+        Args:
+            pivot (V3): Center point
+            radius (int | float): Circle radius
+            segments (int): Segment (point) count
+
+        Returns:
+            list[V3]: List of vertex positions
+        """
+        points = []
+        for i in range(segments):
+            degrees = 360*i/segments
+            sin = math.sin(math.radians(degrees)) * radius
+            cos = math.cos(math.radians(degrees)) * radius
+            points.append(pivot + V3.FORWARD * sin + V3.RIGHT * cos)
+        return points
+
+    def generate(self, height: int|float, radius: int|float, segments: int) -> None:
         """Generating a column
 
         Args:
-            height (int | float, optional): Column height. Defaults to 5.
-            radius (int | float, optional): Column radius. Defaults to 0.5.
-            segments (int, optional): Number of outer vertical faces. Defaults to 8.
+            height (int | float): Column height.
+            radius (int | float): Column radius.
+            segments (int): Number of outer vertical faces.
         """
-        pass
+        lower = self.points(self.pivot, radius, segments)
+        upper = self.points(self.pivot + V3.UP * height, radius, segments)
 
 
 
@@ -29,7 +50,7 @@ class Babel(Scene):
     def generate(self) -> None:
         """Generating Babel structure
         """
-        pass
+        self.load(Column, "Central column", V3.ZERO, 5, 0.5, 8)
 
 
 
