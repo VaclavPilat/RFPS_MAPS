@@ -1,14 +1,14 @@
 ## \file
 # Class for creating a scene or a map
 try:
-    from Mesh import Mesh, Container
+    from Mesh import Mesh, Object
 except:
-    from Utils.Mesh import Mesh, Container
+    from Utils.Mesh import Mesh, Object
 import bpy, bmesh
 
 
 
-class Scene(Container):
+class Scene(Object):
     """Class for a map, a top level object containing meshes
     """
     
@@ -21,11 +21,11 @@ class Scene(Container):
         for obj in self.objects:
             yield from obj
     
-    def create(self, root: Container = None) -> None:
+    def create(self, root: Object = None) -> None:
         """Creating the scene by materializing meshes and their faces
 
         Args:
-            root (Container, optional): Root container. Defaults to None.
+            root (Object, optional): Root object. Defaults to None.
         """
         if root is None:
             root = self

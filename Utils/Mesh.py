@@ -7,11 +7,11 @@ except:
 
 
 
-class Container:
-    """Class for containing a list of meshes
+class Object:
+    """Class for containing other meshes
     """
 
-    def __init__(self, name: str = "New mesh", pivot: V3 = V3.ZERO, *args, **kwargs) -> None:
+    def __init__(self, name: str = "New object", pivot: V3 = V3.ZERO, *args, **kwargs) -> None:
         """Creating a new mesh
 
         Args:
@@ -60,7 +60,7 @@ class Container:
 
 
 
-class Mesh(Container):
+class Mesh(Object):
     """Class for representing the mesh of an object as a collection of faces
     """
 
