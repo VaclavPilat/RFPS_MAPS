@@ -5,9 +5,10 @@ if __name__ == "__main__":
     directory = os.path.dirname(bpy.data.filepath)
     if not directory in sys.path:
         sys.path.append(directory)
-from Utils.Scene import Scene
-from Utils.Object import Mesh
 from Utils.Vector import V3
+from Utils.Object import Mesh
+from Utils.Scene import Scene
+from Utils.Blender import Blender
 import math
 
 
@@ -60,4 +61,6 @@ class Babel(Scene):
 
 
 if __name__ == "__main__":
+    Blender.setup()
+    Blender.purge()
     Babel().create()
