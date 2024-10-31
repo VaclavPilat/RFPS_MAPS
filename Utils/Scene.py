@@ -12,7 +12,7 @@ class Scene(Object):
     """Class for a map, a top level object containing meshes
     """
     
-    def __iter__(self):
+    def __iter__(self) -> None:
         """Iterating over meshes
 
         Returns:
