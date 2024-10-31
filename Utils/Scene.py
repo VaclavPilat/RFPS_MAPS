@@ -1,9 +1,9 @@
 ## \file
 # Class for creating a scene or a map
 try:
-    from Mesh import Mesh, Object
+    from Object import Mesh, Object
 except:
-    from Utils.Mesh import Mesh, Object
+    from Utils.Object import Mesh, Object
 import bpy, bmesh
 
 

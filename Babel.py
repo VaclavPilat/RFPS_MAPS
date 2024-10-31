@@ -6,7 +6,7 @@ if __name__ == "__main__":
     if not directory in sys.path:
         sys.path.append(directory)
 from Utils.Scene import Scene
-from Utils.Mesh import Mesh
+from Utils.Object import Mesh
 from Utils.Vector import V3
 import math
 
