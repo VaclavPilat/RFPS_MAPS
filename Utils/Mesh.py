@@ -11,10 +11,17 @@ class Container:
     """Class for containing a list of meshes
     """
 
-    def __init__(self, *args, **kwargs) -> None:
-        """Initializing the container and generating its structure
+    def __init__(self, name: str = "New mesh", pivot: V3 = V3.ZERO, *args, **kwargs) -> None:
+        """Creating a new mesh
+
+        Args:
+            name (str, optional): Mesh name. Defaults to "New mesh".
+            pivot (V3, optional): Pivot positions. Defaults to V3.ZERO.
         """
+        self.name = name
+        self.pivot = pivot
         self.objects = []
+        self.argstring = ", ".join([repr(a) for a in (name, pivot) + args] + [f"{k}={repr(kwargs[k])}" for k in kwargs])
         self.generate(*args, **kwargs)
     
     def __iter__(self):
@@ -26,6 +33,14 @@ class Container:
         yield self
         for obj in self.objects:
             yield from obj
+    
+    def __repr__(self) -> str:
+        """Getting the representation of a Mesh instance
+
+        Returns:
+            str: String representation of a constructor call with parameters
+        """
+        return f"{self.__class__.__name__}({self.argstring})"
 
     def load(self, mesh: "Mesh", *args, **kwargs) -> None:
         """Creating a mesh instance using class type and its constructor arguments
@@ -49,17 +64,10 @@ class Mesh(Container):
     """Class for representing the mesh of an object as a collection of faces
     """
 
-    def __init__(self, name: str = "New mesh", pivot: V3 = V3.ZERO, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         """Creating a new mesh
-
-        Args:
-            name (str, optional): Mesh name. Defaults to "New mesh".
-            pivot (V3, optional): Pivot positions. Defaults to V3.ZERO.
         """
-        self.name = name
-        self.pivot = pivot
         self.faces = []
-        self.argstring = ", ".join([repr(a) for a in (name, pivot) + args] + [f"{k}={repr(kwargs[k])}" for k in kwargs])
         super().__init__(*args, **kwargs)
 
     def face(self, vertices: list[V3]|tuple[V3], material: int = 0) -> None:
@@ -70,14 +78,6 @@ class Mesh(Container):
             material (int, optional): Material index. Defaults to 0.
         """
         self.faces.append(vertices)
-    
-    def __repr__(self) -> str:
-        """Getting the representation of a Mesh instance
-
-        Returns:
-            str: String representation of a constructor call with parameters
-        """
-        return f"{self.__class__.__name__}({self.argstring})"
 
 
 
