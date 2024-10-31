@@ -1,5 +1,10 @@
 ## \file
 # Implementation of the Babel map
+if __name__ == "__main__":
+    import os, sys, bpy
+    directory = os.path.dirname(bpy.data.filepath)
+    if not directory in sys.path:
+        sys.path.append(directory)
 from Utils.Scene import Scene
 from Utils.Mesh import Mesh
 from Utils.Vector import V3

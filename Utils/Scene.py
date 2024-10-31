@@ -4,6 +4,7 @@ try:
     from Mesh import Mesh, Container
 except:
     from Utils.Mesh import Mesh, Container
+import bpy, bmesh
 
 
 
@@ -20,8 +21,14 @@ class Scene(Container):
         for obj in self.objects:
             yield from obj
     
-    def create(self) -> None:
+    def create(self, root: Container = None) -> None:
         """Creating the scene by materializing meshes and their faces
+
+        Args:
+            root (Container, optional): Root container. Defaults to None.
         """
-        for obj in self:
-            print(obj)
+        if root is None:
+            root = self
+        print(root)
+        for obj in root.objects:
+            self.create(obj)
