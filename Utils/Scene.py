@@ -24,4 +24,4 @@ class Scene(Container):
         """Creating the scene by materializing meshes and their faces
         """
         for obj in self:
-            print(obj.name)
+            print(obj)
