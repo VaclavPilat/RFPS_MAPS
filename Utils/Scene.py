@@ -21,14 +21,17 @@ class Scene(Object):
         for obj in self.objects:
             yield from obj
     
-    def create(self, root: Object = None) -> None:
-        """Creating the scene by materializing meshes and their faces
+    def create(self, mesh: Mesh) -> None:
+        """Creating faces for a Mesh instances
 
         Args:
-            root (Object, optional): Root object. Defaults to None.
+            mesh (Mesh): Mesh instance to create faces of
         """
-        if root is None:
-            root = self
-        print(root)
-        for obj in root.objects:
+        obj = bpy.data.objects.new(mesh.name, bpy.data.meshes.new(mesh.name))
+        bpy.context.scene.collection.objects.link(obj)
+    
+    def show(self) -> None:
+        """Creating the scene by materializing meshes and their faces
+        """
+        for obj in self:
             self.create(obj)
