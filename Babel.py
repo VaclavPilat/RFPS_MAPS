@@ -63,4 +63,4 @@ class Babel(Scene):
 if __name__ == "__main__":
     Blender.setup()
     Blender.purge()
-    Babel().show()
+    Babel("Tower of Babel", V3.ZERO).show()

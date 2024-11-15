@@ -29,9 +29,12 @@ class Scene(Object):
         """
         obj = bpy.data.objects.new(mesh.name, bpy.data.meshes.new(mesh.name))
         bpy.context.scene.collection.objects.link(obj)
+        obj.parent = self.obj
     
     def show(self) -> None:
         """Creating the scene by materializing meshes and their faces
         """
+        self.obj = bpy.data.objects.new(self.name, None)
+        bpy.context.scene.collection.objects.link(self.obj)
         for obj in self:
             self.create(obj)
