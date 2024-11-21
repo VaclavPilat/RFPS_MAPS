@@ -42,6 +42,33 @@ class Object:
         """
         return f"{self.__class__.__name__}({self.argstring})"
 
+    def layer(self, obj: "Object", indent: str = "", itemIndent: str = "") -> str:
+        """Getting the string representation of a layer
+
+        Args:
+            obj (Object): Object to return string representation of
+            indent (str, optional): Default line indent. Defaults to "".
+            itemIndent (str, optional): Default item line indent to be passed deeper. Defaults to "".
+
+        Returns:
+            str: Hierarchical representation of an object
+        """
+        output = indent + repr(obj) + "\n"
+        for index, child in enumerate(obj.objects):
+            if index < len(obj.objects) - 1:
+                output += self.layer(child, itemIndent + "├──", itemIndent + "│  ")
+            else:
+                output += self.layer(child, itemIndent + "└──", itemIndent + "   ")
+        return output
+    
+    def __str__(self) -> str:
+        """Getting object hierarchy
+
+        Returns:
+            str: String representation of object hierarchy
+        """
+        return self.layer(self)
+
     def load(self, mesh: "Mesh", *args, **kwargs) -> None:
         """Creating a mesh instance using class type and its constructor arguments
 
