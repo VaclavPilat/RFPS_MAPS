@@ -1,5 +1,5 @@
 ## \file
-# Classes for creating objects and meshes
+# Classes for creating objects
 try:
     from Vector import V3
 except:
@@ -9,14 +9,14 @@ import bpy, bmesh
 
 
 class Object:
-    """Class for containing other meshes
+    """Class for containing own mesh and/or other objectes
     """
 
     def __init__(self, name: str = "New object", pivot: V3 = V3.ZERO, *args, **kwargs) -> None:
-        """Creating a new mesh
+        """Creating a new object
 
         Args:
-            name (str, optional): Mesh name. Defaults to "New mesh".
+            name (str, optional): Object name. Defaults to "New object".
             pivot (V3, optional): Pivot positions. Defaults to V3.ZERO.
         """
         self.name = name
@@ -27,17 +27,17 @@ class Object:
         self.generate(*args, **kwargs)
     
     def __iter__(self):
-        """Iterating over meshes
+        """Iterating over objectes
 
         Returns:
-            Iterator representing mesh objects
+            Iterator representing object objects
         """
         yield self
         for obj in self.objects:
             yield from obj
     
     def __repr__(self) -> str:
-        """Getting the representation of a Mesh instance
+        """Getting the representation of an Object instance
 
         Returns:
             str: String representation of a constructor call with parameters
@@ -71,21 +71,21 @@ class Object:
         """
         return self.stringify(self)
 
-    def load(self, mesh: "Mesh", *args, **kwargs) -> None:
-        """Creating a mesh instance using class type and its constructor arguments
+    def load(self, obj: "Object", *args, **kwargs) -> None:
+        """Creating a object instance using class type and its constructor arguments
 
         Args:
-            mesh (Mesh): Mesh type to create
+            obj (Object): Object type to create
         """
-        self.objects.append(mesh(*args, **kwargs))
+        self.objects.append(obj(*args, **kwargs))
     
     def generate(self) -> None:
-        """Generating the mesh
+        """Generating the object
 
         Raises:
             NotImplementedError: Thrown when not overriden
         """
-        raise NotImplementedError("Mesh generation method was not overriden")
+        raise NotImplementedError("Object generation method was not overriden")
 
     def face(self, vertices: list[V3]|tuple[V3], material: int = 0) -> None:
         """Creating a new face
