@@ -42,8 +42,8 @@ class Object:
         """
         return f"{self.__class__.__name__}({self.argstring})"
 
-    def layer(self, obj: "Object", indent: str = "", itemIndent: str = "") -> str:
-        """Getting the string representation of a layer
+    def stringify(self, obj: "Object", indent: str = "", itemIndent: str = "") -> str:
+        """Getting the string representation of object hierearchy
 
         Args:
             obj (Object): Object to return string representation of
@@ -56,9 +56,9 @@ class Object:
         output = indent + repr(obj) + "\n"
         for index, child in enumerate(obj.objects):
             if index < len(obj.objects) - 1:
-                output += self.layer(child, itemIndent + "├──", itemIndent + "│  ")
+                output += self.stringify(child, itemIndent + "├──", itemIndent + "│  ")
             else:
-                output += self.layer(child, itemIndent + "└──", itemIndent + "   ")
+                output += self.stringify(child, itemIndent + "└──", itemIndent + "   ")
         return output
     
     def __str__(self) -> str:
@@ -67,7 +67,7 @@ class Object:
         Returns:
             str: String representation of object hierarchy
         """
-        return self.layer(self)
+        return self.stringify(self)
 
     def load(self, mesh: "Mesh", *args, **kwargs) -> None:
         """Creating a mesh instance using class type and its constructor arguments
