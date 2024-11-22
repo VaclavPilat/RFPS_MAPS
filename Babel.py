@@ -45,6 +45,8 @@ class Column(Object):
         """
         lower = self.points(self.pivot, radius, segments)
         upper = self.points(self.pivot + V3.UP * height, radius, segments)
+        for i, j in [(a-1, a) for a in range(segments)]:
+            self.face([upper[j], upper[i], lower[i], lower[j]])
 
 
 
@@ -64,4 +66,4 @@ if __name__ == "__main__":
     Blender.purge()
     scene = Babel("Tower of Babel", V3.ZERO)
     print(scene)
-    scene.create()
+    scene.build()

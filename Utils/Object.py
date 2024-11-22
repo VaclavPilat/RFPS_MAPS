@@ -96,17 +96,31 @@ class Object:
         """
         self.faces.append(vertices)
     
-    def create(self) -> "bpy object":
-        """Creating a blender object from an Object instance
+    def create(self) -> "bpy mesh":
+        """Creating a blender mesh from face vertices
 
         Returns:
-            bpy object: Created blender object
+            bpy mesh: Created mesh object
         """
-        if len(self.faces):
-            obj = bpy.data.objects.new(self.name, bpy.data.meshes.new(self.name))
-        else:
-            obj = bpy.data.objects.new(self.name, None)
+        mesh = bpy.data.meshes.new(self.name)
+        bm = bmesh.new()
+        vertices = {}
+        for face in self.faces:
+            for vert in face:
+                if vert not in vertices:
+                    vertices[vert] = bm.verts.new(tuple(vert))
+            bm.faces.new([vertices[vert] for vert in face])
+        bm.to_mesh(mesh)
+        return mesh
+    
+    def build(self) -> "bpy object":
+        """Building a blender object from an Object instance
+
+        Returns:
+            bpy object: Built blender object
+        """
+        obj = bpy.data.objects.new(self.name, self.create() if len(self.faces) else None)
         bpy.context.scene.collection.objects.link(obj)
         for child in self.objects:
-            child.create().parent = obj
+            child.build().parent = obj
         return obj
