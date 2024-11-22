@@ -6,14 +6,13 @@ if __name__ == "__main__":
     if not directory in sys.path:
         sys.path.append(directory)
 from Utils.Vector import V3
-from Utils.Object import Mesh
-from Utils.Scene import Scene
+from Utils.Object import Object
 from Utils.Blender import Blender
 import math
 
 
 
-class Column(Mesh):
+class Column(Object):
     """Cylinder mesh with vertical walls only
     """
 
@@ -49,7 +48,7 @@ class Column(Mesh):
 
 
 
-class Babel(Scene):
+class Babel(Object):
     """Implementation of the Tower of Babel map
     """
 
@@ -63,4 +62,6 @@ class Babel(Scene):
 if __name__ == "__main__":
     Blender.setup()
     Blender.purge()
-    Babel("Tower of Babel", V3.ZERO).show()
+    scene = Babel("Tower of Babel", V3.ZERO)
+    print(scene)
+    scene.create()

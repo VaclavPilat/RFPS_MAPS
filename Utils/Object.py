@@ -4,6 +4,7 @@ try:
     from Vector import V3
 except:
     from Utils.Vector import V3
+import bpy, bmesh
 
 
 
@@ -21,6 +22,7 @@ class Object:
         self.name = name
         self.pivot = pivot
         self.objects = []
+        self.faces = []
         self.argstring = ", ".join([repr(a) for a in (name, pivot) + args] + [f"{k}={repr(kwargs[k])}" for k in kwargs])
         self.generate(*args, **kwargs)
     
@@ -85,18 +87,6 @@ class Object:
         """
         raise NotImplementedError("Mesh generation method was not overriden")
 
-
-
-class Mesh(Object):
-    """Class for representing the mesh of an object as a collection of faces
-    """
-
-    def __init__(self, *args, **kwargs) -> None:
-        """Creating a new mesh
-        """
-        self.faces = []
-        super().__init__(*args, **kwargs)
-
     def face(self, vertices: list[V3]|tuple[V3], material: int = 0) -> None:
         """Creating a new face
 
@@ -105,46 +95,18 @@ class Mesh(Object):
             material (int, optional): Material index. Defaults to 0.
         """
         self.faces.append(vertices)
+    
+    def create(self) -> "bpy object":
+        """Creating a blender object from an Object instance
 
-
-
-if __name__ == "__main__":
-    import unittest
-    class MeshTest(unittest.TestCase):
-        """Class for testing Mesh implementation
+        Returns:
+            bpy object: Created blender object
         """
-        def test_constructor(self) -> None:
-            """Testing that basic constructor works
-            """
-            with self.assertRaises(NotImplementedError):
-                Mesh()
-        def test_overwriting(self) -> None:
-            """Overwriting the generate() method on Mesh
-            """
-            class OverwrittenMesh(Mesh):
-                def generate(self, value: int) -> None:
-                    self.value = value
-            self.assertEqual(OverwrittenMesh(value=10).value, 10)
-        def test_nesting(self) -> None:
-            """Counting the nested meshes in a container
-            """
-            class AMesh(Mesh):
-                def generate(self) -> None:
-                    pass
-            class BMesh(Mesh):
-                def generate(self) -> None:
-                    self.load(AMesh)
-            class CMesh(Mesh):
-                def generate(self, inner: "Mesh") -> None:
-                    self.load(inner)
-            a = AMesh()
-            self.assertEqual(len(list(a)), 1)
-            a.load(AMesh)
-            self.assertEqual(len(list(a)), 2)
-            a.load(BMesh)
-            self.assertEqual(len(list(a)), 4)
-            a.load(CMesh, inner=AMesh)
-            self.assertEqual(len(list(a)), 6)
-            a.load(CMesh, inner=BMesh)
-            self.assertEqual(len(list(a)), 9)
-    unittest.main()
+        if len(self.faces):
+            obj = bpy.data.objects.new(self.name, bpy.data.meshes.new(self.name))
+        else:
+            obj = bpy.data.objects.new(self.name, None)
+        bpy.context.scene.collection.objects.link(obj)
+        for child in self.objects:
+            child.create().parent = obj
+        return obj
