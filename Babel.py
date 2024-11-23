@@ -12,24 +12,27 @@ import math
 
 
 
-def points(pivot: V3, radius: int|float, count: int) -> list[V3]:
-    """Generating a list of points around a circle
-
-    Args:
-        pivot (V3): Center point
-        radius (int | float): Circle radius
-        count (int): Segment (point) count
-
-    Returns:
-        list[V3]: List of vertex positions
+class Points:
+    """Math functions for generating points
     """
-    points = []
-    for i in range(count):
-        degrees = 360*i/count
-        sin = math.sin(math.radians(degrees)) * radius
-        cos = math.cos(math.radians(degrees)) * radius
-        points.append(pivot + V3.FORWARD * sin + V3.RIGHT * cos)
-    return points
+
+    @staticmethod
+    def circle(pivot: V3, radius: int|float, count: int):
+        """Generating a list of points around a circle
+
+        Args:
+            pivot (V3): Center point
+            radius (int | float): Circle radius
+            count (int): Segment (point) count
+
+        Yields:
+            V3: Vertex position
+        """
+        for i in range(count):
+            degrees = math.radians(360 * i / count)
+            sin = math.sin(degrees) * radius
+            cos = math.cos(degrees) * radius
+            yield pivot + V3.FORWARD * sin + V3.RIGHT * cos
 
 
 
@@ -45,8 +48,8 @@ class Column(Object):
             radius (int | float): Column radius.
             segments (int): Number of outer vertical faces.
         """
-        lower = points(self.pivot, radius, segments)
-        upper = points(self.pivot + V3.UP * height, radius, segments)
+        lower = tuple(Points.circle(self.pivot, radius, segments))
+        upper = tuple(Points.circle(self.pivot + V3.UP * height, radius, segments))
         for i, j in [(a-1, a) for a in range(segments)]:
             self.face([upper[j], upper[i], lower[i], lower[j]])
 
@@ -60,7 +63,7 @@ class Babel(Object):
         """Generating Babel structure
         """
         self.load(Column, "Central column", V3.ZERO, 5, 2.5, 64)
-        for point in points(V3.ZERO, 5, 10):
+        for point in Points.circle(V3.ZERO, 5, 10):
             self.load(Column, "Atrium pillar", point, 5, 0.3, 24)
 
 
