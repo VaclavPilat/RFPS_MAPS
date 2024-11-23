@@ -61,6 +61,7 @@ class CentralStaircase(Object):
 
     INNER_RADIUS = 0.5
     INNER_SEGMENTS = 16
+    WALL_WIDTH = 0.5
 
     def generate(self, height: int|float, radius: int|float, segments: int) -> None:
         """Generating a central column with a spiral staircase inside
@@ -71,6 +72,8 @@ class CentralStaircase(Object):
             segments (int): Outer segment count
         """
         self.load(Column, "Central pillar", V3.ZERO, height, self.INNER_RADIUS, self.INNER_SEGMENTS)
+        self.load(Column, "Inner wall", V3.ZERO, height, radius - self.WALL_WIDTH, segments)
+        self.load(Column, "Outer wall", V3.ZERO, height, radius, segments)
 
 
 
@@ -79,13 +82,15 @@ class Babel(Object):
     """
 
     FLOOR_HEIGHT = 5
+    CENTRAL_RADIUS = 3
+    PILLAR_GAP = 3
 
     def generate(self) -> None:
         """Generating Babel structure
         """
-        self.load(CentralStaircase, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, 2.5, 32)
-        #for point in Points.circle(V3.ZERO, 5, 10):
-        #    self.load(Column, "Atrium pillar", point, 5, 0.3, 24)
+        self.load(CentralStaircase, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, self.CENTRAL_RADIUS, 32)
+        for point in Points.circle(V3.ZERO, self.CENTRAL_RADIUS + self.PILLAR_GAP, 12):
+            self.load(Column, "Atrium pillar", point, 3.5, 0.25, 24)
 
 
 
