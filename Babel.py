@@ -12,28 +12,30 @@ import math
 
 
 
+def points(pivot: V3, radius: int|float, count: int) -> list[V3]:
+    """Generating a list of points around a circle
+
+    Args:
+        pivot (V3): Center point
+        radius (int | float): Circle radius
+        count (int): Segment (point) count
+
+    Returns:
+        list[V3]: List of vertex positions
+    """
+    points = []
+    for i in range(count):
+        degrees = 360*i/count
+        sin = math.sin(math.radians(degrees)) * radius
+        cos = math.cos(math.radians(degrees)) * radius
+        points.append(pivot + V3.FORWARD * sin + V3.RIGHT * cos)
+    return points
+
+
+
 class Column(Object):
     """Cylinder mesh with vertical walls only
     """
-
-    def points(self, pivot: V3, radius: int|float, segments: int) -> list[V3]:
-        """Generating a list of points around a circle
-
-        Args:
-            pivot (V3): Center point
-            radius (int | float): Circle radius
-            segments (int): Segment (point) count
-
-        Returns:
-            list[V3]: List of vertex positions
-        """
-        points = []
-        for i in range(segments):
-            degrees = 360*i/segments
-            sin = math.sin(math.radians(degrees)) * radius
-            cos = math.cos(math.radians(degrees)) * radius
-            points.append(pivot + V3.FORWARD * sin + V3.RIGHT * cos)
-        return points
 
     def generate(self, height: int|float, radius: int|float, segments: int) -> None:
         """Generating a column
@@ -43,8 +45,8 @@ class Column(Object):
             radius (int | float): Column radius.
             segments (int): Number of outer vertical faces.
         """
-        lower = self.points(self.pivot, radius, segments)
-        upper = self.points(self.pivot + V3.UP * height, radius, segments)
+        lower = points(self.pivot, radius, segments)
+        upper = points(self.pivot + V3.UP * height, radius, segments)
         for i, j in [(a-1, a) for a in range(segments)]:
             self.face([upper[j], upper[i], lower[i], lower[j]])
 
@@ -57,7 +59,9 @@ class Babel(Object):
     def generate(self) -> None:
         """Generating Babel structure
         """
-        self.load(Column, "Central column", V3.ZERO, 5, 0.5, 8)
+        self.load(Column, "Central column", V3.ZERO, 5, 2.5, 64)
+        for point in points(V3.ZERO, 5, 10):
+            self.load(Column, "Atrium pillar", point, 5, 0.3, 24)
 
 
 
