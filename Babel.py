@@ -55,16 +55,37 @@ class Column(Object):
 
 
 
+class CentralStaircase(Object):
+    """Central spiral staircase sorrounded by walls
+    """
+
+    INNER_RADIUS = 0.5
+    INNER_SEGMENTS = 16
+
+    def generate(self, height: int|float, radius: int|float, segments: int) -> None:
+        """Generating a central column with a spiral staircase inside
+
+        Args:
+            height (int | float): Total height
+            radius (int | float): Outer radius of the staircase
+            segments (int): Outer segment count
+        """
+        self.load(Column, "Central pillar", V3.ZERO, height, self.INNER_RADIUS, self.INNER_SEGMENTS)
+
+
+
 class Babel(Object):
     """Implementation of the Tower of Babel map
     """
 
+    FLOOR_HEIGHT = 5
+
     def generate(self) -> None:
         """Generating Babel structure
         """
-        self.load(Column, "Central column", V3.ZERO, 5, 2.5, 64)
-        for point in Points.circle(V3.ZERO, 5, 10):
-            self.load(Column, "Atrium pillar", point, 5, 0.3, 24)
+        self.load(CentralStaircase, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, 2.5, 32)
+        #for point in Points.circle(V3.ZERO, 5, 10):
+        #    self.load(Column, "Atrium pillar", point, 5, 0.3, 24)
 
 
 
