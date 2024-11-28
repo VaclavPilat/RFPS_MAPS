@@ -55,12 +55,34 @@ class Column(Object):
 
 
 
+class SpiralStaircaseWall(Object):
+    """Wall sorrounding a spiral staircase
+    """
+
+    def generate(self, height: int|float, outer: int|float, inner: int|float, segments: int) -> None:
+        """Generating a circular wall around for a spiral staircase
+
+        Args:
+            height (int | float): Floor height
+            outer (int | float): Outer radius
+            inner (int | float): Inner radius
+            segments (int): Segment count
+        """
+        # Inner walls
+        ENTRANCE_GAP = segments // 8
+        lower = tuple(Points.circle(V3.ZERO, inner, segments))
+        upper = tuple(Points.circle(V3.ZERO + height * V3.UP, inner, segments))
+        for i, j in [(a-1, a) for a in range(ENTRANCE_GAP // 2 + 2, segments - ENTRANCE_GAP // 2)]:
+            self.face([upper[i], upper[j], lower[j], lower[i]])
+        # Outer walls
+
+
+
 class CentralStaircase(Object):
     """Central spiral staircase sorrounded by walls
     """
 
     INNER_RADIUS = 0.5
-    INNER_SEGMENTS = 16
     WALL_WIDTH = 0.5
 
     def generate(self, height: int|float, radius: int|float, segments: int) -> None:
@@ -71,9 +93,9 @@ class CentralStaircase(Object):
             radius (int | float): Outer radius of the staircase
             segments (int): Outer segment count
         """
-        self.load(Column, "Central pillar", V3.ZERO, height, self.INNER_RADIUS, self.INNER_SEGMENTS)
-        self.load(Column, "Inner wall", V3.ZERO, height, radius - self.WALL_WIDTH, segments)
-        self.load(Column, "Outer wall", V3.ZERO, height, radius, segments)
+        INNER_SEGMENTS = segments // 2
+        self.load(Column, "Central pillar", V3.ZERO, height, self.INNER_RADIUS, INNER_SEGMENTS)
+        self.load(SpiralStaircaseWall, "Staircase wall", V3.ZERO, height, radius, radius - self.WALL_WIDTH, segments)
 
 
 
@@ -89,8 +111,8 @@ class Babel(Object):
         """Generating Babel structure
         """
         self.load(CentralStaircase, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, self.CENTRAL_RADIUS, 32)
-        for point in Points.circle(V3.ZERO, self.CENTRAL_RADIUS + self.PILLAR_GAP, 12):
-            self.load(Column, "Atrium pillar", point, 3.5, 0.25, 24)
+        #for point in Points.circle(V3.ZERO, self.CENTRAL_RADIUS + self.PILLAR_GAP, 12):
+        #    self.load(Column, "Atrium pillar", point, 3.5, 0.25, 24)
 
 
 
