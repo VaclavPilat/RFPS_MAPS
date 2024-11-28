@@ -68,13 +68,17 @@ class SpiralStaircaseWall(Object):
             inner (int | float): Inner radius
             segments (int): Segment count
         """
-        # Inner walls
         ENTRANCE_GAP = segments // 8
-        lower = tuple(Points.circle(V3.ZERO, inner, segments))
-        upper = tuple(Points.circle(V3.ZERO + height * V3.UP, inner, segments))
+        # Inner walls
+        innerLower = tuple(Points.circle(V3.ZERO, inner, segments))
+        innerUpper = tuple(Points.circle(V3.ZERO + height * V3.UP, inner, segments))
         for i, j in [(a-1, a) for a in range(ENTRANCE_GAP // 2 + 2, segments - ENTRANCE_GAP // 2)]:
-            self.face([upper[i], upper[j], lower[j], lower[i]])
+            self.face([innerUpper[i], innerUpper[j], innerLower[j], innerLower[i]])
         # Outer walls
+        outerLower = tuple(Points.circle(V3.ZERO, outer, segments))
+        outerUpper = tuple(Points.circle(V3.ZERO + height * V3.UP, outer, segments))
+        for i, j in [(a-1, a) for a in range(ENTRANCE_GAP // 2 + 2, segments - ENTRANCE_GAP // 2)]:
+            self.face([outerUpper[i], outerUpper[j], outerLower[j], outerLower[i]][::-1])
 
 
 
