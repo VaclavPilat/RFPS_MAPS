@@ -12,6 +12,24 @@ import math
 
 
 
+class Math:
+    """General math functions
+    """
+
+    @staticmethod
+    def isPow2(number: int) -> bool:
+        """Checking whether a number is a power of 2
+
+        Args:
+            number (int): Number to check
+
+        Returns:
+            bool: True if the number is a non-zero power of 2
+        """
+        return number > 0 and (number & (number - 1)) == 0
+
+
+
 class Points:
     """Math functions for generating points
     """
@@ -97,6 +115,7 @@ class CentralStaircase(Object):
             radius (int | float): Outer radius of the staircase
             segments (int): Outer segment count
         """
+        assert Math.isPow2(segments), "Segment count has to be a power of 2"
         INNER_SEGMENTS = segments // 2
         self.load(Column, "Central pillar", V3.ZERO, height, self.INNER_RADIUS, INNER_SEGMENTS)
         self.load(SpiralStaircaseWall, "Staircase wall", V3.ZERO, height, radius, radius - self.WALL_WIDTH, segments)
