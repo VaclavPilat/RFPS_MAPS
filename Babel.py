@@ -54,6 +54,39 @@ class Points:
 
 
 
+class Arc:
+    """Data object for storing information used for generating real arcs and circles
+    """
+
+    def __init__(self, radius: int|float = 1, points: int = 8, start: int|float = 0, end: int|float = 360) -> None:
+        """Initializing an Arc instance
+
+        Args:
+            radius (int | float, optional): Arc radius, in meters. Defaults to 1.
+            points (int, optional): Number of points in arc, should be a power of 2. Defaults to 8.
+            start (int | float, optional): Arc angle start, in degrees. Defaults to 0.
+            end (int | float, optional): Arc angle end, in degrees. Defaults to 360.
+        """
+        assert(radius > 0, "Radius has to be a positive number")
+        self.radius = radius
+        assert(Math.isPow2(points), "Point count has to be a power of 2")
+        self.points = points
+        assert(start >= 0, "Start has to be greater than or equal to 0")
+        self.start = start
+        assert(end <= 360, "End has to lesser than or equal to 360")
+        self.end = end
+    
+    def __repr__(self) -> str:
+        """Returning a string representation of own constructor call
+
+        Returns:
+            str: String representation of instance creation
+        """
+        argstring = ", ".join((str(x) for x in (self.radius, self.points, self.start, self.end)))
+        return f"Arc({argstring})"
+
+
+
 class Column(Object):
     """Cylinder mesh with vertical walls only
     """
@@ -115,9 +148,8 @@ class CentralStaircase(Object):
             radius (int | float): Outer radius of the staircase
             segments (int): Outer segment count
         """
-        assert Math.isPow2(segments), "Segment count has to be a power of 2"
         INNER_SEGMENTS = segments // 2
-        self.load(Column, "Central pillar", V3.ZERO, height, self.INNER_RADIUS, INNER_SEGMENTS)
+        self.load(Column, "Central pillar", V3.ZERO, height, Arc(self.INNER_RADIUS, INNER_SEGMENTS))
         self.load(SpiralStaircaseWall, "Staircase wall", V3.ZERO, height, radius, radius - self.WALL_WIDTH, segments)
 
 
