@@ -8,6 +8,7 @@ if __name__ == "__main__":
 from Utils.Vector import V3
 from Utils.Object import Object
 from Utils.Blender import Blender
+from Utils.Wrapper import reprWrapper
 import math
 
 
@@ -54,6 +55,7 @@ class Points:
 
 
 
+@reprWrapper
 class Arc:
     """Data object for storing information used for generating real arcs and circles
     """
