@@ -58,7 +58,7 @@ class Arc:
     """Data object for storing information used for generating real arcs and circles
     """
 
-    def __init__(self, radius: int|float = 1, points: int = 8, start: int|float = 0, end: int|float = 360) -> None:
+    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, start: int|float = 0, end: int|float = 360) -> None:
         """Initializing an Arc instance
 
         Args:
@@ -67,13 +67,14 @@ class Arc:
             start (int | float, optional): Arc angle start, in degrees. Defaults to 0.
             end (int | float, optional): Arc angle end, in degrees. Defaults to 360.
         """
-        assert(radius > 0, "Radius has to be a positive number")
+        assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
-        assert(Math.isPow2(points), "Point count has to be a power of 2")
+        assert Math.isPow2(points), "Point count has to be a power of 2"
         self.points = points
-        assert(start >= 0, "Start has to be greater than or equal to 0")
+        self.pivot = pivot
+        assert start >= 0, "Start has to be greater than or equal to 0"
         self.start = start
-        assert(end <= 360, "End has to lesser than or equal to 360")
+        assert end <= 360, "End has to lesser than or equal to 360"
         self.end = end
     
     def __repr__(self) -> str:
@@ -82,7 +83,7 @@ class Arc:
         Returns:
             str: String representation of instance creation
         """
-        argstring = ", ".join((str(x) for x in (self.radius, self.points, self.start, self.end)))
+        argstring = ", ".join((str(x) for x in (self.radius, self.points, self.pivot, self.start, self.end)))
         return f"Arc({argstring})"
 
 
@@ -91,17 +92,16 @@ class Column(Object):
     """Cylinder mesh with vertical walls only
     """
 
-    def generate(self, height: int|float, radius: int|float, segments: int) -> None:
+    def generate(self, height: int|float, arc: Arc) -> None:
         """Generating a column
 
         Args:
             height (int | float): Column height.
-            radius (int | float): Column radius.
-            segments (int): Number of outer vertical faces.
+            arc (Arc): Column radius.
         """
-        lower = tuple(Points.circle(self.pivot, radius, segments))
-        upper = tuple(Points.circle(self.pivot + V3.UP * height, radius, segments))
-        for i, j in [(a-1, a) for a in range(segments)]:
+        lower = tuple(Points.circle(arc.pivot, arc.radius, arc.points))
+        upper = tuple(Points.circle(arc.pivot + V3.UP * height, arc.radius, arc.points))
+        for i, j in [(a-1, a) for a in range(arc.points)]:
             self.face([upper[j], upper[i], lower[i], lower[j]])
 
 
@@ -140,7 +140,7 @@ class CentralStaircase(Object):
     INNER_RADIUS = 0.5
     WALL_WIDTH = 0.5
 
-    def generate(self, height: int|float, radius: int|float, segments: int) -> None:
+    def generate(self, height: int|float, arc: Arc) -> None:
         """Generating a central column with a spiral staircase inside
 
         Args:
@@ -148,9 +148,9 @@ class CentralStaircase(Object):
             radius (int | float): Outer radius of the staircase
             segments (int): Outer segment count
         """
-        INNER_SEGMENTS = segments // 2
+        INNER_SEGMENTS = arc.points // 2
         self.load(Column, "Central pillar", V3.ZERO, height, Arc(self.INNER_RADIUS, INNER_SEGMENTS))
-        self.load(SpiralStaircaseWall, "Staircase wall", V3.ZERO, height, radius, radius - self.WALL_WIDTH, segments)
+        self.load(SpiralStaircaseWall, "Staircase wall", V3.ZERO, height, arc.radius, arc.radius - self.WALL_WIDTH, arc.points)
 
 
 
@@ -165,7 +165,7 @@ class Babel(Object):
     def generate(self) -> None:
         """Generating Babel structure
         """
-        self.load(CentralStaircase, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, self.CENTRAL_RADIUS, 32)
+        self.load(CentralStaircase, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, Arc(radius=self.FLOOR_HEIGHT, points=32))
         #for point in Points.circle(V3.ZERO, self.CENTRAL_RADIUS + self.PILLAR_GAP, 12):
         #    self.load(Column, "Atrium pillar", point, 3.5, 0.25, 24)
 
