@@ -23,7 +23,6 @@ class Object:
         self.pivot = pivot
         self.objects = []
         self.faces = []
-        self.argstring = ", ".join([repr(a) for a in (name, pivot) + args] + [f"{k}={repr(kwargs[k])}" for k in kwargs])
         self.generate(*args, **kwargs)
     
     def __iter__(self):
@@ -35,14 +34,6 @@ class Object:
         yield self
         for obj in self.objects:
             yield from obj
-    
-    def __repr__(self) -> str:
-        """Getting the representation of an Object instance
-
-        Returns:
-            str: String representation of a constructor call with parameters
-        """
-        return f"{self.__class__.__name__}({self.argstring})"
 
     def stringify(self, obj: "Object", indent: str = "", itemIndent: str = "") -> str:
         """Getting the string representation of object hierearchy

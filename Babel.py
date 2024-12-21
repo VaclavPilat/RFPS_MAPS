@@ -76,15 +76,6 @@ class Arc:
         self.start = start
         assert end <= 360, "End has to lesser than or equal to 360"
         self.end = end
-    
-    def __repr__(self) -> str:
-        """Returning a string representation of own constructor call
-
-        Returns:
-            str: String representation of instance creation
-        """
-        argstring = ", ".join((str(x) for x in (self.radius, self.points, self.pivot, self.start, self.end)))
-        return f"Arc({argstring})"
 
 
 
