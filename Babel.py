@@ -31,30 +31,6 @@ class Math:
 
 
 
-class Points:
-    """Math functions for generating points
-    """
-
-    @staticmethod
-    def circle(pivot: V3, radius: int|float, count: int):
-        """Generating a list of points around a circle
-
-        Args:
-            pivot (V3): Center point
-            radius (int | float): Circle radius
-            count (int): Segment (point) count
-
-        Yields:
-            V3: Vertex position
-        """
-        for i in range(count):
-            degrees = math.radians(360 * i / count)
-            sin = math.sin(degrees) * radius
-            cos = math.cos(degrees) * radius
-            yield pivot + V3.FORWARD * sin + V3.RIGHT * cos
-
-
-
 @reprWrapper
 class Arc:
     """Data object for storing information used for generating real arcs and circles
@@ -66,6 +42,7 @@ class Arc:
         Args:
             radius (int | float, optional): Arc radius, in meters. Defaults to 1.
             points (int, optional): Number of points in arc, should be a power of 2. Defaults to 8.
+            pivot (V3, optional): Arc pivot point. Defaults to V3.ZERO.
             start (int | float, optional): Arc angle start, in degrees. Defaults to 0.
             end (int | float, optional): Arc angle end, in degrees. Defaults to 360.
         """
@@ -78,6 +55,17 @@ class Arc:
         self.start = start
         assert end <= 360, "End has to lesser than or equal to 360"
         self.end = end
+    
+    def generate(self):
+        """Generating points on a arc
+
+        Yields:
+            V3: Vertex positions
+        """
+        for i in range(self.points):
+            degrees = math.radians(360 * i / self.points)
+            sin, cos = (f(degrees) for f in (math.sin, math.cos))
+            yield self.pivot + V3.FORWARD * sin + V3.RIGHT * cos
 
 
 
@@ -92,37 +80,11 @@ class Column(Object):
             height (int | float): Column height.
             arc (Arc): Column radius.
         """
-        lower = tuple(Points.circle(arc.pivot, arc.radius, arc.points))
-        upper = tuple(Points.circle(arc.pivot + V3.UP * height, arc.radius, arc.points))
+        lower = tuple(arc.generate())
+        arc.pivot = V3.UP * 5
+        upper = tuple(arc.generate())
         for i, j in [(a-1, a) for a in range(arc.points)]:
             self.face([upper[j], upper[i], lower[i], lower[j]])
-
-
-
-class SpiralStaircaseWall(Object):
-    """Wall sorrounding a spiral staircase
-    """
-
-    def generate(self, height: int|float, outer: int|float, inner: int|float, segments: int) -> None:
-        """Generating a circular wall around for a spiral staircase
-
-        Args:
-            height (int | float): Floor height
-            outer (int | float): Outer radius
-            inner (int | float): Inner radius
-            segments (int): Segment count
-        """
-        ENTRANCE_GAP = segments // 8
-        # Inner walls
-        innerLower = tuple(Points.circle(V3.ZERO, inner, segments))
-        innerUpper = tuple(Points.circle(V3.ZERO + height * V3.UP, inner, segments))
-        for i, j in [(a-1, a) for a in range(ENTRANCE_GAP // 2 + 2, segments - ENTRANCE_GAP // 2)]:
-            self.face([innerUpper[i], innerUpper[j], innerLower[j], innerLower[i]])
-        # Outer walls
-        outerLower = tuple(Points.circle(V3.ZERO, outer, segments))
-        outerUpper = tuple(Points.circle(V3.ZERO + height * V3.UP, outer, segments))
-        for i, j in [(a-1, a) for a in range(ENTRANCE_GAP // 2 + 2, segments - ENTRANCE_GAP // 2)]:
-            self.face([outerUpper[i], outerUpper[j], outerLower[j], outerLower[i]][::-1])
 
 
 
@@ -130,7 +92,7 @@ class CentralStaircase(Object):
     """Central spiral staircase sorrounded by walls
     """
 
-    INNER_RADIUS = 0.5
+    INNER_RADIUS = 1
     WALL_WIDTH = 0.5
 
     def generate(self, height: int|float, arc: Arc) -> None:
@@ -142,8 +104,7 @@ class CentralStaircase(Object):
             segments (int): Outer segment count
         """
         INNER_SEGMENTS = arc.points // 2
-        self.load(Column, "Central pillar", V3.ZERO, height, Arc(self.INNER_RADIUS, INNER_SEGMENTS))
-        self.load(SpiralStaircaseWall, "Staircase wall", V3.ZERO, height, arc.radius, arc.radius - self.WALL_WIDTH, arc.points)
+        self.load(Column, "Central pillar", V3.ZERO, height, Arc(radius=self.INNER_RADIUS, points=INNER_SEGMENTS))
 
 
 
@@ -159,14 +120,12 @@ class Babel(Object):
         """Generating Babel structure
         """
         self.load(CentralStaircase, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, Arc(radius=self.FLOOR_HEIGHT, points=32))
-        #for point in Points.circle(V3.ZERO, self.CENTRAL_RADIUS + self.PILLAR_GAP, 12):
-        #    self.load(Column, "Atrium pillar", point, 3.5, 0.25, 24)
 
 
 
 if __name__ == "__main__":
     Blender.setup()
     Blender.purge()
-    scene = Babel("Tower of Babel", V3.ZERO)
+    scene = Babel("Tower of Babel")
     print(scene)
     scene.build()
