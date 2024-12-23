@@ -88,7 +88,7 @@ class Column(Object):
 
 
 
-class CentralStaircase(Object):
+class Center(Object):
     """Central spiral staircase sorrounded by walls
     """
 
@@ -97,14 +97,9 @@ class CentralStaircase(Object):
 
     def generate(self, height: int|float, arc: Arc) -> None:
         """Generating a central column with a spiral staircase inside
-
-        Args:
-            height (int | float): Total height
-            radius (int | float): Outer radius of the staircase
-            segments (int): Outer segment count
         """
         INNER_SEGMENTS = arc.points // 2
-        self.load(Column, "Central pillar", V3.ZERO, height, Arc(radius=self.INNER_RADIUS, points=INNER_SEGMENTS))
+        self.load(Column, "Central pillar", height=height, arc=Arc(radius=self.INNER_RADIUS, points=INNER_SEGMENTS))
 
 
 
@@ -119,7 +114,7 @@ class Babel(Object):
     def generate(self) -> None:
         """Generating Babel structure
         """
-        self.load(CentralStaircase, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, Arc(radius=self.FLOOR_HEIGHT, points=32))
+        self.load(Center, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, Arc(radius=self.FLOOR_HEIGHT, points=32))
 
 
 
