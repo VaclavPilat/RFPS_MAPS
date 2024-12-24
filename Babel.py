@@ -84,7 +84,7 @@ class Column(Object):
             circle (Circle): Column radius.
         """
         lower = tuple(circle.generate())
-        circle.pivot = V3.UP * 5
+        circle.pivot = V3.UP * height
         upper = tuple(circle.generate())
         for i, j in [(a-1, a) for a in range(circle.points)]:
             self.face([upper[j], upper[i], lower[i], lower[j]])
@@ -97,11 +97,19 @@ class CenterWall(Object):
 
     def generate(self, height: int|float, circle: Circle) -> None:
         # Outer wall
-        lower = tuple(circle.generate())
-        circle.pivot = V3.UP * 5
-        upper = tuple(circle.generate())
-        for i, j in [(a, a+1) for a in range(len(lower) - 1)]:
-            self.face([upper[j], upper[i], lower[i], lower[j]])
+        outer_lower = tuple(circle.generate())
+        circle.pivot = V3.UP * height
+        outer_upper = tuple(circle.generate())
+        for i, j in [(a, a+1) for a in range(len(outer_lower) - 1)]:
+            self.face([outer_upper[j], outer_upper[i], outer_lower[i], outer_lower[j]])
+        # Inner wall
+        circle.pivot = V3.ZERO
+        circle.radius -= 0.5
+        inner_lower = tuple(circle.generate())
+        circle.pivot = V3.UP * height
+        inner_upper = tuple(circle.generate())
+        for i, j in [(a, a+1) for a in range(len(inner_lower) - 1)]:
+            self.face([inner_upper[i], inner_upper[j], inner_lower[j], inner_lower[i]])
 
 
 
