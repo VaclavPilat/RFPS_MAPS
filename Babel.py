@@ -63,10 +63,12 @@ class Circle:
             V3: Vertex positions
         """
         for i in range(self.points):
-            # Limit by degrees
-            degrees = math.radians(360 * i / self.points)
-            sin, cos = (f(degrees) for f in (math.sin, math.cos))
-            yield self.pivot + V3.FORWARD * sin + V3.RIGHT * cos
+            degrees = 360 * i / self.points
+            if not (self.start <= degrees <= self.end):
+                continue
+            radians = math.radians(degrees)
+            sin, cos = (f(radians) for f in (math.sin, math.cos))
+            yield self.pivot + V3.FORWARD * sin * self.radius + V3.RIGHT * cos * self.radius
 
 
 
@@ -89,6 +91,20 @@ class Column(Object):
 
 
 
+class CenterWall(Object):
+    """Wall around central staircase
+    """
+
+    def generate(self, height: int|float, circle: Circle) -> None:
+        # Outer wall
+        lower = tuple(circle.generate())
+        circle.pivot = V3.UP * 5
+        upper = tuple(circle.generate())
+        for i, j in [(a, a+1) for a in range(len(lower) - 1)]:
+            self.face([upper[j], upper[i], lower[i], lower[j]])
+
+
+
 class Center(Object):
     """Central spiral staircase sorrounded by walls
     """
@@ -99,8 +115,8 @@ class Center(Object):
     def generate(self, height: int|float, circle: Circle) -> None:
         """Generating a central column with a spiral staircase inside
         """
-        INNER_SEGMENTS = circle.points // 2
-        self.load(Column, "Central pillar", height=height, circle=Circle(radius=self.INNER_RADIUS, points=INNER_SEGMENTS))
+        self.load(Column, "Central pillar", height=height, circle=Circle(radius=self.INNER_RADIUS, points=circle.points//2))
+        self.load(CenterWall, "Central wall", height=height, circle=circle)
 
 
 
@@ -109,13 +125,13 @@ class Babel(Object):
     """
 
     FLOOR_HEIGHT = 5
-    CENTRAL_RADIUS = 3
+    CENTRAL_RADIUS = 4
     PILLAR_GAP = 3
 
     def generate(self) -> None:
         """Generating Babel structure
         """
-        self.load(Center, "Central staircase", height=self.FLOOR_HEIGHT, circle=Circle(radius=self.CENTRAL_RADIUS, points=32))
+        self.load(Center, "Central staircase", height=self.FLOOR_HEIGHT, circle=Circle(radius=self.CENTRAL_RADIUS, points=32, start=30, end=-30%360))
 
 
 
