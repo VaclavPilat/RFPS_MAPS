@@ -32,19 +32,19 @@ class Math:
 
 
 @reprWrapper
-class Arc:
-    """Data object for storing information used for generating real arcs and circles
+class Circle:
+    """Data object for storing information used for generating points in circles
     """
 
     def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, start: int|float = 0, end: int|float = 360) -> None:
-        """Initializing an Arc instance
+        """Initializing an Circle instance
 
         Args:
-            radius (int | float, optional): Arc radius, in meters. Defaults to 1.
-            points (int, optional): Number of points in arc, should be a power of 2. Defaults to 8.
-            pivot (V3, optional): Arc pivot point. Defaults to V3.ZERO.
-            start (int | float, optional): Arc angle start, in degrees. Defaults to 0.
-            end (int | float, optional): Arc angle end, in degrees. Defaults to 360.
+            radius (int | float, optional): Circle radius, in meters. Defaults to 1.
+            points (int, optional): Number of points in circle, should be a power of 2. Defaults to 8.
+            pivot (V3, optional): Circle pivot point. Defaults to V3.ZERO.
+            start (int | float, optional): Circle angle start, in degrees. Defaults to 0.
+            end (int | float, optional): Circle angle end, in degrees. Defaults to 360.
         """
         assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
@@ -57,12 +57,13 @@ class Arc:
         self.end = end
     
     def generate(self):
-        """Generating points on a arc
+        """Generating points on a circle
 
         Yields:
             V3: Vertex positions
         """
         for i in range(self.points):
+            # Limit by degrees
             degrees = math.radians(360 * i / self.points)
             sin, cos = (f(degrees) for f in (math.sin, math.cos))
             yield self.pivot + V3.FORWARD * sin + V3.RIGHT * cos
@@ -73,17 +74,17 @@ class Column(Object):
     """Cylinder mesh with vertical walls only
     """
 
-    def generate(self, height: int|float, arc: Arc) -> None:
+    def generate(self, height: int|float, circle: Circle) -> None:
         """Generating a column
 
         Args:
             height (int | float): Column height.
-            arc (Arc): Column radius.
+            circle (Circle): Column radius.
         """
-        lower = tuple(arc.generate())
-        arc.pivot = V3.UP * 5
-        upper = tuple(arc.generate())
-        for i, j in [(a-1, a) for a in range(arc.points)]:
+        lower = tuple(circle.generate())
+        circle.pivot = V3.UP * 5
+        upper = tuple(circle.generate())
+        for i, j in [(a-1, a) for a in range(circle.points)]:
             self.face([upper[j], upper[i], lower[i], lower[j]])
 
 
@@ -95,11 +96,11 @@ class Center(Object):
     INNER_RADIUS = 1
     WALL_WIDTH = 0.5
 
-    def generate(self, height: int|float, arc: Arc) -> None:
+    def generate(self, height: int|float, circle: Circle) -> None:
         """Generating a central column with a spiral staircase inside
         """
-        INNER_SEGMENTS = arc.points // 2
-        self.load(Column, "Central pillar", height=height, arc=Arc(radius=self.INNER_RADIUS, points=INNER_SEGMENTS))
+        INNER_SEGMENTS = circle.points // 2
+        self.load(Column, "Central pillar", height=height, circle=Circle(radius=self.INNER_RADIUS, points=INNER_SEGMENTS))
 
 
 
@@ -114,7 +115,7 @@ class Babel(Object):
     def generate(self) -> None:
         """Generating Babel structure
         """
-        self.load(Center, "Central staircase", V3.ZERO, self.FLOOR_HEIGHT, Arc(radius=self.FLOOR_HEIGHT, points=32))
+        self.load(Center, "Central staircase", height=self.FLOOR_HEIGHT, circle=Circle(radius=self.CENTRAL_RADIUS, points=32))
 
 
 
