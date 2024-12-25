@@ -112,6 +112,9 @@ class CenterWall(Object):
         inner_upper = circle.generate()
         for i, j in [(a, a+1) for a in range(len(inner_lower) - 1)]:
             self.face([inner_upper[i], inner_upper[j], inner_lower[j], inner_lower[i]])
+        # Walls between outer and inner
+        self.face([outer_upper[0], inner_upper[0], inner_lower[0], outer_lower[0]])
+        self.face([inner_upper[-1], outer_upper[-1], outer_lower[-1], inner_lower[-1]])
 
 
 
