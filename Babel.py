@@ -110,9 +110,10 @@ class Column(Object):
             height (int | float): Column height.
             circle (Circle): Column radius.
         """
+        assert circle.start == 0, "Column cannot have an overwritten circle start"
+        assert circle.end == 360, "Column cannot have an overwritten circle end"
         lower = circle.generate()
-        circle.pivot = V3.UP * height
-        upper = circle.generate()
+        upper = circle(pivot=V3.UP * height).generate()
         for i, j in [(a-1, a) for a in range(circle.points)]:
             self.face([upper[j], upper[i], lower[i], lower[j]])
 
@@ -122,19 +123,15 @@ class CenterWall(Object):
     """Wall around central staircase
     """
 
-    def generate(self, height: int|float, circle: Circle) -> None:
+    def generate(self, height: int|float, outer: Circle, inner: Circle) -> None:
         # Outer wall
-        outer_lower = circle.generate()
-        circle.pivot = V3.UP * height
-        outer_upper = circle.generate()
+        outer_lower = outer.generate()
+        outer_upper = outer(pivot=V3.UP * height).generate()
         for i, j in [(a, a+1) for a in range(len(outer_lower) - 1)]:
             self.face([outer_upper[j], outer_upper[i], outer_lower[i], outer_lower[j]])
         # Inner wall
-        circle.pivot = V3.ZERO
-        circle.radius -= 0.5
-        inner_lower = circle.generate()
-        circle.pivot = V3.UP * height
-        inner_upper = circle.generate()
+        inner_lower = inner.generate()
+        inner_upper = inner(pivot=V3.UP * height).generate()
         for i, j in [(a, a+1) for a in range(len(inner_lower) - 1)]:
             self.face([inner_upper[i], inner_upper[j], inner_lower[j], inner_lower[i]])
         # Walls between outer and inner
@@ -147,14 +144,13 @@ class Center(Object):
     """Central spiral staircase sorrounded by walls
     """
 
-    INNER_RADIUS = 1
-    WALL_WIDTH = 0.5
-
-    def generate(self, height: int|float, circle: Circle) -> None:
+    def generate(self, height: int|float, outer: Circle) -> None:
         """Generating a central column with a spiral staircase inside
         """
-        self.load(Column, "Central pillar", height=height, circle=Circle(radius=self.INNER_RADIUS, points=circle.points//2))
-        self.load(CenterWall, "Central wall", height=height, circle=circle)
+        inner = outer(radius=outer.radius - 0.5)
+        column = Circle(radius=1, points=outer.points//2)
+        self.load(Column, "Central pillar", height=height, circle=column)
+        self.load(CenterWall, "Central wall", height=height, outer=outer, inner=inner)
 
 
 
@@ -162,14 +158,11 @@ class Babel(Object):
     """Implementation of the Tower of Babel map
     """
 
-    FLOOR_HEIGHT = 5
-    CENTRAL_RADIUS = 4
-    PILLAR_GAP = 3
-
-    def generate(self) -> None:
+    def generate(self, height: int|float = 5) -> None:
         """Generating Babel structure
         """
-        self.load(Center, "Central staircase", height=self.FLOOR_HEIGHT, circle=Circle(radius=self.CENTRAL_RADIUS, points=32, start=30, end=-30%360))
+        center = Circle(radius=4, points=32, start=30, end=-30%360)
+        self.load(Center, "Central staircase", height=height, outer=center)
 
 
 
