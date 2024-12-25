@@ -71,6 +71,31 @@ class Circle:
             degrees.append(self.end)
         radians = [math.radians(d) for d in degrees]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
+    
+    def __call__(self, radius: int|float = None, points: int = None, pivot: V3 = None, start: int|float = None, end: int|float = None) -> "Circle":
+        """Creating a new Circle instance by modifying the current one
+
+        Args:
+            radius (int | float, optional): New circle radius. Defaults to None.
+            points (int, optional): New point count. Defaults to None.
+            pivot (V3, optional): New circle pivot. Defaults to None.
+            start (int | float, optional): New angle start. Defaults to None.
+            end (int | float, optional): New angle end. Defaults to None.
+
+        Returns:
+            Circle: Newly created Circle instance
+        """
+        if radius is None:
+            radius = self.radius
+        if points is None:
+            points = self.points
+        if pivot is None:
+            pivot = self.pivot
+        if start is None:
+            start = self.start
+        if end is None:
+            end = self.end
+        return Circle(radius=radius, points=points, pivot=pivot, start=start, end=end)
 
 
 
