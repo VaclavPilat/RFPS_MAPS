@@ -51,24 +51,26 @@ class Circle:
         assert Math.isPow2(points), "Point count has to be a power of 2"
         self.points = points
         self.pivot = pivot
-        assert start >= 0, "Start has to be greater than or equal to 0"
+        assert 0 <= start <= 360, "Start has to be between 0 and 360"
+        assert start < end, "Start has to be lesser than end"
         self.start = start
-        assert end <= 360, "End has to lesser than or equal to 360"
+        assert 0 <= end <= 360, "End has to between 0 and 360"
         self.end = end
     
-    def generate(self):
+    def generate(self) -> tuple:
         """Generating points on a circle
 
-        Yields:
-            V3: Vertex positions
+        Returns:
+            tuple: Tuple of generated point positions
         """
-        for i in range(self.points):
-            degrees = 360 * i / self.points
-            if not (self.start <= degrees <= self.end):
-                continue
-            radians = math.radians(degrees)
-            sin, cos = (f(radians) for f in (math.sin, math.cos))
-            yield self.pivot + V3.FORWARD * sin * self.radius + V3.RIGHT * cos * self.radius
+        points = [360 * i / self.points for i in range(self.points)]
+        degrees = [p for p in points if self.start < p < self.end]
+        if self.start not in degrees:
+            degrees.insert(0, self.start)
+        if self.end % 360 not in degrees:
+            degrees.append(self.end)
+        radians = [math.radians(d) for d in degrees]
+        return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
 
 
 
@@ -83,9 +85,9 @@ class Column(Object):
             height (int | float): Column height.
             circle (Circle): Column radius.
         """
-        lower = tuple(circle.generate())
+        lower = circle.generate()
         circle.pivot = V3.UP * height
-        upper = tuple(circle.generate())
+        upper = circle.generate()
         for i, j in [(a-1, a) for a in range(circle.points)]:
             self.face([upper[j], upper[i], lower[i], lower[j]])
 
@@ -97,17 +99,17 @@ class CenterWall(Object):
 
     def generate(self, height: int|float, circle: Circle) -> None:
         # Outer wall
-        outer_lower = tuple(circle.generate())
+        outer_lower = circle.generate()
         circle.pivot = V3.UP * height
-        outer_upper = tuple(circle.generate())
+        outer_upper = circle.generate()
         for i, j in [(a, a+1) for a in range(len(outer_lower) - 1)]:
             self.face([outer_upper[j], outer_upper[i], outer_lower[i], outer_lower[j]])
         # Inner wall
         circle.pivot = V3.ZERO
         circle.radius -= 0.5
-        inner_lower = tuple(circle.generate())
+        inner_lower = circle.generate()
         circle.pivot = V3.UP * height
-        inner_upper = tuple(circle.generate())
+        inner_upper = circle.generate()
         for i, j in [(a, a+1) for a in range(len(inner_lower) - 1)]:
             self.face([inner_upper[i], inner_upper[j], inner_lower[j], inner_lower[i]])
 
