@@ -83,6 +83,14 @@ class Circle:
         for i, j in [(a-1, a) for a in range(not closed, len(lower))]:
             yield (upper[i], upper[j], lower[j], lower[i]) if inverted else (upper[j], upper[i], lower[i], lower[j])
     
+    def face(self) -> tuple:
+        """Generating circle face
+
+        Returns:
+            tuple: Sequence of vertices
+        """
+        return self.vertices()
+    
     def __call__(self, radius: int|float = None, points: int = None, pivot: V3 = None, bounds: tuple = None) -> "Circle":
         if radius is None:
             radius = self.radius
@@ -155,6 +163,39 @@ class Center(Object):
 
 
 
+class AtriumFloor(Object):
+    """Floor of the atrium
+    """
+
+    def generate(self, height: int|float, outer: Circle, inner: Circle) -> None:
+        """Generating atrium floor
+
+        Args:
+            height (int | float): Floor height
+            outer (Circle): Outer circle
+            inner (Circle): Inner circle
+        """
+        self.face(outer.face())
+
+
+
+class Atrium(Object):
+    """Atrium in the center of the map
+    """
+
+    def generate(self, height: int|float, outer: Circle) -> None:
+        """Generating the atrium in the center of the map
+
+        Args:
+            height (int | float): Floor height
+            outer (Circle): Outer circle
+        """
+        center = Circle(radius=4, points=32, bounds=(30, -30%360))
+        self.load(Center, "Central staircase", height=height, outer=center)
+        self.load(AtriumFloor, "Atrium floor", height=height, outer=outer, inner = center)
+
+
+
 class Babel(Object):
     """Implementation of the Tower of Babel map
     """
@@ -165,8 +206,8 @@ class Babel(Object):
         Args:
             height (int | float, optional): Floor height. Defaults to 5.
         """
-        center = Circle(radius=4, points=32, bounds=(30, -30%360))
-        self.load(Center, "Central staircase", height=height, outer=center)
+        atrium = Circle(10, 64)
+        self.load(Atrium, "Atrium", height=height, outer=atrium)
 
 
 
