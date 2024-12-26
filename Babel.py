@@ -83,13 +83,19 @@ class Circle:
         for i, j in [(a-1, a) for a in range(not closed, len(lower))]:
             yield (upper[i], upper[j], lower[j], lower[i]) if inverted else (upper[j], upper[i], lower[i], lower[j])
     
-    def face(self) -> tuple:
+    def face(self, cutout: "Circle" = None) -> tuple:
         """Generating circle face
+
+        Args:
+            cutout (Circle, optional): Circular hole dimensions. Defaults to None.
 
         Returns:
             tuple: Sequence of vertices
         """
-        return self.vertices()
+        if cutout is None:
+            return self.vertices()
+        assert cutout.radius < self.radius, "A hole has to be smaller that the object it is a part of!"
+        return self.vertices() + cutout.vertices()[::-1]
     
     def __call__(self, **kwargs) -> "Circle":
         """Creating a new Circle instance by modifying current fields
@@ -179,7 +185,7 @@ class AtriumFloor(Object):
             outer (Circle): Outer circle
             inner (Circle): Inner circle
         """
-        self.face(outer.face())
+        self.face(outer.face(cutout=inner))
 
 
 
@@ -196,7 +202,7 @@ class Atrium(Object):
         """
         center = Circle(radius=4, points=32, bounds=(30, -30%360))
         self.load(Center, "Central staircase", height=height, outer=center)
-        self.load(AtriumFloor, "Atrium floor", height=height, outer=outer, inner = center)
+        self.load(AtriumFloor, "Atrium floor", height=height, outer=outer, inner=center(bounds=None))
 
 
 
