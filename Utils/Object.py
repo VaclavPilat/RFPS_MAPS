@@ -60,6 +60,15 @@ class Object:
             str: String representation of object hierarchy
         """
         return self.stringify(self)
+    
+    def print(self) -> "Object":
+        """Printing object structure
+
+        Returns:
+            Object: Self reference
+        """
+        print(self)
+        return self
 
     def load(self, obj: "Object", *args, **kwargs) -> None:
         """Creating a object instance using class type and its constructor arguments
@@ -110,6 +119,7 @@ class Object:
             bpy object: Built blender object
         """
         obj = bpy.data.objects.new(self.name, self.create() if len(self.faces) else None)
+        obj.location = list(self.pivot)
         bpy.context.scene.collection.objects.link(obj)
         for child in self.objects:
             child.build().parent = obj

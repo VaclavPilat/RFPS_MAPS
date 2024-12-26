@@ -169,6 +169,6 @@ class Babel(Object):
 if __name__ == "__main__":
     Blender.setup()
     Blender.purge()
-    scene = Babel("Tower of Babel")
-    print(scene)
-    scene.build()
+    Babel("Tower of Babel").print().build()
+    #Babel("Tower of Babel (above copy)", V3.UP * 5).build()
+    #Babel("Tower of Babel (below copy)", V3.DOWN * 5).build()
