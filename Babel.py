@@ -28,6 +28,15 @@ class Math:
             bool: True if the number is a non-zero power of 2
         """
         return number > 0 and (number & (number - 1)) == 0
+    
+    @staticmethod
+    def average(*args) -> float:
+        """Calculating average of numbers
+
+        Returns:
+            float: Average number
+        """
+        return sum(args) / len(args)
 
 
 
@@ -47,6 +56,7 @@ class Circle:
         """
         assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
+        ## \todo Remove the 2^n requirement (or make it optional)
         assert Math.isPow2(points), "Point count has to be a power of 2"
         self.points = points
         self.pivot = pivot
@@ -206,6 +216,8 @@ class Atrium(Object):
         self.load(Center, "Central staircase", height=height, outer=center)
         for bounds in ((0, 180), (180, 360)):
             self.load(AtriumFloor, "Atrium floor", height=height, outer=outer(bounds=bounds), inner=center(bounds=bounds))
+        #for position in Circle(radius=Math.average(outer.radius, center.radius), points=8.vertices():
+        #    self.load(Column, "Atrium pillar", height=3, circle=Circle(0.5, 8, position))
 
 
 
