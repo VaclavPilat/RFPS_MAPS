@@ -63,6 +63,7 @@ class Circle:
         Returns:
             tuple: Tuple of generated point positions
         """
+        ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
         points = [360 * i / self.points for i in range(self.points)]
         degrees = [p for p in points if self.start < p < self.end]
         if self.start not in degrees:
@@ -124,6 +125,13 @@ class CenterWall(Object):
     """
 
     def generate(self, height: int|float, outer: Circle, inner: Circle) -> None:
+        """Generating walls around spiral
+
+        Args:
+            height (int | float): Object height
+            outer (Circle): Outer wall circle
+            inner (Circle): Inner wall circle
+        """
         # Outer wall
         outer_lower = outer.generate()
         outer_upper = outer(pivot=V3.UP * height).generate()
@@ -146,6 +154,10 @@ class Center(Object):
 
     def generate(self, height: int|float, outer: Circle) -> None:
         """Generating a central column with a spiral staircase inside
+
+        Args:
+            height (int | float): Object height
+            outer (Circle): Outer circle
         """
         inner = outer(radius=outer.radius - 0.5)
         column = Circle(radius=1, points=outer.points//2)
@@ -159,7 +171,10 @@ class Babel(Object):
     """
 
     def generate(self, height: int|float = 5) -> None:
-        """Generating Babel structure
+        """Generating a floor of a tower of Babel
+
+        Args:
+            height (int | float, optional): Floor height. Defaults to 5.
         """
         center = Circle(radius=4, points=32, start=30, end=-30%360)
         self.load(Center, "Central staircase", height=height, outer=center)
