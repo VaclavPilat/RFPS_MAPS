@@ -80,7 +80,6 @@ class Circle:
         """
         lower = self.vertices()
         upper = self(pivot=self.pivot + V3.UP * height).vertices()
-        print(int(closed))
         for i, j in [(a-1, a) for a in range(not closed, len(lower))]:
             yield (upper[i], upper[j], lower[j], lower[i]) if inverted else (upper[j], upper[i], lower[i], lower[j])
     

@@ -33,33 +33,24 @@ class Object:
         yield self
         for obj in self.objects:
             yield from obj
-
-    def stringify(self, obj: "Object", indent: str = "", itemIndent: str = "") -> str:
+    
+    def __str__(self, indent: str = "", itemIndent: str = "") -> str:
         """Getting the string representation of object hierearchy
 
         Args:
-            obj (Object): Object to return string representation of
             indent (str, optional): Default line indent. Defaults to "".
             itemIndent (str, optional): Default item line indent to be passed deeper. Defaults to "".
 
         Returns:
             str: Hierarchical representation of an object
         """
-        output = indent + repr(obj) + "\n"
-        for index, child in enumerate(obj.objects):
-            if index < len(obj.objects) - 1:
-                output += self.stringify(child, itemIndent + "├──", itemIndent + "│  ")
+        output = indent + repr(self) + "\n"
+        for index, child in enumerate(self.objects):
+            if index < len(self.objects) - 1:
+                output += child.__str__(itemIndent + "├──", itemIndent + "│  ")
             else:
-                output += self.stringify(child, itemIndent + "└──", itemIndent + "   ")
+                output += child.__str__(itemIndent + "└──", itemIndent + "   ")
         return output
-    
-    def __str__(self) -> str:
-        """Getting object hierarchy
-
-        Returns:
-            str: String representation of object hierarchy
-        """
-        return self.stringify(self)
     
     def print(self) -> "Object":
         """Printing object structure
