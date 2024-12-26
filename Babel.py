@@ -36,26 +36,23 @@ class Circle:
     """Data object for storing information used for generating points in circles
     """
 
-    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, start: int|float = 0, end: int|float = 360) -> None:
+    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: tuple = None) -> None:
         """Initializing an Circle instance
 
         Args:
             radius (int | float, optional): Circle radius, in meters. Defaults to 1.
             points (int, optional): Number of points in circle, should be a power of 2. Defaults to 8.
             pivot (V3, optional): Circle pivot point. Defaults to V3.ZERO.
-            start (int | float, optional): Circle angle start, in degrees. Defaults to 0.
-            end (int | float, optional): Circle angle end, in degrees. Defaults to 360.
+            bounds (tuple, optional): Pair of angle bound values in degrees. Defaults to None.
         """
         assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
         assert Math.isPow2(points), "Point count has to be a power of 2"
         self.points = points
         self.pivot = pivot
-        assert 0 <= start <= 360, "Start has to be between 0 and 360"
-        assert start < end, "Start has to be lesser than end"
-        self.start = start
-        assert 0 <= end <= 360, "End has to between 0 and 360"
-        self.end = end
+        if bounds is not None:
+            assert 0 <= bounds[0] < bounds[1] <= 360, "Both bounds have to between 0 and 360 and the first one has to be lesser than the seconds one"
+        self.bounds = bounds
     
     def vertices(self) -> tuple:
         """Generating vertex points on a circle
@@ -64,55 +61,39 @@ class Circle:
             tuple: Tuple of generated vertex positions
         """
         ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
-        points = [360 * i / self.points for i in range(self.points)]
-        degrees = [p for p in points if self.start <= p <= self.end]
-        """degrees = [p for p in points if self.start < p < self.end]
-        if self.start not in degrees:
-            degrees.insert(0, self.start)
-        if self.end % 360 not in degrees:
-            degrees.append(self.end)"""
+        degrees = [360 * i / self.points for i in range(self.points)]
+        if self.bounds is not None:
+            degrees = [d for d in degrees if self.bounds[0] <= d <= self.bounds[1]]
         radians = [math.radians(d) for d in degrees]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
     
-    def cylinder(self, height: int|float, inverted: bool = False):
+    def cylinder(self, height: int|float, inverted: bool = False, closed: bool = True):
         """Generating cylinder walls
 
         Args:
             height (int | float): Cylinder height
             inverted (bool, optional): Should the faces be inverted? Defaults to False.
+            closed (bool, optional): Should the cylinder be closed? Defaults to True.
 
         Yields:
             tuple: Sequences of vertices for each face
         """
         lower = self.vertices()
         upper = self(pivot=self.pivot + V3.UP * height).vertices()
-        for i, j in [(a-1, a) for a in range(len(lower))]:
+        print(int(closed))
+        for i, j in [(a-1, a) for a in range(not closed, len(lower))]:
             yield (upper[i], upper[j], lower[j], lower[i]) if inverted else (upper[j], upper[i], lower[i], lower[j])
     
-    def __call__(self, radius: int|float = None, points: int = None, pivot: V3 = None, start: int|float = None, end: int|float = None) -> "Circle":
-        """Creating a new Circle instance by modifying the current one
-
-        Args:
-            radius (int | float, optional): New circle radius. Defaults to None.
-            points (int, optional): New point count. Defaults to None.
-            pivot (V3, optional): New circle pivot. Defaults to None.
-            start (int | float, optional): New angle start. Defaults to None.
-            end (int | float, optional): New angle end. Defaults to None.
-
-        Returns:
-            Circle: Newly created Circle instance
-        """
+    def __call__(self, radius: int|float = None, points: int = None, pivot: V3 = None, bounds: tuple = None) -> "Circle":
         if radius is None:
             radius = self.radius
         if points is None:
             points = self.points
         if pivot is None:
             pivot = self.pivot
-        if start is None:
-            start = self.start
-        if end is None:
-            end = self.end
-        return Circle(radius=radius, points=points, pivot=pivot, start=start, end=end)
+        if bounds is None:
+            bounds = self.bounds
+        return Circle(radius=radius, points=points, pivot=pivot, bounds=bounds)
 
 
 
@@ -127,8 +108,7 @@ class Column(Object):
             height (int | float): Column height.
             circle (Circle): Column radius.
         """
-        assert circle.start == 0, "Column cannot have an overwritten circle start"
-        assert circle.end == 360, "Column cannot have an overwritten circle end"
+        assert circle.bounds is None, "Column cannot have overwritten circle angle bounds"
         for face in circle.cylinder(height):
             self.face(face)
 
@@ -147,10 +127,10 @@ class CenterWall(Object):
             inner (Circle): Inner wall circle
         """
         # Outer wall
-        for face in outer.cylinder(height):
+        for face in outer.cylinder(height, closed=False):
             self.face(face)
         # Inner wall
-        for face in inner.cylinder(height, True):
+        for face in inner.cylinder(height, inverted=True, closed=False):
             self.face(face)
         # Walls between outer and inner
         #self.face([outer_upper[0], inner_upper[0], inner_lower[0], outer_lower[0]])
@@ -186,7 +166,7 @@ class Babel(Object):
         Args:
             height (int | float, optional): Floor height. Defaults to 5.
         """
-        center = Circle(radius=4, points=32, start=30, end=-30%360)
+        center = Circle(radius=4, points=32, bounds=(30, -30%360))
         self.load(Center, "Central staircase", height=height, outer=center)
 
 
