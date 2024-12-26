@@ -57,21 +57,37 @@ class Circle:
         assert 0 <= end <= 360, "End has to between 0 and 360"
         self.end = end
     
-    def generate(self) -> tuple:
-        """Generating points on a circle
+    def vertices(self) -> tuple:
+        """Generating vertex points on a circle
 
         Returns:
-            tuple: Tuple of generated point positions
+            tuple: Tuple of generated vertex positions
         """
         ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
         points = [360 * i / self.points for i in range(self.points)]
-        degrees = [p for p in points if self.start < p < self.end]
+        degrees = [p for p in points if self.start <= p <= self.end]
+        """degrees = [p for p in points if self.start < p < self.end]
         if self.start not in degrees:
             degrees.insert(0, self.start)
         if self.end % 360 not in degrees:
-            degrees.append(self.end)
+            degrees.append(self.end)"""
         radians = [math.radians(d) for d in degrees]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
+    
+    def cylinder(self, height: int|float, inverted: bool = False):
+        """Generating cylinder walls
+
+        Args:
+            height (int | float): Cylinder height
+            inverted (bool, optional): Should the faces be inverted? Defaults to False.
+
+        Yields:
+            tuple: Sequences of vertices for each face
+        """
+        lower = self.vertices()
+        upper = self(pivot=self.pivot + V3.UP * height).vertices()
+        for i, j in [(a-1, a) for a in range(len(lower))]:
+            yield (upper[i], upper[j], lower[j], lower[i]) if inverted else (upper[j], upper[i], lower[i], lower[j])
     
     def __call__(self, radius: int|float = None, points: int = None, pivot: V3 = None, start: int|float = None, end: int|float = None) -> "Circle":
         """Creating a new Circle instance by modifying the current one
@@ -113,10 +129,8 @@ class Column(Object):
         """
         assert circle.start == 0, "Column cannot have an overwritten circle start"
         assert circle.end == 360, "Column cannot have an overwritten circle end"
-        lower = circle.generate()
-        upper = circle(pivot=V3.UP * height).generate()
-        for i, j in [(a-1, a) for a in range(circle.points)]:
-            self.face([upper[j], upper[i], lower[i], lower[j]])
+        for face in circle.cylinder(height):
+            self.face(face)
 
 
 
@@ -133,18 +147,14 @@ class CenterWall(Object):
             inner (Circle): Inner wall circle
         """
         # Outer wall
-        outer_lower = outer.generate()
-        outer_upper = outer(pivot=V3.UP * height).generate()
-        for i, j in [(a, a+1) for a in range(len(outer_lower) - 1)]:
-            self.face([outer_upper[j], outer_upper[i], outer_lower[i], outer_lower[j]])
+        for face in outer.cylinder(height):
+            self.face(face)
         # Inner wall
-        inner_lower = inner.generate()
-        inner_upper = inner(pivot=V3.UP * height).generate()
-        for i, j in [(a, a+1) for a in range(len(inner_lower) - 1)]:
-            self.face([inner_upper[i], inner_upper[j], inner_lower[j], inner_lower[i]])
+        for face in inner.cylinder(height, True):
+            self.face(face)
         # Walls between outer and inner
-        self.face([outer_upper[0], inner_upper[0], inner_lower[0], outer_lower[0]])
-        self.face([inner_upper[-1], outer_upper[-1], outer_lower[-1], inner_lower[-1]])
+        #self.face([outer_upper[0], inner_upper[0], inner_lower[0], outer_lower[0]])
+        #self.face([inner_upper[-1], outer_upper[-1], outer_lower[-1], inner_lower[-1]])
 
 
 
