@@ -64,6 +64,9 @@ class Circle:
         degrees = [360 * i / self.points for i in range(self.points)]
         if self.bounds is not None:
             degrees = [d for d in degrees if self.bounds[0] <= d <= self.bounds[1]]
+            ## \todo Find a better solution instead of this if statement
+            if self.bounds[1] == 360:
+                degrees.append(360)
         radians = [math.radians(d) for d in degrees]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
     
@@ -202,7 +205,8 @@ class Atrium(Object):
         """
         center = Circle(radius=4, points=32, bounds=(30, -30%360))
         self.load(Center, "Central staircase", height=height, outer=center)
-        self.load(AtriumFloor, "Atrium floor", height=height, outer=outer, inner=center(bounds=None))
+        for bounds in ((0, 180), (180, 360)):
+            self.load(AtriumFloor, "Atrium floor", height=height, outer=outer(bounds=bounds), inner=center(bounds=bounds))
 
 
 
