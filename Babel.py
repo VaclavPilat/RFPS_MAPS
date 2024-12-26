@@ -91,16 +91,20 @@ class Circle:
         """
         return self.vertices()
     
-    def __call__(self, radius: int|float = None, points: int = None, pivot: V3 = None, bounds: tuple = None) -> "Circle":
-        if radius is None:
-            radius = self.radius
-        if points is None:
-            points = self.points
-        if pivot is None:
-            pivot = self.pivot
-        if bounds is None:
-            bounds = self.bounds
-        return Circle(radius=radius, points=points, pivot=pivot, bounds=bounds)
+    def __call__(self, **kwargs) -> "Circle":
+        """Creating a new Circle instance by modifying current fields
+
+        Returns:
+            Circle: New Circle instance
+        """
+        data = {
+            "radius": self.radius,
+            "points": self.points,
+            "pivot": self.pivot,
+            "bounds": self.bounds
+        }
+        data.update(**kwargs)
+        return Circle(**data)
 
 
 
