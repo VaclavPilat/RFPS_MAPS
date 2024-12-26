@@ -77,14 +77,14 @@ class Object:
         """
         raise NotImplementedError("Object generation method was not overriden")
 
-    def face(self, vertices: list[V3]|tuple[V3], material: int = 0) -> None:
+    def face(self, vertices: list[V3]|tuple[V3], inverted: bool = False) -> None:
         """Creating a new face
 
         Args:
             vertices (list[V3] | tuple[V3]): List of bounding vertex positions
-            material (int, optional): Material index. Defaults to 0.
+            inverted (bool, optional): Should the face be inverted? Defaults to False.
         """
-        self.faces.append(vertices)
+        self.faces.append(vertices if not inverted else vertices[::-1])
     
     def create(self) -> "bpy mesh":
         """Creating a blender mesh from face vertices

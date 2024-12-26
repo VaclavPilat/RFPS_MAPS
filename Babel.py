@@ -70,12 +70,11 @@ class Circle:
         radians = [math.radians(d) for d in degrees]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
     
-    def cylinder(self, height: int|float, inverted: bool = False, closed: bool = True):
+    def cylinder(self, height: int|float, closed: bool = True):
         """Generating cylinder walls
 
         Args:
             height (int | float): Cylinder height
-            inverted (bool, optional): Should the faces be inverted? Defaults to False.
             closed (bool, optional): Should the cylinder be closed? Defaults to True.
 
         Yields:
@@ -84,7 +83,7 @@ class Circle:
         lower = self.vertices()
         upper = self(pivot=self.pivot + V3.UP * height).vertices()
         for i, j in [(a-1, a) for a in range(not closed, len(lower))]:
-            yield (upper[i], upper[j], lower[j], lower[i]) if inverted else (upper[j], upper[i], lower[i], lower[j])
+            yield (upper[j], upper[i], lower[i], lower[j])
     
     def face(self, cutout: "Circle" = None) -> tuple:
         """Generating circle face
@@ -150,8 +149,8 @@ class CenterWall(Object):
         for face in outer.cylinder(height, closed=False):
             self.face(face)
         # Inner wall
-        for face in inner.cylinder(height, inverted=True, closed=False):
-            self.face(face)
+        for face in inner.cylinder(height, closed=False):
+            self.face(face, inverted=True)
         # Walls between outer and inner
         #self.face([outer_upper[0], inner_upper[0], inner_lower[0], outer_lower[0]])
         #self.face([inner_upper[-1], outer_upper[-1], outer_lower[-1], inner_lower[-1]])
