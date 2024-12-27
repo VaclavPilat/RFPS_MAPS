@@ -1,6 +1,7 @@
-# RFPS Maps
+# About RFPS Maps
 
-Maps for the **RFPS** project created using Blender's Python support.
+This project contains scripts for creating maps and other 3D models for the **RFPS** project using Blender's Python support.
+
 Blender version **3.0.1** was used.
 
 ## How to run
