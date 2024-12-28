@@ -20,7 +20,7 @@ class Wrapped:
 
 
 
-class ReprWrapperTest(unittest.TestCase):
+class InitReprTest(unittest.TestCase):
     """Class for testing initRepr implementation
     """
 
