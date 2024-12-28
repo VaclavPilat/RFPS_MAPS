@@ -2,11 +2,12 @@
 # Implementation of Circle math functions
 from Math.Functions import Math
 from Math.Vector import V3
-from Utils.Wrapper import autoRepr
+from Utils.Wrapper import autoRepr, immutable
 import math
 
 
 
+@immutable
 @autoRepr
 class Circle:
     """Data object for storing information used for generating points in circles
@@ -23,8 +24,7 @@ class Circle:
         """
         assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
-        ## \todo Remove the 2^n requirement (or make it optional)
-        assert Math.isPow2(points), "Point count has to be a power of 2"
+        assert points > 0, "Point count has to be a positive number"
         self.points = points
         self.pivot = pivot
         ## \todo Make it possible to create Circle instances with bounds like (330-30)
