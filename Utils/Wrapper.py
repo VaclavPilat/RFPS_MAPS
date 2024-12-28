@@ -23,3 +23,27 @@ def initRepr(cls: "cls") -> "cls":
     cls.__init__ = new_init
     cls.__repr__ = new_repr
     return cls
+
+
+
+def immutable(cls: "cls") -> "cls":
+    """Class wrapper that turns the class into an immutable one
+
+    Args:
+        cls (cls): Data class type to wrap
+
+    Returns:
+        cls: The same class type with updated members
+    """
+    old_init = cls.__init__
+    old_setattr = cls.__setattr__
+    def new_init(self, *args, **kwargs) -> None:
+        old_init(self, *args, **kwargs)
+        self._initialised = True
+    def new_setattr(self, name, value) -> None:
+        if getattr(self, "_initialised", False):
+            raise AttributeError(f"Attempting to modify attribute '{name}' of an immutable class")
+        old_setattr(self, name, value)
+    cls.__init__ = new_init
+    cls.__setattr__ = new_setattr
+    return cls
