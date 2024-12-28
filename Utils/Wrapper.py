@@ -42,7 +42,7 @@ def immutable(cls: "cls") -> "cls":
         self._initialised = True
     def new_setattr(self, name, value) -> None:
         if getattr(self, "_initialised", False):
-            raise AttributeError(f"Attempting to modify attribute '{name}' of an immutable class")
+            raise AttributeError(f"Attempting to modify {self.__class__.__name__}.{name}")
         old_setattr(self, name, value)
     cls.__init__ = new_init
     cls.__setattr__ = new_setattr

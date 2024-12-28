@@ -63,12 +63,8 @@ class V3Test(unittest.TestCase):
     def test_equality(self) -> None:
         """Testing __eq__ implementation
         """
-        a = V3(1, 2, 3)
-        b = a
-        self.assertEqual(a, b)
-        a.x = 5
-        self.assertEqual(a.x, 5)
-        self.assertEqual(a, b)
+        self.assertEqual(V3(1, 2, 3), V3(1, 2, 3))
+        self.assertNotEqual(V3(1, 2, 3), V3(1, 2, 4))
     
     def test_copy(self) -> None:
         """Testing __call__ operator for making vector copies
@@ -78,8 +74,6 @@ class V3Test(unittest.TestCase):
         a = V3(1, 2, 3)
         b = a()
         self.assertEqual(a, b)
-        a.x = 5
-        self.assertNotEqual(a, b)
     
     def test_flipping(self)->None:
         """Testing __invert__ operator for flipping a vector on the X axis
