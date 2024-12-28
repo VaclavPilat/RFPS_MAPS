@@ -22,33 +22,3 @@ def reprWrapper(cls: "cls") -> "cls":
     cls.__init__ = new_init
     cls.__repr__ = new_repr
     return cls
-
-
-
-if __name__ == "__main__":
-    @reprWrapper
-    class Wrapped:
-        """Example class being wrapped
-        """
-        def __init__(self, value: int = 10):
-            """Initialising an optional value
-
-            Args:
-                value (int, optional): Example value. Defaults to 10.
-            """
-            self.value = value
-    import unittest
-    class ReprWrapperTest(unittest.TestCase):
-        """Class for testing @reprWrapper implementation
-        """
-        def test_repr(self) -> None:
-            """Testing repr() output
-            """
-            self.assertEqual(repr(Wrapped()), "Wrapped()")
-            self.assertEqual(repr(Wrapped(5)), "Wrapped(5)")
-        def test_fields(self) -> None:
-            """Testing field value
-            """
-            self.assertEqual(Wrapped().value, 10)
-            self.assertEqual(Wrapped(5).value, 5)
-    unittest.main()

@@ -5,7 +5,8 @@ This project contains scripts for creating maps and other 3D models for the **RF
 Blender version **3.0.1** was used.
 
 ## How to run
-- **To view models** : `blender --python-exit-code 2 --disable-abort-handler --python script.py` (replace `script.py` with the desired script file name)
+- **Run tests** : `python3 -m unittest discover -s Tests -p "*Test.py"`
+- **To view models** : `blender --python-exit-code 2 --disable-abort-handler --python Babel.py` (replace `Babel.py` with the desired script file name)
 
 ## Documentation
 - **Create documentation** : `doxygen Doxyfile`
