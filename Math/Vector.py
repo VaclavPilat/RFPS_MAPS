@@ -1,8 +1,10 @@
 ## \file
 # Implementations of vector classes
+from Utils.Wrapper import initRepr
 
 
 
+@initRepr
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
     """
@@ -34,14 +36,6 @@ class V3:
             str: String representation of a vector
         """
         return "(" + ", ".join([str(a) for a in list(self)]) + ")"
-    
-    def __repr__(self) -> str:
-        """Getting string representation of the object
-
-        Returns:
-            str: String representing the object's values
-        """
-        return self.__class__.__name__ + self.__str__()
     
     def __hash__(self) -> int:
         """Getting the hash of this vector
