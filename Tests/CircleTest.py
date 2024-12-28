@@ -36,13 +36,10 @@ class CircleTest(unittest.TestCase):
             second (tuple): Second tuple
         """
         self.assertEqual(len(first), len(second))
-        for fv, sv in zip(first, second):
-            for f, s in zip(fv, sv):
-                try:
-                    self.assertNotAlmostEqual(f, s)
-                    return
-                except AssertionError:
-                    continue
+        try:
+            self.assertTuplesAlmostEqual(first, second)
+        except AssertionError:
+            return
         self.assertTrue(False)
     
     def test_almost_equal(self) -> None:
