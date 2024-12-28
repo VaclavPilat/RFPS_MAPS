@@ -1,6 +1,6 @@
 ## \file
 # Classes for creating objects
-from Utils.Vector import V3
+from Math.Vector import V3
 from Utils.Wrapper import reprWrapper
 import bpy, bmesh
 
