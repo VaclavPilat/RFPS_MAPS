@@ -1,11 +1,11 @@
 ## \file
-# Testing initRepr functionality
-from Utils.Wrapper import initRepr
+# Testing autoRepr functionality
+from Utils.Wrapper import autoRepr
 import unittest
 
 
 
-@initRepr
+@autoRepr
 class Wrapped:
     """Example class being wrapped
     """
@@ -20,8 +20,8 @@ class Wrapped:
 
 
 
-class InitReprTest(unittest.TestCase):
-    """Class for testing initRepr implementation
+class AutoReprTest(unittest.TestCase):
+    """Class for testing autoRepr implementation
     """
 
     def test_repr(self) -> None:

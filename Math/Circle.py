@@ -2,12 +2,12 @@
 # Implementation of Circle math functions
 from Math.Functions import Math
 from Math.Vector import V3
-from Utils.Wrapper import initRepr
+from Utils.Wrapper import autoRepr
 import math
 
 
 
-@initRepr
+@autoRepr
 class Circle:
     """Data object for storing information used for generating points in circles
     """

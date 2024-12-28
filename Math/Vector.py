@@ -1,11 +1,11 @@
 ## \file
 # Implementations of vector classes
-from Utils.Wrapper import initRepr, immutable
+from Utils.Wrapper import autoRepr, immutable
 
 
 
+@autoRepr
 @immutable
-@initRepr
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
     """

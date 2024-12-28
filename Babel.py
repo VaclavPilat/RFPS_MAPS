@@ -10,7 +10,6 @@ from Math.Vector import V3
 from Math.Circle import Circle
 from Blender.Object import Object
 from Blender.Blender import Blender
-from Utils.Wrapper import initRepr
 
 
 
