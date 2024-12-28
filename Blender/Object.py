@@ -1,12 +1,12 @@
 ## \file
 # Classes for creating objects
 from Math.Vector import V3
-from Utils.Wrapper import reprWrapper
+from Utils.Wrapper import initRepr
 import bpy, bmesh
 
 
 
-@reprWrapper
+@initRepr
 class Object:
     """Class for containing own mesh and/or other objectes
     """

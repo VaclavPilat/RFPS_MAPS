@@ -8,7 +8,7 @@ if __name__ == "__main__":
 from Math.Vector import V3
 from Blender.Object import Object
 from Blender.Blender import Blender
-from Utils.Wrapper import reprWrapper
+from Utils.Wrapper import initRepr
 import math
 
 
@@ -40,7 +40,7 @@ class Math:
 
 
 
-@reprWrapper
+@initRepr
 class Circle:
     """Data object for storing information used for generating points in circles
     """

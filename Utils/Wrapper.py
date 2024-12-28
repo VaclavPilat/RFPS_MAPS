@@ -3,7 +3,7 @@
 
 
 
-def reprWrapper(cls: "cls") -> "cls":
+def initRepr(cls: "cls") -> "cls":
     """Class wrapper that adds __repr__ method.
     repr(obj) should return a string representation of the constructor call.
 

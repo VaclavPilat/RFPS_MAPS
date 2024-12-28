@@ -1,11 +1,11 @@
 ## \file
-# Testing reprWrapper functionality
-from Utils.Wrapper import reprWrapper
+# Testing initRepr functionality
+from Utils.Wrapper import initRepr
 import unittest
 
 
 
-@reprWrapper
+@initRepr
 class Wrapped:
     """Example class being wrapped
     """
@@ -21,7 +21,7 @@ class Wrapped:
 
 
 class ReprWrapperTest(unittest.TestCase):
-    """Class for testing @reprWrapper implementation
+    """Class for testing @initRepr implementation
     """
 
     def test_repr(self) -> None:
