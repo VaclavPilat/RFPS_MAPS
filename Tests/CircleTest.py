@@ -24,9 +24,26 @@ class CircleTest(unittest.TestCase):
             second (tuple): Second tuple
         """
         self.assertEqual(len(first), len(second))
-        for a, b in zip(first, second):
-            for c, d in zip(a, b):
-                self.assertAlmostEqual(c, d)
+        for fv, sv in zip(first, second):
+            for f, s in zip(fv, sv):
+                self.assertAlmostEqual(f, s)
+    
+    def assertTuplesNotAlmostEqual(self, first: tuple, second: tuple) -> None:
+        """Asserting that both tuples do not have almost equal vertices
+
+        Args:
+            first (tuple): First tuple
+            second (tuple): Second tuple
+        """
+        self.assertEqual(len(first), len(second))
+        for fv, sv in zip(first, second):
+            for f, s in zip(fv, sv):
+                try:
+                    self.assertNotAlmostEqual(f, s)
+                    return
+                except AssertionError:
+                    continue
+        self.assertTrue(False)
     
     def test_vertices(self) -> None:
         """Testing generated vertices
@@ -34,3 +51,6 @@ class CircleTest(unittest.TestCase):
         self.assertTuplesAlmostEqual(Circle(radius=1, points=1).vertices(), (V3.RIGHT, ))
         self.assertTuplesAlmostEqual(Circle(radius=1, points=2).vertices(), (V3.RIGHT, V3.LEFT))
         self.assertTuplesAlmostEqual(Circle(radius=1, points=4).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD))
+        self.assertTuplesNotAlmostEqual(Circle(radius=1, points=1).vertices(), (V3.FORWARD, ))
+        self.assertTuplesNotAlmostEqual(Circle(radius=1, points=2).vertices(), (V3.RIGHT, V3.RIGHT))
+        self.assertTuplesNotAlmostEqual(Circle(radius=1, points=4).vertices(), (V3.RIGHT, V3.BACKWARD, V3.LEFT, V3.FORWARD))
