@@ -21,7 +21,7 @@ class Wrapped:
 
 
 class ReprWrapperTest(unittest.TestCase):
-    """Class for testing @initRepr implementation
+    """Class for testing initRepr implementation
     """
 
     def test_repr(self) -> None:

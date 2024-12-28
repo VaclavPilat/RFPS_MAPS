@@ -1,5 +1,6 @@
 ## \file
-# Wrapper functions
+# Custom decorator/wrapper functions for data classes.
+# Method injection is preferred over subclassing
 
 
 
