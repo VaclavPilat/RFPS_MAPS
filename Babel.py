@@ -167,6 +167,25 @@ class CenterWall(Object):
 
 
 
+class SpiralStairs(Object):
+    """Spiral staircase
+    """
+
+    def generate(self, height: int|float, outer: Circle, inner: Circle) -> None:
+        """Generating a spiral staircase
+
+        Args:
+            height (int|float): Floor height
+            outer (Circle): Outer circle
+            inner (Circle): inner circle
+        """
+        outer_vertices, inner_vertices = (x for x in (outer.vertices(), inner.vertices()))
+        outer_edges, inner_edges = (len(x) - 1 for x in (outer_vertices, inner_vertices))
+        steps = inner_edges
+        print(steps)
+
+
+
 class Center(Object):
     """Central spiral staircase sorrounded by walls
     """
@@ -179,9 +198,10 @@ class Center(Object):
             outer (Circle): Outer circle
         """
         inner = outer(radius=outer.radius - 0.5)
-        column = Circle(radius=1, points=outer.points//2)
+        column = Circle(radius=1, points=outer.points)
         self.load(Column, "Central pillar", height=height, circle=column)
         self.load(CenterWall, "Central wall", height=height, outer=outer, inner=inner)
+        self.load(SpiralStairs, "Spiral stairs", height=height, outer=inner, inner=column(bounds=inner.bounds))
 
 
 
