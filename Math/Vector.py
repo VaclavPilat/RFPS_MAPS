@@ -8,15 +8,17 @@ from Utils.Wrapper import autoRepr, immutable
 @immutable
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
+
+    This class is made to be immutable and have an automatic __repr__() implementation using decorators.
     """
 
     def __init__(self, x: int|float = 0, y: int|float = 0, z: int|float = 0) -> None:
         """Initializing a 3D vector
 
         Args:
-            x (int | float, optional): X. Defaults to 0.
-            y (int | float, optional): Y. Defaults to 0.
-            z (int | float, optional): Z. Defaults to 0.
+            x (int | float, optional): X value. Defaults to 0.
+            y (int | float, optional): Y value. Defaults to 0.
+            z (int | float, optional): Z value. Defaults to 0.
         
         Examples:
             >>> V3(1, 2, 3)
@@ -24,8 +26,11 @@ class V3:
             >>> V3(z=3)
             V3(z=3)
         """
+        ## Value of the X axis
         self.x = x
+        ## Value of the Y axis
         self.y = y
+        ## Value of the Z axis
         self.z = z
 
     def __iter__(self):
@@ -255,11 +260,19 @@ class V3:
 
 
 
+## Zero-filled vector, equals to V3(0, 0, 0)
 V3.ZERO = V3()
+## One-filled vector, equals to V3(1, 1, 1)
 V3.ONE = V3(1, 1, 1)
+## Forward direction vector, equals to V3(1, 0, 0)
 V3.FORWARD = V3(x=1)
+## Backward direction vector, equals to V3(-1, 0, 0)
 V3.BACKWARD = V3(x=-1)
+## Left direction vector, equals to V3(0, 1, 0)
 V3.LEFT = V3(y=1)
+## Right direction vector, equals to V3(0, -1, 0)
 V3.RIGHT = V3(y=-1)
+## Up direction vector, equals to V3(0, 0, 1)
 V3.UP = V3(z=1)
+## Down direction vector, equals to V3(0, 0, -1)
 V3.DOWN = V3(z=-1)
