@@ -35,7 +35,6 @@ class V3Test(unittest.TestCase):
     def test_multiplication(self) -> None:
         """Testing __mul__ and __rmul__ implementation
         """
-        self.assertEqual(V3(1, 2, 3) * V3(4, 5, 6), V3(4, 10, 18))
         self.assertEqual(V3(1, 2, 3) * 3, V3(3, 6, 9))
         self.assertEqual(3 * V3(1, 2, 3), V3(3, 6, 9))
     
@@ -47,7 +46,7 @@ class V3Test(unittest.TestCase):
     def test_presets(self) -> None:
         """Testing custom presets
         """
-        self.assertEqual(V3(1, 2, 3) * V3.LEFT, V3(0, 2, 0))
+        self.assertEqual(V3(1, 2, 3) + V3.LEFT * 2, V3(1, 4, 3))
     
     def test_rotation(self) -> None:
         """Testing __rshift__ and __lshift__ implementation
@@ -74,8 +73,3 @@ class V3Test(unittest.TestCase):
         a = V3(1, 2, 3)
         b = a()
         self.assertEqual(a, b)
-    
-    def test_flipping(self)->None:
-        """Testing __invert__ operator for flipping a vector on the X axis
-        """
-        self.assertEqual(~V3(1, 2, 3), V3(-1, 2, 3))

@@ -17,6 +17,12 @@ class V3:
             x (int | float, optional): X. Defaults to 0.
             y (int | float, optional): Y. Defaults to 0.
             z (int | float, optional): Z. Defaults to 0.
+        
+        Examples:
+            >>> V3(1, 2, 3)
+            V3(1, 2, 3)
+            >>> V3(z=3)
+            V3(z=3)
         """
         self.x = x
         self.y = y
@@ -27,6 +33,10 @@ class V3:
 
         Returns:
             Iterator representing vector values
+        
+        Examples:
+            >>> list(V3(1, 2, 3))
+            [1, 2, 3]
         """
         return iter((self.x, self.y, self.z))
 
@@ -35,6 +45,10 @@ class V3:
 
         Returns:
             str: String representation of a vector
+        
+        Examples:
+            >>> str(V3(1, 2, 3))
+            '(1, 2, 3)'
         """
         return "(" + ", ".join([str(a) for a in list(self)]) + ")"
     
@@ -43,6 +57,10 @@ class V3:
 
         Returns:
             Hash representation of this vector
+        
+        Examples:
+            >>> hash(V3(1, 2, 3))
+            529344067295497451
         """
         return hash(tuple(self))
 
@@ -54,6 +72,12 @@ class V3:
 
         Returns:
             bool: True if both have the same values
+        
+        Examples:
+            >>> V3(1, 2, 3) == V3(1, 2, 3)
+            True
+            >>> V3(1, 2, 3) == V3(1, 3, 2)
+            False
         """
         if not isinstance(other, self.__class__):
             return False
@@ -70,6 +94,10 @@ class V3:
 
         Returns:
             V3: Sum of this and the other vector
+        
+        Examples:
+            >>> V3(1, 2, 3) + V3(-5, 8, 14)
+            V3(-4, 10, 17) 
         """
         if not isinstance(other, self.__class__):
             raise ValueError("Other value is not a vector")
@@ -83,22 +111,32 @@ class V3:
 
         Returns:
             V3: Difference of this and the other vector
+        
+        Examples:
+            >>> V3(1, 2, 3) - V3(-3, 2, 5)
+            V3(4, 0, -2)
         """
         if not isinstance(other, self.__class__):
             raise ValueError("Other value is not a vector")
         return V3(*(a - b for a, b in zip(self, other)))
     
-    def __mul__(self, other: "V3") -> "V3":
-        """Multiplication of a vector by a number or another vector
+    def __mul__(self, other: int|float) -> "V3":
+        """Multiplication of a vector by a number
 
         Args:
-            other (V3): Other vector or a number
+            other (int | float): Number to multiply by
 
         Returns:
-            V3: Product of this vector and the other argument
+            V3: Product of this vector and the number
+        
+        Examples:
+            >>> V3(1, 2, 3) * 0
+            V3(0, 0, 0)
+            >>> V3(1, 2, 3) * 1
+            V3(1, 2, 3)
+            >>> V3(1, 2, 3) * 2
+            V3(2, 4, 6)
         """
-        if isinstance(other, self.__class__):
-            return V3(*(a * b for a, b in zip(self, other)))
         if type(other) in (int, float):
             return V3(*([other * a for a in self]))
         raise ValueError("Other value is not a vector or a number")
@@ -111,6 +149,14 @@ class V3:
 
         Returns:
             V3: Product of this vector and the number
+        
+        Examples:
+            >>> 0 * V3(1, 2, 3)
+            V3(0, 0, 0)
+            >>> 1 * V3(1, 2, 3)
+            V3(1, 2, 3)
+            >>> 2 * V3(1, 2, 3)
+            V3(2, 4, 6)
         """
         return self.__mul__(other)
     
@@ -122,19 +168,35 @@ class V3:
 
         Returns:
             V3: Quotient of this vector and the number
+        
+        Examples:
+            >>> V3(1, 2, 3) / 1
+            V3(1.0, 2.0, 3.0)
+            >>> V3(1, 2, 3) / 2
+            V3(0.5, 1.0, 1.5)
         """
         if type(other) in (int, float):
             return V3(*([a / other for a in self]))
         raise ValueError("Other value is not a number")
     
     def __rshift__(self, index: int) -> "V3":
-        """Rotating the vector on Z axis, clockwise
+        """Rotating the vector on Z axis by multiples of 90 degrees, clockwise
 
         Args:
             index (int): Rotation index
 
         Returns:
             V3: Rotated vector
+        
+        Examples:
+            >>> V3(1, 2, 3) >> 0
+            V3(1, 2, 3)
+            >>> V3(1, 2, 3) >> 1
+            V3(2, -1, 3)
+            >>> V3(1, 2, 3) >> 2
+            V3(-1, -2, 3)
+            >>> V3(1, 2, 3) >> 3
+            V3(-2, 1, 3)
         """
         index = index % 4
         if index == 1:
@@ -146,13 +208,23 @@ class V3:
         return self
     
     def __lshift__(self, index: int) -> "V3":
-        """Rotating the vector on Z axis, counter-clockwise
+        """Rotating the vector on Z axis by multiples of 90 degrees, counter-clockwise
 
         Args:
             index (int): Rotation index
 
         Returns:
             V3: Rotated vector
+        
+        Examples:
+            >>> V3(1, 2, 3) << 0
+            V3(1, 2, 3)
+            >>> V3(1, 2, 3) << 1
+            V3(-2, 1, 3)
+            >>> V3(1, 2, 3) << 2
+            V3(-1, -2, 3)
+            >>> V3(1, 2, 3) << 3
+            V3(2, -1, 3)
         """
         return self.__rshift__(-index)
 
@@ -166,6 +238,12 @@ class V3:
 
         Returns:
             V3: Copy of this vector (with new values)
+        
+        Examples:
+            >>> V3(1, 2, 3)(z=0)
+            V3(1, 2, 0)
+            >>> V3(1, 2, 3)(5)
+            V3(5, 2, 3)
         """
         if x is None:
             x = self.x
@@ -174,15 +252,6 @@ class V3:
         if z is None:
             z = self.z
         return V3(x, y, z)
-    
-    ## \todo Make an alternative to flip Y axis
-    def __invert__(self) -> "V3":
-        """Flipping the X axis of this vector
-
-        Returns:
-            V3: New vector with X axis value flipped
-        """
-        return self(x=-self.x)
 
 
 
