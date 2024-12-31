@@ -7,7 +7,7 @@ if __name__ == "__main__":
         sys.path.append(directory)
 from Math.Functions import Math
 from Math.Vector import V3
-from Math.Circle import Circle
+from Math.Shape import Circle
 from Blender.Object import Object
 from Blender.Blender import Blender
 
