@@ -29,7 +29,7 @@ class Circle:
         self.pivot = pivot
         ## \todo Make it possible to create Circle instances with bounds like (330-30)
         if bounds is not None:
-            assert 0 <= bounds[0] < bounds[1] <= 360, "Both bounds have to between 0 and 360 and the first one has to be lesser than the seconds one"
+            assert len(bounds) == 2, "Exactly 2 bounds are required"
         self.bounds = bounds
     
     def vertices(self) -> tuple:
