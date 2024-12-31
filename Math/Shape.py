@@ -1,5 +1,5 @@
 ## \file
-# Implementation of Circle math functions
+# Implementations of shapes and and their vertex generation
 from Math.Functions import Math
 from Math.Vector import V3
 from Utils.Wrapper import autoRepr, immutable
@@ -11,6 +11,8 @@ import math
 @autoRepr
 class Circle:
     """Data object for storing information used for generating points in circles
+
+    Made immutable and has an automatic __repr__() implementation by using decorators
     """
 
     def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: tuple = None) -> None:
@@ -22,11 +24,15 @@ class Circle:
             pivot (V3, optional): Circle pivot point. Defaults to V3.ZERO.
             bounds (tuple, optional): Pair of angle bound values in degrees. Defaults to None.
         """
+        ## Circle radius
         assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
+        ## Number of points on the whole circle
         assert points > 0, "Point count has to be a positive number"
         self.points = points
+        ## Position of the center of the circle
         self.pivot = pivot
+        ## Generated circle bounds
         ## \todo Make it possible to create Circle instances with bounds like (330-30)
         if bounds is not None:
             assert len(bounds) == 2, "Exactly 2 bounds are required"
