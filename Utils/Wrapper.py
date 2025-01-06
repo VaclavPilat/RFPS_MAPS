@@ -13,6 +13,12 @@ def autoRepr(cls: "cls") -> "cls":
 
     Returns:
         cls: The same class type with updated members
+    
+    Examples:
+        >>> @autoRepr
+        ... class Wrapped:
+        ...     pass
+        ... 
     """
     old_init = cls.__init__
     def new_init(self, *args, **kwargs) -> None:
@@ -26,6 +32,7 @@ def autoRepr(cls: "cls") -> "cls":
 
 
 
+## \todo Add recursive behaviour - restricting value changes on inner fields
 def immutable(cls: "cls") -> "cls":
     """Class wrapper that turns the class into an immutable one
 
@@ -34,6 +41,12 @@ def immutable(cls: "cls") -> "cls":
 
     Returns:
         cls: The same class type with updated members
+    
+    Examples:
+        >>> @immutable
+        ... class Wrapped:
+        ...     pass
+        ... 
     """
     old_init = cls.__init__
     old_setattr = cls.__setattr__
