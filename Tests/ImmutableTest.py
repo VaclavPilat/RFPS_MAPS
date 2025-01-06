@@ -37,17 +37,12 @@ class ImmutableTest(unittest.TestCase):
         self.assertEqual(Wrapped().value, 10)
         self.assertEqual(Wrapped(5).value, 5)
 
-    def test_reassignment(self) -> None:
-        """Testing field value reassignment
+    def test_assignment(self) -> None:
+        """Testing field value (re)assignment
         """
         x = Wrapped()
         with self.assertRaises(AttributeError):
             x.value = 15
-
-    def test_assignment(self) -> None:
-        """Testing field value reassignment
-        """
-        x = Wrapped(5)
         with self.assertRaises(AttributeError):
             x.foo = "bar"
     
