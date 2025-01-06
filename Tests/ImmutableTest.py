@@ -20,6 +20,13 @@ class Wrapped:
 
 
 
+class WrappedSubclass(Wrapped):
+    """Subclass of the example wrapped class
+    """
+    pass
+
+
+
 class ImmutableTest(unittest.TestCase):
     """Class for testing immutable implementation
     """
@@ -43,3 +50,10 @@ class ImmutableTest(unittest.TestCase):
         x = Wrapped(5)
         with self.assertRaises(AttributeError):
             x.foo = "bar"
+    
+    def test_subclass(self) -> None:
+        """Testing that the decorator still works even when subclassing
+        """
+        self.assertEqual(WrappedSubclass(value=20).value, 20)
+        with self.assertRaises(AttributeError):
+            WrappedSubclass().value = 10
