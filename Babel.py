@@ -5,7 +5,7 @@ if __name__ == "__main__":
     directory = os.path.dirname(bpy.data.filepath)
     if not directory in sys.path:
         sys.path.append(directory)
-from Math.Vector import V3
+from Math.Data import V3
 from Math.Shape import Circle
 from Blender.Object import Object
 from Blender.Blender import Blender

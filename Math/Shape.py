@@ -1,6 +1,6 @@
 ## \file
 # Implementations of shapes and and their vertex generation
-from Math.Vector import V3
+from Math.Data import V3
 from Utils.Wrapper import autoRepr, immutable
 import math
 

@@ -1,5 +1,5 @@
 ## \file
-# Implementations of vector classes
+# Implementations of data classes
 from Utils.Wrapper import autoRepr, immutable
 
 
