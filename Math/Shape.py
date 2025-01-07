@@ -1,6 +1,6 @@
 ## \file
 # Implementations of shapes and and their vertex generation
-from Math.Data import V3
+from Math.Data import V3, Interval
 from Utils.Wrapper import autoRepr, immutable, autoCall
 import math
 
@@ -15,14 +15,14 @@ class Circle:
     Made immutable and has an automatic __repr__() implementation by using decorators
     """
 
-    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: tuple = None) -> None:
+    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: Interval = None) -> None:
         """Initializing an Circle instance
 
         Args:
             radius (int | float, optional): Circle radius, in meters. Defaults to 1.
             points (int, optional): Number of points in circle, should be a power of 2. Defaults to 8.
             pivot (V3, optional): Circle pivot point. Defaults to V3.ZERO.
-            bounds (tuple, optional): Pair of angle bound values in degrees. Defaults to None.
+            bounds (Interval, optional): Angle bound values in degrees. Defaults to None.
         """
         ## Circle radius
         assert radius > 0, "Radius has to be a positive number"
@@ -34,8 +34,6 @@ class Circle:
         self.pivot = pivot
         ## Generated circle bounds
         ## \todo Make it possible to create Circle instances with bounds like (330-30)
-        if bounds is not None:
-            assert len(bounds) == 2, "Exactly 2 bounds are required"
         self.bounds = bounds
     
     def vertices(self) -> tuple:
@@ -47,9 +45,9 @@ class Circle:
         ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
         degrees = [360 * i / self.points for i in range(self.points)]
         if self.bounds is not None:
-            degrees = [d for d in degrees if self.bounds[0] <= d <= self.bounds[1]]
+            degrees = [d for d in degrees if d in self.bounds]
             ## \todo Find a better solution instead of this if statement
-            if self.bounds[1] == 360:
+            if self.bounds.upper == 360:
                 degrees.append(360)
         radians = [math.radians(d) for d in degrees]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)

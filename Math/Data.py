@@ -275,7 +275,7 @@ class Interval:
             >>> Interval(90, 270)
             Interval(90, 270)
         """
-        assert lower < upper, "lower value has to be lesser than the upper one"
+        assert lower < upper, "Lower bound has to be lesser than the upper one"
         ## Interval lower bound
         self.lower = lower
         ## Interval upper bound
