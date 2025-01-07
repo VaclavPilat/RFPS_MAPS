@@ -1,6 +1,6 @@
 ## \file
 # Testing immutable decorator functionality
-from Utils.Wrapper import immutable
+from Utils.Decorators import immutable
 import unittest
 
 

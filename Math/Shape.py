@@ -1,7 +1,7 @@
 ## \file
 # Implementations of shapes and and their vertex generation
 from Math.Data import V3, Interval
-from Utils.Wrapper import autoRepr, immutable, autoCall
+from Utils.Decorators import autoRepr, immutable, autoCall
 import math
 
 

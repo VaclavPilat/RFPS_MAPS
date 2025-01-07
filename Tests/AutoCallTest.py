@@ -1,6 +1,6 @@
 ## \file
 # Testing the logic of the autoCall decorator
-from Utils.Wrapper import autoCall
+from Utils.Decorators import autoCall
 import unittest
 
 

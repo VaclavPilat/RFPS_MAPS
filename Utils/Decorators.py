@@ -1,11 +1,11 @@
 ## \file
-# Custom decorator/wrapper functions for data classes.
+# Custom decorator functions for data classes.
 # Method injection is preferred over subclassing
 
 
 
 def autoRepr(cls: "cls") -> "cls":
-    """Class wrapper that adds __repr__ method.
+    """Class decorator that adds __repr__ method.
     repr(obj) should return a string representation of the constructor call.
 
     Args:
@@ -41,7 +41,7 @@ def autoRepr(cls: "cls") -> "cls":
 
 ## \todo Add recursive behaviour - restricting value changes on inner fields
 def immutable(cls: "cls") -> "cls":
-    """Class wrapper that turns the class into an immutable one
+    """Class decorator that turns the class into an immutable one
 
     Args:
         cls (cls): Data class type to wrap

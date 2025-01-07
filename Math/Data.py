@@ -1,6 +1,6 @@
 ## \file
 # Implementations of data classes
-from Utils.Wrapper import autoRepr, immutable, autoCall
+from Utils.Decorators import autoRepr, immutable, autoCall
 
 
 

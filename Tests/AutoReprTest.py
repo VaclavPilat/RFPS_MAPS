@@ -1,6 +1,6 @@
 ## \file
 # Testing autoRepr functionality
-from Utils.Wrapper import autoRepr
+from Utils.Decorators import autoRepr
 import unittest
 
 

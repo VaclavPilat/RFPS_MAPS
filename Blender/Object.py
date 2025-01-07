@@ -1,7 +1,7 @@
 ## \file
 # Classes for creating objects
 from Math.Data import V3
-from Utils.Wrapper import autoRepr, immutable
+from Utils.Decorators import autoRepr, immutable
 import bpy, bmesh
 
 
