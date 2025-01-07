@@ -82,3 +82,14 @@ class CircleTest(unittest.TestCase):
         self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 150)).vertices(), (V3.RIGHT, V3.FORWARD, ))
         self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 90)).vertices(), (V3.RIGHT, V3.FORWARD, ))
         self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 60)).vertices(), (V3.RIGHT, ))
+    
+    def test_advanced_bounds(self) -> None:
+        """Testing advance bound usage
+        """
+        circle = Circle(points=4)
+        self.assertTuplesAlmostEqual(circle(bounds=Interval(90, 360)).vertices(), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
+        self.assertTuplesAlmostEqual(circle(bounds=Interval(180, 270)).vertices(), (V3.LEFT, V3.BACKWARD))
+        self.assertTuplesAlmostEqual(circle(bounds=Interval(-90, 90)).vertices(), (V3.BACKWARD, V3.RIGHT, V3.FORWARD))
+        self.assertTuplesAlmostEqual(circle(bounds=Interval(-180, -90)).vertices(), (V3.LEFT, V3.BACKWARD))
+        self.assertTuplesAlmostEqual(circle(bounds=Interval(360, 450)).vertices(), (V3.RIGHT, V3.FORWARD))
+        self.assertTuplesAlmostEqual(circle(bounds=Interval(450, 720)).vertices(), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
