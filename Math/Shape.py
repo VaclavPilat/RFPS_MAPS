@@ -1,13 +1,14 @@
 ## \file
 # Implementations of shapes and and their vertex generation
 from Math.Data import V3
-from Utils.Wrapper import autoRepr, immutable
+from Utils.Wrapper import autoRepr, immutable, autoCall
 import math
 
 
 
 @immutable
 @autoRepr
+@autoCall("radius", "points", "pivot", "bounds")
 class Circle:
     """Data object for storing information used for generating points in circles
 
@@ -81,18 +82,3 @@ class Circle:
             return self.vertices()
         assert cutout.radius < self.radius, "A hole has to be smaller that the object it is a part of!"
         return self.vertices() + cutout.vertices()[::-1]
-    
-    def __call__(self, **kwargs) -> "Circle":
-        """Creating a new Circle instance by modifying current fields
-
-        Returns:
-            Circle: New Circle instance
-        """
-        data = {
-            "radius": self.radius,
-            "points": self.points,
-            "pivot": self.pivot,
-            "bounds": self.bounds
-        }
-        data.update(**kwargs)
-        return Circle(**data)

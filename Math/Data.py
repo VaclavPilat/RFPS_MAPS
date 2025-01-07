@@ -1,11 +1,12 @@
 ## \file
 # Implementations of data classes
-from Utils.Wrapper import autoRepr, immutable
+from Utils.Wrapper import autoRepr, immutable, autoCall
 
 
 
 @autoRepr
 @immutable
+@autoCall("x", "y", "z")
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
 
@@ -232,31 +233,6 @@ class V3:
             V3(2, -1, 3)
         """
         return self.__rshift__(-index)
-
-    def __call__(self, x: int|float = None, y: int|float = None, z: int|float = None) -> "V3":
-        """Making a copy of self (with new values)
-
-        Args:
-            x (int | float, optional): New X value. Defaults to self.x
-            y (int | float, optional): New Y value. Defaults to self.y
-            z (int | float, optional): New Z value. Defaults to self.z
-
-        Returns:
-            V3: Copy of this vector (with new values)
-        
-        Examples:
-            >>> V3(1, 2, 3)(z=0)
-            V3(1, 2, 0)
-            >>> V3(1, 2, 3)(5)
-            V3(5, 2, 3)
-        """
-        if x is None:
-            x = self.x
-        if y is None:
-            y = self.y
-        if z is None:
-            z = self.z
-        return V3(x, y, z)
 
 
 
