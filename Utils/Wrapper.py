@@ -17,8 +17,15 @@ def autoRepr(cls: "cls") -> "cls":
     Examples:
         >>> @autoRepr
         ... class Wrapped:
-        ...     pass
+        ...     def __init__(self, value=0):
+        ...             self.value = value
         ... 
+        >>> repr(Wrapped())
+        'Wrapped()'
+        >>> repr(Wrapped(20))
+        'Wrapped(20)'
+        >>> repr(Wrapped(value=10))
+        'Wrapped(value=10)' 
     """
     old_init = cls.__init__
     def new_init(self, *args, **kwargs) -> None:
@@ -45,8 +52,14 @@ def immutable(cls: "cls") -> "cls":
     Examples:
         >>> @immutable
         ... class Wrapped:
-        ...     pass
+        ...     def __init__(self, value):
+        ...             self.value = value
         ... 
+        >>> Wrapped(5).value
+        5
+        >>> Wrapped(10).value = 20
+            ...
+        AttributeError: Attempting to modify Wrapped.value 
     """
     old_init = cls.__init__
     old_setattr = cls.__setattr__
@@ -70,6 +83,19 @@ def autoCall(*fields) -> "func":
 
     Returns:
         func: Created class decorator function
+    
+    Examples:
+        >>> @autoCall("value")
+        ... class Wrapped:
+        ...     def __init__(self, value=0):
+        ...             self.value = value
+        ... 
+        >>> Wrapped()(10).value
+        10
+        >>> Wrapped(20)().value
+        20
+        >>> Wrapped(30)(value=-5).value
+        -5
     """
     def decorator(cls: "cls") -> "cls":
         def new_call(self, *args, **kwargs) -> "obj":
