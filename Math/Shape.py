@@ -43,12 +43,10 @@ class Circle:
             tuple: Tuple of generated vertex positions
         """
         ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
-        degrees = [360 * i / self.points for i in range(self.points)]
-        if self.bounds is not None:
-            degrees = [d for d in degrees if d in self.bounds]
-            ## \todo Find a better solution instead of this if statement
-            if self.bounds.upper == 360:
-                degrees.append(360)
+        if self.bounds is None:
+            degrees = [360 * i / self.points for i in range(self.points)]
+        else:
+            degrees = [d for d in [360 * i / self.points for i in range(self.points + 1)] if d in self.bounds]
         radians = [math.radians(d) for d in degrees]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
     
