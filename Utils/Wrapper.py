@@ -60,3 +60,24 @@ def immutable(cls: "cls") -> "cls":
     cls.__init__ = new_init
     cls.__setattr__ = new_setattr
     return cls
+
+
+
+def autoCall(*fields) -> "func":
+    """Creating a decorator the adds an automatic __call__ implementation.
+    This function takes field names in the same order as constructor arguments.
+    The new __call__ implementation creates a new instance from updated field values.
+
+    Returns:
+        func: Created class decorator function
+    """
+    def decorator(cls: "cls") -> "cls":
+        def new_call(self, *args, **kwargs) -> "obj":
+            data = {field: getattr(self, field) for field in fields}
+            for i in range(len(args)):
+                data[fields[i]] = args[i]
+            data.update(**kwargs)
+            return cls(**data)
+        cls.__call__ = new_call
+        return cls
+    return decorator
