@@ -208,6 +208,14 @@ class Interval(IOperator):
         if number == self.upper:
             return self.includeUpper
         return self.lower <= number <= self.upper
+    
+    def __str__(self) -> str:
+        """Getting string representation of an interval
+
+        Returns:
+            str: String representation of an interval
+        """
+        return f"{'<' if self.includeLower else '('}{self.lower}, {self.upper}{'>' if self.includeUpper else ')'}"
 
 
 
