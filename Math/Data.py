@@ -1,12 +1,12 @@
 ## \file
 # Implementations of data classes
-from Utils.Decorators import autoRepr, immutable, autoCall
+from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 
 
 
-@autoRepr
-@immutable
-@autoCall("x", "y", "z")
+@addInitRepr
+@makeImmutable
+@addCopyCall("x", "y", "z")
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
 
@@ -255,9 +255,9 @@ V3.DOWN = V3(z=-1)
 
 
 
-@autoRepr
-@immutable
-@autoCall("lower", "upper")
+@addInitRepr
+@makeImmutable
+@addCopyCall("lower", "upper")
 class Interval:
     """Class for an interval
     """

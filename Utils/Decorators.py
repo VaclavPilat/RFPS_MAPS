@@ -4,7 +4,7 @@
 
 
 
-def autoRepr(cls: "cls") -> "cls":
+def addInitRepr(cls: "cls") -> "cls":
     """Class decorator that adds __repr__ method.
     repr(obj) should return a string representation of the constructor call.
 
@@ -15,7 +15,7 @@ def autoRepr(cls: "cls") -> "cls":
         cls: The same class type with updated members
     
     Examples:
-        >>> @autoRepr
+        >>> @addInitRepr
         ... class Wrapped:
         ...     def __init__(self, value=0):
         ...             self.value = value
@@ -40,8 +40,8 @@ def autoRepr(cls: "cls") -> "cls":
 
 
 ## \todo Add recursive behaviour - restricting value changes on inner fields
-def immutable(cls: "cls") -> "cls":
-    """Class decorator that turns the class into an immutable one
+def makeImmutable(cls: "cls") -> "cls":
+    """Class decorator that turns the class into an makeImmutable one
 
     Args:
         cls (cls): Data class type to wrap
@@ -50,7 +50,7 @@ def immutable(cls: "cls") -> "cls":
         cls: The same class type with updated members
     
     Examples:
-        >>> @immutable
+        >>> @makeImmutable
         ... class Wrapped:
         ...     def __init__(self, value):
         ...             self.value = value
@@ -76,7 +76,7 @@ def immutable(cls: "cls") -> "cls":
 
 
 
-def autoCall(*fields) -> "func":
+def addCopyCall(*fields) -> "func":
     """Creating a decorator the adds an automatic __call__ implementation.
     This function takes field names in the same order as constructor arguments.
     The new __call__ implementation creates a new instance from updated field values.
@@ -85,7 +85,7 @@ def autoCall(*fields) -> "func":
         func: Created class decorator function
     
     Examples:
-        >>> @autoCall("value")
+        >>> @addCopyCall("value")
         ... class Wrapped:
         ...     def __init__(self, value=0):
         ...             self.value = value

@@ -1,11 +1,11 @@
 ## \file
 # Testing immutable decorator functionality
-from Utils.Decorators import immutable
+from Utils.Decorators import makeImmutable
 import unittest
 
 
 
-@immutable
+@makeImmutable
 class Wrapped:
     """Example class being wrapped
     """
@@ -27,7 +27,7 @@ class WrappedSubclass(Wrapped):
 
 
 
-class ImmutableTest(unittest.TestCase):
+class MakeImmutableTest(unittest.TestCase):
     """Class for testing immutable implementation
     """
 

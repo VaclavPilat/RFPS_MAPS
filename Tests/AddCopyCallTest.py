@@ -1,11 +1,11 @@
 ## \file
 # Testing the logic of the autoCall decorator
-from Utils.Decorators import autoCall
+from Utils.Decorators import addCopyCall
 import unittest
 
 
 
-@autoCall("number", "string", "boolean")
+@addCopyCall("number", "string", "boolean")
 class Wrapped:
     """Example class being wrapped
     """
@@ -24,7 +24,7 @@ class Wrapped:
 
 
 
-class AutoCallTest(unittest.TestCase):
+class AddCopyCallTest(unittest.TestCase):
     """Class for testing autoCall behaviour
     """
 

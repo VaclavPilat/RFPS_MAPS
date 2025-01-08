@@ -1,13 +1,13 @@
 ## \file
 # Classes for creating objects
 from Math.Data import V3
-from Utils.Decorators import autoRepr, immutable
+from Utils.Decorators import addInitRepr, makeImmutable
 import bpy, bmesh
 
 
 
-@autoRepr
-@immutable
+@addInitRepr
+@makeImmutable
 class Object:
     """Class for containing own mesh and/or other objectes
     """

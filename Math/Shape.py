@@ -1,14 +1,15 @@
 ## \file
 # Implementations of shapes and and their vertex generation
+## \todo Rename file to Shapes
 from Math.Data import V3, Interval
-from Utils.Decorators import autoRepr, immutable, autoCall
+from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 import math
 
 
 
-@immutable
-@autoRepr
-@autoCall("radius", "points", "pivot", "bounds")
+@makeImmutable
+@addInitRepr
+@addCopyCall("radius", "points", "pivot", "bounds")
 class Circle:
     """Data object for storing information used for generating points in circles
 
