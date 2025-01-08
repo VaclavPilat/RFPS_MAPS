@@ -163,12 +163,14 @@ class Interval(IOperator):
     """Class for an interval
     """
 
-    def __init__(self, lower: int|float, upper: int|float) -> None:
+    def __init__(self, lower: int|float, upper: int|float, includeLower: bool = True, includeUpper: bool = True) -> None:
         """Initializing the interval
 
         Args:
             lower (int | float): Interval lower bound
             upper (int | float): Interval upper bound
+            includeLower (bool, optional): Should lower bound be included? Defaults to True.
+            includeUpper (bool, optional): Should upper bound be included? Defaults to True.
         
         Examples:
             >>> Interval(0, 100)
@@ -181,6 +183,10 @@ class Interval(IOperator):
         self.lower = lower
         ## Interval upper bound
         self.upper = upper
+        ## Should the lower bound be included?
+        self.includeLower = includeLower
+        ## Should the upper bound be included?
+        self.includeUpper = includeUpper
     
     def __contains__(self, number: int|float) -> bool:
         """Checking whether a number is within this interval
@@ -197,6 +203,10 @@ class Interval(IOperator):
             >>> 180 in Interval(0, 90)
             False
         """
+        if number == self.lower:
+            return self.includeLower
+        if number == self.upper:
+            return self.includeUpper
         return self.lower <= number <= self.upper
 
 
@@ -205,16 +215,18 @@ class I360(Interval):
     """Interval of degrees on a circle
     """
 
-    def __init__(self, lower: int|float, upper: int|float) -> None:
+    def __init__(self, lower: int|float = 0, upper: int|float = 360, includeLower: bool = True, includeUpper: bool = True) -> None:
         """Initialising the interval
 
         Args:
-            lower (int | float): Lower bound value
-            upper (int | float): Upper bound value
+            lower (int | float, optional): Lower bound. Defaults to 0.
+            upper (int | float, optional): Upper bound. Defaults to 360.
+            includeLower (bool, optional): Should lower bound be included? Defaults to True.
+            includeUpper (bool, optional): Should upper bound be included? Defaults to True.
         """
         for angle in (lower, upper):
             assert 0 <= angle <= 360, "Both angle bounds have to be between 0 and 360"
-        super().__init__(lower, upper)
+        super().__init__(lower, upper, includeLower, includeUpper)
     
     @staticmethod
     def clamp(lower: int|float, upper: int|float) -> "IOperator":

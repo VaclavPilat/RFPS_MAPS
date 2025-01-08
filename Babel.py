@@ -24,7 +24,6 @@ class Column(Object):
             height (int | float): Column height.
             circle (Circle): Column radius.
         """
-        assert circle.bounds is None, "Column cannot have overwritten circle angle bounds"
         for face in circle.cylinder(height):
             self.face(face)
 

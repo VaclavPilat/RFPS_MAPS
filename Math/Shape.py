@@ -1,7 +1,7 @@
 ## \file
 # Implementations of shapes and and their vertex generation
 from Math.Vector import V3
-from Math.Interval import IOperator
+from Math.Interval import IOperator, I360
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 import math
 
@@ -16,14 +16,14 @@ class Circle:
     Made immutable and has an automatic __repr__() implementation by using decorators
     """
 
-    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: IOperator = None) -> None:
+    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: IOperator = I360(includeUpper=False)) -> None:
         """Initializing an Circle instance
 
         Args:
             radius (int | float, optional): Circle radius, in meters. Defaults to 1.
             points (int, optional): Number of points in circle, should be a power of 2. Defaults to 8.
             pivot (V3, optional): Circle pivot point. Defaults to V3.ZERO.
-            bounds (IOperator, optional): Angle bound values in degrees. Defaults to None.
+            bounds (IOperator, optional): Angle bound values in degrees. Defaults to I360().
         """
         ## Circle radius
         assert radius > 0, "Radius has to be a positive number"
@@ -34,7 +34,6 @@ class Circle:
         ## Position of the center of the circle
         self.pivot = pivot
         ## Generated circle bounds
-        # \todo Make it possible to create Circle instances with bounds like (330-30)
         self.bounds = bounds
     
     def vertices(self) -> tuple:
@@ -44,11 +43,7 @@ class Circle:
             tuple: Tuple of generated vertex positions
         """
         ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
-        if self.bounds is None:
-            degrees = [360 * i / self.points for i in range(self.points)]
-        else:
-            degrees = self.bounds.generate(self.points)
-        radians = [math.radians(d) for d in degrees]
+        radians = [math.radians(d) for d in self.bounds.generate(self.points)]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
     
     def cylinder(self, height: int|float, closed: bool = True):
