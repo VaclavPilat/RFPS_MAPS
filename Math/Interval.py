@@ -4,10 +4,129 @@ from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 
 
 
-@addInitRepr
 @makeImmutable
+class IOperator:
+    """Class for containing common interval operations
+    """
+
+    def __contains__(self, number: int|float) -> bool:
+        """Checking whether a number is within an interval
+
+        Args:
+            number (int | float): Number value to check
+
+        Raises:
+            NotImplemented: Thrown when not overwritten
+
+        Returns:
+            bool: True if number belongs to the interval
+        """
+        raise NotImplemented
+    
+    def __and__(self, other: "IOperator") -> "IIntersect":
+        """Creating an intersection of intervals
+
+        Args:
+            other (IOperator): Other interval
+
+        Returns:
+            Interval: Intersection of this and the other interval
+        """
+        return IIntersect(self, other)
+
+    def __or__(self, other: "IOperator") -> "Interval":
+        """Creating a union of intervals
+
+        Args:
+            other (IOperator): Other interval
+
+        Returns:
+            Interval: Union of this and the other interval
+        """
+        pass
+
+    def __str__(self) -> str:
+        """Getting string representation of this interval operator
+
+        Raises:
+            NotImplemented: Thrown when not overwritten
+
+        Returns:
+            str: String representation of this interval operator
+        """
+        raise NotImplemented
+
+
+
+class IIntersect(IOperator):
+    """Class for containing multiple intervals in an intersection
+    """
+
+    def __init__(self, *intervals) -> None:
+        """Initialising an interval intersection
+        """
+        self.intervals = intervals
+    
+    def __contains__(self, number: int|float) -> bool:
+        """Checking whether a number is within this interval intersection
+
+        Args:
+            number (int | float): Number value to check
+
+        Returns:
+            bool: True if the number is within all intervals
+        """
+        for interval in self.intervals:
+            if number not in interval:
+                return False
+        return True
+    
+    def __str__(self) -> str:
+        """Getting string representation of an interval intersection
+
+        Returns:
+            str: String representation
+        """
+        return "(" + " & ".join(self.intervals) + ")"
+
+
+
+class IUnion(IOperator):
+    """Class for containing multiple intervals in a union
+    """
+
+    def __init__(self, *intervals) -> None:
+        """Initialising an interval union
+        """
+        self.intervals = intervals
+    
+    def __contains__(self, number: int|float) -> bool:
+        """Checking whether a number is within this interval union
+
+        Args:
+            number (int | float): Number value to check
+
+        Returns:
+            bool: True if the number is within at least one of the intervals
+        """
+        for interval in self.intervals:
+            if number in interval:
+                return True
+        return False
+    
+    def __str__(self) -> str:
+        """Getting string representation of an interval union
+
+        Returns:
+            str: String representation
+        """
+        return "(" + " | ".join(self.intervals) + ")"
+
+
+
+@addInitRepr
 @addCopyCall("lower", "upper")
-class Interval:
+class Interval(IOperator):
     """Class for an interval
     """
 
