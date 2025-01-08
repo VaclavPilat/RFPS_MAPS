@@ -34,7 +34,7 @@ class IOperator:
         """
         return IIntersect(self, other)
 
-    def __or__(self, other: "IOperator") -> "Interval":
+    def __or__(self, other: "IOperator") -> "IUnion":
         """Creating a union of intervals
 
         Args:
@@ -143,7 +143,10 @@ class Interval(IOperator):
             >>> Interval(90, 270)
             Interval(90, 270)
         """
-        assert lower < upper, "Lower bound has to be lesser than the upper one"
+        try:
+            assert lower < upper, "Lower bound has to be lesser than the upper one"
+        except:
+            print(lower, upper)
         ## Interval lower bound
         self.lower = lower
         ## Interval upper bound
@@ -182,3 +185,21 @@ class I360(Interval):
         for angle in (lower, upper):
             assert 0 <= angle <= 360, "Both angle bounds have to be between 0 and 360"
         super().__init__(lower, upper)
+    
+    @staticmethod
+    def clamp(lower: int|float, upper: int|float) -> "IOperator":
+        """Creating an interval from unclamped degree values
+
+        Args:
+            lower (int | float): Unclamped lower bound
+            upper (int | float): Unclamped upepr bound
+
+        Returns:
+            IOperator: Interval operator
+        """
+        assert lower < upper, "Lower bound has to be lesser than upper bound"
+        lower, upper = (x if 0 <= x <= 360 else x % 360 for x in (lower, upper))
+        if lower < upper:
+            return I360(lower, upper)
+        ## \todo fix the 359 number by adding the ability to exclude bound(s)
+        return IUnion(I360(0, upper), I360(lower, 359))

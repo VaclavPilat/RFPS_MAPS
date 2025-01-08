@@ -1,6 +1,7 @@
 ## \file
 # Custom decorator functions for data classes.
 # Method injection is preferred over subclassing
+# \todo Add a decorator that forces corrent argument type usage
 
 
 
