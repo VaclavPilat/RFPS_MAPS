@@ -1,5 +1,6 @@
 ## \file
-# Interval classes
+# Interval classes.
+# The "I" in front of some class names stands for "Interval"
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 
 
