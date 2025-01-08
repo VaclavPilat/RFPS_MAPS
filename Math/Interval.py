@@ -66,6 +66,14 @@ class IOperator:
             tuple: List of generated values
         """
         raise NotImplemented
+    
+    def __invert__(self) -> "IOperator":
+        """Inverting the interval
+
+        Returns:
+            IOperator: Inverted operator
+        """
+        raise NotImplemented
 
 
 
@@ -110,6 +118,14 @@ class IIntersect(IOperator):
         for i in self.intervals[1:]:
             values = (x for x in values if x in i.generate(*args, **kwargs))
         return values
+    
+    def __invert__(self) -> "IUnion":
+        """Inverts an intersection of intervals
+
+        Returns:
+            IUnion: Union of inverted intervals
+        """
+        return IUnion(*[~i for i in self.intervals])
 
 
 
@@ -156,6 +172,14 @@ class IUnion(IOperator):
                 if x not in values:
                     values.append(x)
         return values
+    
+    def __invert__(self) -> "IIntersect":
+        """Inverts a union of intervals
+
+        Returns:
+            IIntersect: Intersection of inverted intervals
+        """
+        return IIntersect(*[~i for i in self.intervals])
 
 
 
@@ -262,3 +286,15 @@ class I360(Interval):
             tuple: Generated points
         """
         return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]
+    
+    def __invert__(self) -> "IOperator":
+        """Inverting an interval
+
+        Returns:
+            IOperator: Inverted interval or a union of intervals
+        """
+        if 0 < self.lower <= self.upper < 360:
+            return I360(self.upper, 360) | I360(0, self.lower)
+        if self.lower == 0:
+            return I360(self.upper, 360)
+        return I360(0, self.lower)
