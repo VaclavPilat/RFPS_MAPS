@@ -1,7 +1,8 @@
 ## \file
 # Implementations of shapes and and their vertex generation
 ## \todo Rename file to Shapes
-from Math.Data import V3, Interval
+from Math.Data import V3
+from Math.Interval import I360
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 import math
 
@@ -16,14 +17,14 @@ class Circle:
     Made immutable and has an automatic __repr__() implementation by using decorators
     """
 
-    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: Interval = None) -> None:
+    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: I360 = None) -> None:
         """Initializing an Circle instance
 
         Args:
             radius (int | float, optional): Circle radius, in meters. Defaults to 1.
             points (int, optional): Number of points in circle, should be a power of 2. Defaults to 8.
             pivot (V3, optional): Circle pivot point. Defaults to V3.ZERO.
-            bounds (Interval, optional): Angle bound values in degrees. Defaults to None.
+            bounds (I360, optional): Angle bound values in degrees. Defaults to None.
         """
         ## Circle radius
         assert radius > 0, "Radius has to be a positive number"

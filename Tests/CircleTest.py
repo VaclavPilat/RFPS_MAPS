@@ -1,7 +1,8 @@
 ## \file
 # Testing Circle implementation
 from Math.Shapes import Circle
-from Math.Data import V3, Interval
+from Math.Data import V3
+from Math.Interval import Interval, I360
 import unittest
 
 
@@ -74,14 +75,14 @@ class CircleTest(unittest.TestCase):
         """Testing vertices generated within bounds
         """
         circle = Circle(radius=1, points=4)
-        self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 360)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT, ))
-        self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 300)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
-        self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 270)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
-        self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 200)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
-        self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 180)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
-        self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 150)).vertices(), (V3.RIGHT, V3.FORWARD, ))
-        self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 90)).vertices(), (V3.RIGHT, V3.FORWARD, ))
-        self.assertTuplesAlmostEqual(circle(bounds=Interval(0, 60)).vertices(), (V3.RIGHT, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 360)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 300)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 270)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 200)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 180)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 150)).vertices(), (V3.RIGHT, V3.FORWARD, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 90)).vertices(), (V3.RIGHT, V3.FORWARD, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 60)).vertices(), (V3.RIGHT, ))
     
     def test_advanced_bounds(self) -> None:
         """Testing advance bound usage
