@@ -1,6 +1,6 @@
 ## \file
 # Implementations of shapes and and their vertex generation
-from Math.Data import V3
+from Math.Vector import V3
 from Math.Interval import I360
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 import math

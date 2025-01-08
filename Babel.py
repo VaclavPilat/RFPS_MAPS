@@ -5,8 +5,9 @@ if __name__ == "__main__":
     directory = os.path.dirname(bpy.data.filepath)
     if not directory in sys.path:
         sys.path.append(directory)
-from Math.Data import V3, Interval
-from Math.Shapes import Circle
+from Math.Vector import V3
+from Math.Interval import I360
+from Math.Shape import Circle
 from Blender.Object import Object
 from Blender.Blender import Blender
 
@@ -118,9 +119,9 @@ class Atrium(Object):
             height (int | float): Floor height
             outer (Circle): Outer circle
         """
-        center = Circle(radius=4, points=32, bounds=Interval(30, -30%360))
+        center = Circle(radius=4, points=32, bounds=I360(30, -30%360))
         self.load(Center, "Central staircase", height=height, outer=center)
-        for bounds in (Interval(0, 180), Interval(180, 360)):
+        for bounds in (I360(0, 180), I360(180, 360)):
             self.load(AtriumFloor, "Atrium floor", height=height, outer=outer(bounds=bounds), inner=center(bounds=bounds))
         #for position in Circle(radius=Math.average(outer.radius, center.radius), points=8.vertices():
         #    self.load(Column, "Atrium pillar", height=3, circle=Circle(0.5, 8, position))

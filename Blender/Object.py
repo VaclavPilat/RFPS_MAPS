@@ -1,6 +1,6 @@
 ## \file
 # Classes for creating objects
-from Math.Data import V3
+from Math.Vector import V3
 from Utils.Decorators import addInitRepr, makeImmutable
 import bpy, bmesh
 
