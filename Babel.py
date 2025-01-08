@@ -65,10 +65,13 @@ class SpiralStairs(Object):
             outer (Circle): Outer circle
             inner (Circle): inner circle
         """
-        outer_vertices, inner_vertices = (x for x in (outer.vertices(), inner.vertices()))
-        outer_edges, inner_edges = (len(x) - 1 for x in (outer_vertices, inner_vertices))
-        steps = inner_edges
-        print(steps)
+        #outer_vertices, inner_vertices = (x for x in (outer.vertices(), inner.vertices()))
+        #outer_edges, inner_edges = (len(x) - 1 for x in (outer_vertices, inner_vertices))
+        #steps = inner_edges
+        #print(steps)
+        # Entrance floor
+        outer_entrance, inner_entrance = (x(bounds=~x.bounds) for x in (outer, inner))
+        self.face(inner_entrance.vertices()[::-1] + outer_entrance.vertices())
 
 
 
