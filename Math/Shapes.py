@@ -1,6 +1,5 @@
 ## \file
 # Implementations of shapes and and their vertex generation
-## \todo Rename file to Shapes
 from Math.Data import V3
 from Math.Interval import I360
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
@@ -35,7 +34,7 @@ class Circle:
         ## Position of the center of the circle
         self.pivot = pivot
         ## Generated circle bounds
-        ## \todo Make it possible to create Circle instances with bounds like (330-30)
+        # \todo Make it possible to create Circle instances with bounds like (330-30)
         self.bounds = bounds
     
     def vertices(self) -> tuple:

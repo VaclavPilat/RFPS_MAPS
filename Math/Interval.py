@@ -43,7 +43,7 @@ class IOperator:
         Returns:
             Interval: Union of this and the other interval
         """
-        pass
+        return IUnion(self, other)
 
     def __str__(self) -> str:
         """Getting string representation of this interval operator
@@ -124,8 +124,6 @@ class IUnion(IOperator):
 
 
 
-@addInitRepr
-@addCopyCall("lower", "upper")
 class Interval(IOperator):
     """Class for an interval
     """
@@ -192,7 +190,7 @@ class I360(Interval):
 
         Args:
             lower (int | float): Unclamped lower bound
-            upper (int | float): Unclamped upepr bound
+            upper (int | float): Unclamped upper bound
 
         Returns:
             IOperator: Interval operator
@@ -201,5 +199,5 @@ class I360(Interval):
         lower, upper = (x if 0 <= x <= 360 else x % 360 for x in (lower, upper))
         if lower < upper:
             return I360(lower, upper)
-        ## \todo fix the 359 number by adding the ability to exclude bound(s)
-        return IUnion(I360(0, upper), I360(lower, 359))
+        ## \todo Fix the 359 number by adding the ability to exclude bound(s)
+        return I360(lower, 359) | I360(0, upper)
