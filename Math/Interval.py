@@ -45,7 +45,7 @@ class IOperator:
         """
         return IUnion(self, other)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         """Getting string representation of this interval operator
 
         Raises:
@@ -100,13 +100,13 @@ class IIntersect(IOperator):
                 return False
         return True
     
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         """Getting string representation of an interval intersection
 
         Returns:
             str: String representation
         """
-        return "(" + " & ".join(self.intervals) + ")"
+        return "(" + " & ".join((str(x) for x in self.intervals)) + ")"
     
     def generate(self, *args, **kwargs) -> list:
         """Generating values from an interval intersection
@@ -152,13 +152,13 @@ class IUnion(IOperator):
                 return True
         return False
     
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         """Getting string representation of an interval union
 
         Returns:
             str: String representation
         """
-        return "(" + " | ".join(self.intervals) + ")"
+        return "(" + " | ".join((str(x) for x in self.intervals)) + ")"
     
     def generate(self, *args, **kwargs) -> list:
         """Generating values from an interval union
@@ -183,6 +183,7 @@ class IUnion(IOperator):
 
 
 
+@addInitRepr
 class Interval(IOperator):
     """Class for an interval
     """
@@ -232,14 +233,6 @@ class Interval(IOperator):
         if number == self.upper:
             return self.includeUpper
         return self.lower <= number <= self.upper
-    
-    def __str__(self) -> str:
-        """Getting string representation of an interval
-
-        Returns:
-            str: String representation of an interval
-        """
-        return f"{'<' if self.includeLower else '('}{self.lower}, {self.upper}{'>' if self.includeUpper else ')'}"
 
 
 
@@ -247,18 +240,16 @@ class I360(Interval):
     """Interval of degrees on a circle
     """
 
-    def __init__(self, lower: int|float = 0, upper: int|float = 360, includeLower: bool = True, includeUpper: bool = True) -> None:
+    def __init__(self, lower: int|float = 0, upper: int|float = 360, *args, **kwargs) -> None:
         """Initialising the interval
 
         Args:
             lower (int | float, optional): Lower bound. Defaults to 0.
             upper (int | float, optional): Upper bound. Defaults to 360.
-            includeLower (bool, optional): Should lower bound be included? Defaults to True.
-            includeUpper (bool, optional): Should upper bound be included? Defaults to True.
         """
         for angle in (lower, upper):
             assert 0 <= angle <= 360, "Both angle bounds have to be between 0 and 360"
-        super().__init__(lower, upper, includeLower, includeUpper)
+        super().__init__(lower, upper, *args, **kwargs)
     
     @staticmethod
     def clamp(lower: int|float, upper: int|float) -> "IOperator":
