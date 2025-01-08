@@ -55,6 +55,17 @@ class IOperator:
             str: String representation of this interval operator
         """
         raise NotImplemented
+    
+    def generate(self, *args, **kwargs) -> list:
+        """Generating values from within the interval
+
+        Raises:
+            NotImplemented: Thrown when not overwritten
+
+        Returns:
+            tuple: List of generated values
+        """
+        raise NotImplemented
 
 
 
@@ -88,6 +99,17 @@ class IIntersect(IOperator):
             str: String representation
         """
         return "(" + " & ".join(self.intervals) + ")"
+    
+    def generate(self, *args, **kwargs) -> list:
+        """Generating values from an interval intersection
+
+        Returns:
+            tuple: List of generated values
+        """
+        values = self.intervals[0].generate(*args, **kwargs)
+        for i in self.intervals[1:]:
+            values = (x for x in values if x in i.generate(*args, **kwargs))
+        return values
 
 
 
@@ -121,6 +143,19 @@ class IUnion(IOperator):
             str: String representation
         """
         return "(" + " | ".join(self.intervals) + ")"
+    
+    def generate(self, *args, **kwargs) -> list:
+        """Generating values from an interval union
+
+        Returns:
+            tuple: List of generated values
+        """
+        values = []
+        for i in self.intervals:
+            for x in i.generate(*args, **kwargs):
+                if x not in values:
+                    values.append(x)
+        return values
 
 
 
@@ -141,10 +176,7 @@ class Interval(IOperator):
             >>> Interval(90, 270)
             Interval(90, 270)
         """
-        try:
-            assert lower < upper, "Lower bound has to be lesser than the upper one"
-        except:
-            print(lower, upper)
+        assert lower <= upper, "Lower bound has to be lesser than or equal to the upper one"
         ## Interval lower bound
         self.lower = lower
         ## Interval upper bound
@@ -195,9 +227,18 @@ class I360(Interval):
         Returns:
             IOperator: Interval operator
         """
-        assert lower < upper, "Lower bound has to be lesser than upper bound"
         lower, upper = (x if 0 <= x <= 360 else x % 360 for x in (lower, upper))
         if lower < upper:
             return I360(lower, upper)
-        ## \todo Fix the 359 number by adding the ability to exclude bound(s)
-        return I360(lower, 359) | I360(0, upper)
+        return I360(lower, 360) | I360(0, upper)
+    
+    def generate(self, points: int) -> list:
+        """Generating points on a circle
+
+        Args:
+            points (int): Number of points to generate
+
+        Returns:
+            tuple: Generated points
+        """
+        return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]

@@ -1,7 +1,7 @@
 ## \file
 # Implementations of shapes and and their vertex generation
 from Math.Vector import V3
-from Math.Interval import I360
+from Math.Interval import IOperator
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 import math
 
@@ -16,14 +16,14 @@ class Circle:
     Made immutable and has an automatic __repr__() implementation by using decorators
     """
 
-    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: I360 = None) -> None:
+    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: IOperator = None) -> None:
         """Initializing an Circle instance
 
         Args:
             radius (int | float, optional): Circle radius, in meters. Defaults to 1.
             points (int, optional): Number of points in circle, should be a power of 2. Defaults to 8.
             pivot (V3, optional): Circle pivot point. Defaults to V3.ZERO.
-            bounds (I360, optional): Angle bound values in degrees. Defaults to None.
+            bounds (IOperator, optional): Angle bound values in degrees. Defaults to None.
         """
         ## Circle radius
         assert radius > 0, "Radius has to be a positive number"
@@ -47,7 +47,7 @@ class Circle:
         if self.bounds is None:
             degrees = [360 * i / self.points for i in range(self.points)]
         else:
-            degrees = [d for d in [360 * i / self.points for i in range(self.points + 1)] if d in self.bounds]
+            degrees = self.bounds.generate(self.points)
         radians = [math.radians(d) for d in degrees]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
     
