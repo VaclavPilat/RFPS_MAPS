@@ -1,6 +1,6 @@
 ## \file
 # Testing Circle implementation
-from Math.Shape import Circle
+from Math.Shapes import Circle
 from Math.Data import V3, Interval
 import unittest
 

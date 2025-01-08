@@ -6,7 +6,7 @@ if __name__ == "__main__":
     if not directory in sys.path:
         sys.path.append(directory)
 from Math.Data import V3, Interval
-from Math.Shape import Circle
+from Math.Shapes import Circle
 from Blender.Object import Object
 from Blender.Blender import Blender
 
