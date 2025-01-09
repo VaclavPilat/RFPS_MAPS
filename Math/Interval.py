@@ -130,7 +130,7 @@ class IIntersect(IOperator):
         """
         values = self.intervals[0].generate(*args, **kwargs)
         for i in self.intervals[1:]:
-            values = (x for x in values if x in i.generate(*args, **kwargs))
+            values = [x for x in values if x in i.generate(*args, **kwargs)]
         return values
     
     def __invert__(self) -> "IUnion":
@@ -305,13 +305,13 @@ class I360(Interval):
         return I360(lower, 360) | I360(0, upper)
     
     def generate(self, points: int) -> list:
-        """Generating points on a circle
+        """Generating angles that belong to the interval
 
         Args:
-            points (int): Number of points to generate
+            points (int): Number of angles to generate
 
         Returns:
-            tuple: Generated points
+            tuple: Generated angle values
         """
         return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]
     
