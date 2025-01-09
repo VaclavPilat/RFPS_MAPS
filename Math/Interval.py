@@ -18,12 +18,12 @@ class IOperator:
             number (int | float): Number value to check
 
         Raises:
-            NotImplemented: Thrown when not overwritten
+            NotImplementedError: Thrown when not overwritten
 
         Returns:
             bool: True if number belongs to the interval
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     def __and__(self, other: "IOperator") -> "IIntersect":
         """Creating an intersection of intervals
@@ -51,31 +51,34 @@ class IOperator:
         """Getting string representation of this interval operator
 
         Raises:
-            NotImplemented: Thrown when not overwritten
+            NotImplementedError: Thrown when not overwritten
 
         Returns:
             str: String representation of this interval operator
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     def generate(self, *args, **kwargs) -> list:
         """Generating values from within the interval
 
         Raises:
-            NotImplemented: Thrown when not overwritten
+            NotImplementedError: Thrown when not overwritten
 
         Returns:
             tuple: List of generated values
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     def __invert__(self) -> "IOperator":
         """Inverting the interval
 
+        Raises:
+            NotImplementedError: Thrown when not overwritten
+
         Returns:
             IOperator: Inverted operator
         """
-        raise NotImplemented
+        raise NotImplementedError
     
     def __add__(self, number: int|float) -> "IOperator":
         """Incrementing an interval by a number
@@ -83,10 +86,13 @@ class IOperator:
         Args:
             number (int | float): Number value to add
 
+        Raises:
+            NotImplementedError: Thrown when not overwritten
+
         Returns:
             IOperator: Incremented interval
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 
