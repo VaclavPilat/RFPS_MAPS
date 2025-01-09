@@ -6,9 +6,9 @@ from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 
 
 @makeImmutable
-class IOperator:
-    """Class for containing common interval operations.
-    Immutable.
+class IOperand:
+    """Abstract class for containing common interval operation definitions.
+    Made immutable by using a decorator.
     """
 
     def __contains__(self, number: int|float) -> bool:
@@ -25,25 +25,25 @@ class IOperator:
         """
         raise NotImplementedError
     
-    def __and__(self, other: "IOperator") -> "IIntersect":
+    def __and__(self, other: "IOperand") -> "IIntersect":
         """Creating an intersection of intervals
 
         Args:
-            other (IOperator): Other interval
+            other (IOperand): Other interval
 
         Returns:
-            Interval: Intersection of this and the other interval
+            IIntersect: Intersection of this and the other interval
         """
         return IIntersect(self, other)
 
-    def __or__(self, other: "IOperator") -> "IUnion":
+    def __or__(self, other: "IOperand") -> "IUnion":
         """Creating a union of intervals
 
         Args:
-            other (IOperator): Other interval
+            other (IOperand): Other interval
 
         Returns:
-            Interval: Union of this and the other interval
+            IUnion: Union of this and the other interval
         """
         return IUnion(self, other)
 
@@ -65,22 +65,22 @@ class IOperator:
             NotImplementedError: Thrown when not overwritten
 
         Returns:
-            tuple: List of generated values
+            list: List of generated values
         """
         raise NotImplementedError
     
-    def __invert__(self) -> "IOperator":
+    def __invert__(self) -> "IOperand":
         """Inverting the interval
 
         Raises:
             NotImplementedError: Thrown when not overwritten
 
         Returns:
-            IOperator: Inverted operator
+            IOperand: Inverted operator
         """
         raise NotImplementedError
     
-    def __add__(self, number: int|float) -> "IOperator":
+    def __add__(self, number: int|float) -> "IOperand":
         """Incrementing an interval by a number
 
         Args:
@@ -90,13 +90,13 @@ class IOperator:
             NotImplementedError: Thrown when not overwritten
 
         Returns:
-            IOperator: Incremented interval
+            IOperand: Incremented interval
         """
         raise NotImplementedError
 
 
 
-class IIntersect(IOperator):
+class IIntersect(IOperand):
     """Class for containing multiple intervals in an intersection
     """
 
@@ -132,7 +132,7 @@ class IIntersect(IOperator):
         """Generating values from an interval intersection
 
         Returns:
-            tuple: List of generated values
+            list: List of generated values
         """
         values = self.intervals[0].generate(*args, **kwargs)
         for i in self.intervals[1:]:
@@ -160,7 +160,7 @@ class IIntersect(IOperator):
 
 
 
-class IUnion(IOperator):
+class IUnion(IOperand):
     """Class for containing multiple intervals in a union
     """
 
@@ -196,7 +196,7 @@ class IUnion(IOperator):
         """Generating values from an interval union
 
         Returns:
-            tuple: List of generated values
+            list: List of generated values
         """
         values = []
         for i in self.intervals:
@@ -227,8 +227,8 @@ class IUnion(IOperator):
 
 
 @addInitRepr
-class Interval(IOperator):
-    """Class for an interval
+class IBase(IOperand):
+    """Abstract class for an interval
     """
 
     def __init__(self, lower: int|float, upper: int|float, includeLower: bool = True, includeUpper: bool = True) -> None:
@@ -239,12 +239,6 @@ class Interval(IOperator):
             upper (int | float): Interval upper bound
             includeLower (bool, optional): Should lower bound be included? Defaults to True.
             includeUpper (bool, optional): Should upper bound be included? Defaults to True.
-        
-        Examples:
-            >>> Interval(0, 100)
-            Interval(0, 100)
-            >>> Interval(90, 270)
-            Interval(90, 270)
         """
         assert lower <= upper, "Lower bound has to be lesser than or equal to the upper one"
         ## Interval lower bound
@@ -279,7 +273,7 @@ class Interval(IOperator):
 
 
 
-class I360(Interval):
+class I360(IBase):
     """Interval of degrees on a circle
     """
 
@@ -295,7 +289,7 @@ class I360(Interval):
         super().__init__(lower, upper, *args, **kwargs)
     
     @staticmethod
-    def clamp(lower: int|float, upper: int|float) -> "IOperator":
+    def clamp(lower: int|float, upper: int|float) -> "IOperand":
         """Creating an interval from unclamped degree values
 
         Args:
@@ -303,7 +297,7 @@ class I360(Interval):
             upper (int | float): Unclamped upper bound
 
         Returns:
-            IOperator: Interval operator
+            IOperand: Interval operator
         """
         lower, upper = (x if 0 <= x <= 360 else x % 360 for x in (lower, upper))
         if lower < upper:
@@ -317,15 +311,15 @@ class I360(Interval):
             points (int): Number of angles to generate
 
         Returns:
-            tuple: Generated angle values
+            list: Generated angle values
         """
         return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]
     
-    def __invert__(self) -> "IOperator":
+    def __invert__(self) -> "IOperand":
         """Inverting an interval
 
         Returns:
-            IOperator: Inverted interval or a union of intervals
+            IOperand: Inverted interval or a union of intervals
         """
         if 0 < self.lower <= self.upper < 360:
             return I360(self.upper, 360, includeLower=not self.includeUpper, includeUpper=False) | I360(0, self.lower, includeLower=True, includeUpper=not self.includeLower)
@@ -333,13 +327,13 @@ class I360(Interval):
             return I360(self.upper, 360, includeLower=not self.includeUpper, includeUpper=not self.includeLower)
         return I360(0, self.lower, includeLower=not self.includeUpper, includeUpper=not self.includeLower)
     
-    def __add__(self, number: int|float) -> "IOperator":
+    def __add__(self, number: int|float) -> "IOperand":
         """Incrementing a circular interval
 
         Args:
             number (int | float): Number to increment by
 
         Returns:
-            IOperator: Either a I360 instance or a union of them
+            IOperand: Either a I360 instance or a union of them
         """
         return self.clamp(self.lower + number, self.upper + number)
