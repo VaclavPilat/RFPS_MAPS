@@ -5,7 +5,6 @@ import unittest
 
 
 
-# \todo Add normal+inversion count test
 class I360Test(unittest.TestCase):
     """Class for testing I360 implementation
     """
@@ -69,3 +68,10 @@ class I360Test(unittest.TestCase):
         self.assertEqual((I360(0, 180) & I360(60, 120)).generate(100), I360(60, 120).generate(100))
         self.assertEqual((I360(90, 270) & I360(180, 360)).generate(100), I360(180, 270).generate(100))
         self.assertEqual((I360(0, 60) & I360(90, 120)).generate(100), I360(0, 0, includeLower=False, includeUpper=False).generate(100))
+    
+    def test_double_inversion(self) -> None:
+        """Testing double inversion
+        """
+        self.assertEqual((~~I360(0, 360)).generate(100), I360(0, 360).generate(100))
+        self.assertEqual((~~I360(0, 180)).generate(100), I360(0, 180).generate(100))
+        self.assertEqual((~~I360(90, 120)).generate(100), I360(90, 120).generate(100))
