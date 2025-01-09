@@ -322,10 +322,10 @@ class I360(Interval):
             IOperator: Inverted interval or a union of intervals
         """
         if 0 < self.lower <= self.upper < 360:
-            return I360(self.upper, 360) | I360(0, self.lower)
+            return I360(self.upper, 360, includeLower=not self.includeUpper, includeUpper=False) | I360(0, self.lower, includeLower=True, includeUpper=not self.includeUpper)
         if self.lower == 0:
-            return I360(self.upper, 360)
-        return I360(0, self.lower)
+            return I360(self.upper, 360, includeLower=not self.includeUpper, includeUpper=not self.includeLower)
+        return I360(0, self.lower, includeLower=not self.includeUpper, includeUpper=not self.includeLower)
     
     def __add__(self, number: int|float) -> "IOperator":
         """Incrementing a circular interval
