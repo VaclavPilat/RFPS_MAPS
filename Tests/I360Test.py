@@ -74,5 +74,6 @@ class I360Test(unittest.TestCase):
         """Testing double inversion
         """
         self.assertEqual((~~I360(0, 360)).generate(20), I360(0, 360).generate(20))
-        self.assertEqual((~~I360(0, 180)).generate(20), I360(0, 180).generate(20))
-        self.assertEqual((~~I360(90, 120)).generate(20), I360(90, 120).generate(20))
+        self.assertEqual((~~I360(0, 180, includeLower=False)).generate(20), I360(0, 180, includeLower=False).generate(20))
+        self.assertEqual((~~I360(90, 120, includeUpper=False)).generate(20), I360(90, 120, includeUpper=False).generate(20))
+        self.assertEqual((~~I360(270, 360, includeLower=False, includeUpper=False)).generate(20), I360(270, 360, includeLower=False, includeUpper=False).generate(20))
