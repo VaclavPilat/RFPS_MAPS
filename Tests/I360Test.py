@@ -87,3 +87,11 @@ class I360Test(unittest.TestCase):
         self.assertIntervalGeneration(~~I360(0, 180, includeLower=False), I360(0, 180, includeLower=False))
         self.assertIntervalGeneration(~~I360(90, 120, includeUpper=False), I360(90, 120, includeUpper=False))
         self.assertIntervalGeneration(~~I360(270, 360, includeLower=False, includeUpper=False), I360(270, 360, includeLower=False, includeUpper=False))
+    
+    def test_addition(self) -> None:
+        """Testing the addition of a number to an interval
+        """
+        self.assertIntervalGeneration(I360(0, 180) + 90, I360(90, 270))
+        self.assertIntervalGeneration(I360(60, 120, includeLower=False) + 0, I360(60, 120, includeLower=False))
+        self.assertIntervalGeneration(I360(0, 360, includeLower=False, includeUpper=False) + 90, I360(90, 360, includeLower=False) | I360(0, 90, includeUpper=False))
+        self.assertIntervalGeneration(I360(90, 120, includeUpper=False) + 360, I360(90, 120, includeUpper=False))

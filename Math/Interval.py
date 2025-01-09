@@ -289,20 +289,22 @@ class I360(IBase):
         super().__init__(lower, upper, *args, **kwargs)
     
     @staticmethod
-    def clamp(lower: int|float, upper: int|float) -> "IOperand":
+    def clamp(lower: int|float, upper: int|float, includeLower: bool = True, includeUpper: bool = True) -> "IOperand":
         """Creating an interval from unclamped degree values
 
         Args:
             lower (int | float): Unclamped lower bound
             upper (int | float): Unclamped upper bound
+            includeLower (bool, optional): Should lower bound be included? Defaults to True.
+            includeUpper (bool, optional): Should upper bound be included? Defaults to True.
 
         Returns:
             IOperand: Interval operator
         """
         lower, upper = (x if 0 <= x <= 360 else x % 360 for x in (lower, upper))
         if lower < upper:
-            return I360(lower, upper)
-        return I360(lower, 360) | I360(0, upper)
+            return I360(lower, upper, includeLower, includeUpper)
+        return I360(lower, 360, includeLower, True) | I360(0, upper, False, includeUpper)
     
     def generate(self, points: int) -> list:
         """Generating angles that belong to the interval
@@ -336,4 +338,4 @@ class I360(IBase):
         Returns:
             IOperand: Either a I360 instance or a union of them
         """
-        return self.clamp(self.lower + number, self.upper + number)
+        return self.clamp(self.lower + number, self.upper + number, self.includeLower, self.includeUpper)
