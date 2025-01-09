@@ -72,6 +72,9 @@ class SpiralStairs(Object):
         # Entrance floor
         outer_entrance, inner_entrance = (x(bounds=~x.bounds) for x in (outer, inner))
         self.face(inner_entrance.vertices()[::-1] + outer_entrance.vertices())
+        # Floor between both staircases
+        outer_floor, inner_floor = (x(bounds=x.bounds + 180) for x in (outer_entrance, inner_entrance))
+        self.face([x(z=x.z + height / 2) for x in inner_floor.vertices()[::-1] + outer_floor.vertices()])
 
 
 
