@@ -1,6 +1,6 @@
 ## \file
 # Testing the implementation of an I360 interval
-from Math.Interval import I360
+from Math.Interval import I360, IOperand
 import unittest
 
 
@@ -40,40 +40,50 @@ class I360Test(unittest.TestCase):
         self.assertEqual(x.generate(2), [180])
         self.assertEqual(x.generate(3), [120, 240])
     
+    def assertIntervalGeneration(self, first: IOperand, second: IOperand, count: int = 30) -> None:
+        """Asserting that both intervals generate the same points
+
+        Args:
+            first (IOperand): First interval
+            second (IOperand): Second interval
+            count (int, optional): Point count. Defaults to 30.
+        """
+        self.assertEqual(first.generate(count), second.generate(count))
+    
     def test_inversion(self) -> None:
         """Testing generation after interval inversion
         """
-        self.assertEqual((~I360()).generate(20), I360(0, 0, includeLower=False, includeUpper=False).generate(20))
-        self.assertEqual((~I360(0, 180, includeLower=False)).generate(20), I360(180, 360, includeLower=False).generate(20))
-        self.assertEqual((~I360(90, 120, includeLower=False, includeUpper=False)).generate(20), (I360(120, 360) | I360(0, 90)).generate(20))
-        self.assertEqual((~I360(90, 120)).generate(20), (I360(120, 360, includeLower=False) | I360(0, 90, includeUpper=False)).generate(20))
+        self.assertIntervalGeneration(~I360(), I360(0, 0, includeLower=False, includeUpper=False))
+        self.assertIntervalGeneration(~I360(0, 180, includeLower=False), I360(180, 360, includeLower=False))
+        self.assertIntervalGeneration(~I360(90, 120, includeLower=False, includeUpper=False), (I360(120, 360) | I360(0, 90)))
+        self.assertIntervalGeneration(~I360(90, 120), I360(120, 360, includeLower=False) | I360(0, 90, includeUpper=False))
     
     def test_clamp(self) -> None:
         """Testing interval clamping by generating items
         """
-        self.assertEqual(I360.clamp(90, 180).generate(20), I360(90, 180).generate(20))
-        self.assertEqual(I360.clamp(0, 360).generate(20), I360(0, 360).generate(20))
-        self.assertEqual(I360.clamp(-30, 30).generate(20), (I360(330, 360) | I360(0, 30)).generate(20))
-        self.assertEqual(I360.clamp(180, 450).generate(20), (I360(180, 360) | I360(0, 90)).generate(20))
+        self.assertIntervalGeneration(I360.clamp(90, 180), I360(90, 180))
+        self.assertIntervalGeneration(I360.clamp(0, 360), I360(0, 360))
+        self.assertIntervalGeneration(I360.clamp(-30, 30), I360(330, 360) | I360(0, 30))
+        self.assertIntervalGeneration(I360.clamp(180, 450), I360(180, 360) | I360(0, 90))
     
     def test_union(self) -> None:
         """Testing unions of intervals
         """
-        self.assertEqual((I360(0, 180) | I360(60, 120)).generate(20), I360(0, 180).generate(20))
-        self.assertEqual((I360(90, 270) | I360(180, 360)).generate(20), I360(90, 360).generate(20))
-        self.assertEqual((I360(0, 60) | I360(90, 120)).generate(20), (I360(0, 60) | I360(90, 120)).generate(20))
+        self.assertIntervalGeneration(I360(0, 180) | I360(60, 120), I360(0, 180))
+        self.assertIntervalGeneration(I360(90, 270) | I360(180, 360), I360(90, 360))
+        self.assertIntervalGeneration(I360(0, 60) | I360(90, 120), I360(0, 60) | I360(90, 120))
     
     def test_intersect(self) -> None:
         """Testing intersections of intervals
         """
-        self.assertEqual((I360(0, 180) & I360(60, 120)).generate(20), I360(60, 120).generate(20))
-        self.assertEqual((I360(90, 270) & I360(180, 360)).generate(20), I360(180, 270).generate(20))
-        self.assertEqual((I360(0, 60) & I360(90, 120)).generate(20), I360(0, 0, includeLower=False, includeUpper=False).generate(20))
+        self.assertIntervalGeneration(I360(0, 180) & I360(60, 120), I360(60, 120))
+        self.assertIntervalGeneration(I360(90, 270) & I360(180, 360), I360(180, 270))
+        self.assertIntervalGeneration(I360(0, 60) & I360(90, 120), I360(0, 0, includeLower=False, includeUpper=False))
     
     def test_double_inversion(self) -> None:
         """Testing double inversion
         """
-        self.assertEqual((~~I360(0, 360)).generate(20), I360(0, 360).generate(20))
-        self.assertEqual((~~I360(0, 180, includeLower=False)).generate(20), I360(0, 180, includeLower=False).generate(20))
-        self.assertEqual((~~I360(90, 120, includeUpper=False)).generate(20), I360(90, 120, includeUpper=False).generate(20))
-        self.assertEqual((~~I360(270, 360, includeLower=False, includeUpper=False)).generate(20), I360(270, 360, includeLower=False, includeUpper=False).generate(20))
+        self.assertIntervalGeneration(~~I360(0, 360), I360(0, 360))
+        self.assertIntervalGeneration(~~I360(0, 180, includeLower=False), I360(0, 180, includeLower=False))
+        self.assertIntervalGeneration(~~I360(90, 120, includeUpper=False), I360(90, 120, includeUpper=False))
+        self.assertIntervalGeneration(~~I360(270, 360, includeLower=False, includeUpper=False), I360(270, 360, includeLower=False, includeUpper=False))
