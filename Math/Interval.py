@@ -7,7 +7,8 @@ from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 
 @makeImmutable
 class IOperator:
-    """Class for containing common interval operations
+    """Class for containing common interval operations.
+    Immutable.
     """
 
     def __contains__(self, number: int|float) -> bool:
@@ -75,6 +76,17 @@ class IOperator:
             IOperator: Inverted operator
         """
         raise NotImplemented
+    
+    def __add__(self, number: int|float) -> "IOperator":
+        """Incrementing an interval by a number
+
+        Args:
+            number (int | float): Number value to add
+
+        Returns:
+            IOperator: Incremented interval
+        """
+        raise NotImplemented
 
 
 
@@ -86,6 +98,7 @@ class IIntersect(IOperator):
         """Initialising an interval intersection
         """
         self.intervals = intervals
+        super().__init__()
     
     def __contains__(self, number: int|float) -> bool:
         """Checking whether a number is within this interval intersection
@@ -127,6 +140,17 @@ class IIntersect(IOperator):
             IUnion: Union of inverted intervals
         """
         return IUnion(*[~i for i in self.intervals])
+    
+    def __add__(self, number: int|float) -> "IIntersect":
+        """Incrementing an intersection of intervals
+
+        Args:
+            number (int | float): Number to increment by
+
+        Returns:
+            IIntersect: Incremented interval intersection
+        """
+        return IIntersect(*[x + number for x in self.intervals])
 
 
 
@@ -138,6 +162,7 @@ class IUnion(IOperator):
         """Initialising an interval union
         """
         self.intervals = intervals
+        super().__init__()
     
     def __contains__(self, number: int|float) -> bool:
         """Checking whether a number is within this interval union
@@ -181,6 +206,17 @@ class IUnion(IOperator):
             IIntersect: Intersection of inverted intervals
         """
         return IIntersect(*[~i for i in self.intervals])
+    
+    def __add__(self, number: int|float) -> "IUnion":
+        """Incrementing a union of intervals
+
+        Args:
+            number (int | float): Number to increment by
+
+        Returns:
+            IUnion: Incremented interval union
+        """
+        return IUnion(*[x + number for x in self.intervals])
 
 
 
@@ -290,3 +326,14 @@ class I360(Interval):
         if self.lower == 0:
             return I360(self.upper, 360)
         return I360(0, self.lower)
+    
+    def __add__(self, number: int|float) -> "IOperator":
+        """Incrementing a circular interval
+
+        Args:
+            number (int | float): Number to increment by
+
+        Returns:
+            IOperator: Either a I360 instance or a union of them
+        """
+        return self.clamp(self.lower + number, self.upper + number)
