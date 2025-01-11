@@ -1,29 +1,15 @@
 ## \file
-# Interval classes.
-# The "I" in front of some class names stands for "Interval"
-from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
+# Implementation of interval classes
+from Utils.Decorators import addCopyCall, makeImmutable, addInitRepr
 
 
 
 @makeImmutable
 class IOperand:
     """Abstract class for containing common interval operation definitions.
+
     Made immutable by using a decorator.
     """
-
-    def __contains__(self, number: int|float) -> bool:
-        """Checking whether a number is within an interval
-
-        Args:
-            number (int | float): Number value to check
-
-        Raises:
-            NotImplementedError: Thrown when not overwritten
-
-        Returns:
-            bool: True if number belongs to the interval
-        """
-        raise NotImplementedError
     
     def __and__(self, other: "IOperand") -> "IIntersect":
         """Creating an intersection of intervals
@@ -46,54 +32,6 @@ class IOperand:
             IUnion: Union of this and the other interval
         """
         return IUnion(self, other)
-
-    def __repr__(self) -> str:
-        """Getting string representation of this interval operator
-
-        Raises:
-            NotImplementedError: Thrown when not overwritten
-
-        Returns:
-            str: String representation of this interval operator
-        """
-        raise NotImplementedError
-    
-    def generate(self, *args, **kwargs) -> list:
-        """Generating values from within the interval
-
-        Raises:
-            NotImplementedError: Thrown when not overwritten
-
-        Returns:
-            list: List of generated values
-        """
-        raise NotImplementedError
-    
-    def __invert__(self) -> "IOperand":
-        """Inverting the interval
-
-        Raises:
-            NotImplementedError: Thrown when not overwritten
-
-        Returns:
-            IOperand: Inverted operator
-        """
-        raise NotImplementedError
-    
-    def __add__(self, number: int|float) -> "IOperand":
-        """Incrementing an interval by a number
-
-        Args:
-            number (int | float): Number value to add
-
-        Raises:
-            NotImplementedError: Thrown when not overwritten
-
-        Returns:
-            IOperand: Incremented interval
-        """
-        raise NotImplementedError
-
 
 
 class IIntersect(IOperand):
@@ -120,6 +58,14 @@ class IIntersect(IOperand):
                 return False
         return True
     
+    def __invert__(self) -> "IUnion":
+        """Inverts an intersection of intervals
+
+        Returns:
+            IUnion: Union of inverted intervals
+        """
+        return IUnion(*[~i for i in self.intervals])
+    
     def __repr__(self) -> str:
         """Getting string representation of an interval intersection
 
@@ -138,25 +84,6 @@ class IIntersect(IOperand):
         for i in self.intervals[1:]:
             values = [x for x in values if x in i.generate(*args, **kwargs)]
         return values
-    
-    def __invert__(self) -> "IUnion":
-        """Inverts an intersection of intervals
-
-        Returns:
-            IUnion: Union of inverted intervals
-        """
-        return IUnion(*[~i for i in self.intervals])
-    
-    def __add__(self, number: int|float) -> "IIntersect":
-        """Incrementing an intersection of intervals
-
-        Args:
-            number (int | float): Number to increment by
-
-        Returns:
-            IIntersect: Incremented interval intersection
-        """
-        return IIntersect(*[x + number for x in self.intervals])
 
 
 
@@ -184,6 +111,14 @@ class IUnion(IOperand):
                 return True
         return False
     
+    def __invert__(self) -> "IIntersect":
+        """Inverts a union of intervals
+
+        Returns:
+            IIntersect: Intersection of inverted intervals
+        """
+        return IIntersect(*[~i for i in self.intervals])
+    
     def __repr__(self) -> str:
         """Getting string representation of an interval union
 
@@ -204,107 +139,71 @@ class IUnion(IOperand):
                 if x not in values:
                     values.append(x)
         return values
-    
-    def __invert__(self) -> "IIntersect":
-        """Inverts a union of intervals
-
-        Returns:
-            IIntersect: Intersection of inverted intervals
-        """
-        return IIntersect(*[~i for i in self.intervals])
-    
-    def __add__(self, number: int|float) -> "IUnion":
-        """Incrementing a union of intervals
-
-        Args:
-            number (int | float): Number to increment by
-
-        Returns:
-            IUnion: Incremented interval union
-        """
-        return IUnion(*[x + number for x in self.intervals])
 
 
 
 @addInitRepr
-class IBase(IOperand):
-    """Abstract class for an interval
+@addCopyCall("start", "end", "openStart", "openEnd")
+class I360(IOperand):
+    """Class for representing a circular interval from 0 to 360 degrees
+
+    This class is made immutable and has automatic __repr__ and __call__ using decorators.
     """
 
-    def __init__(self, lower: int|float, upper: int|float, includeLower: bool = True, includeUpper: bool = True) -> None:
-        """Initializing the interval
+    def __init__(self, start: int|float = 0, end: int|float = 360, openStart: bool = False, openEnd: bool = False) -> None:
+        """Initialising a circular interval
 
         Args:
-            lower (int | float): Interval lower bound
-            upper (int | float): Interval upper bound
-            includeLower (bool, optional): Should lower bound be included? Defaults to True.
-            includeUpper (bool, optional): Should upper bound be included? Defaults to True.
+            start (int | float, optional): Start value. Defaults to 0.
+            end (int | float, opetional): End value. Defaults to 360.
+            openStart (bool, optional): Should the start of the interval be open? Defaults to False.
+            openEnd (bool, optional): Should the end of the interval be open? Defaults to False.
         """
-        assert lower <= upper, "Lower bound has to be lesser than or equal to the upper one"
-        ## Interval lower bound
-        self.lower = lower
-        ## Interval upper bound
-        self.upper = upper
-        ## Should the lower bound be included?
-        self.includeLower = includeLower
-        ## Should the upper bound be included?
-        self.includeUpper = includeUpper
+        assert 0 <= start <= end <= 360, "Both bounds have to be between 0 and 360, start cannot be greater than end"
+        ## Interval start bound value
+        self.start = start
+        ## Interval end bound value
+        self.end = end
+        ## Is interval open at start?
+        self.openStart = openStart
+        ## Is interval open at end?
+        self.openEnd = openEnd
+        ## Is the interval empty?
+        self.isEmpty = start == end and openStart and openEnd
+        ## Is the interval the whole circle?
+        self.isFull = start == 0 and end == 360 and (not openStart or not openEnd)
+        super().__init__()
     
     def __contains__(self, number: int|float) -> bool:
-        """Checking whether a number is within this interval
+        """Checking whether a number belongs to the interval
 
         Args:
             number (int | float): Number value to check
 
         Returns:
-            bool: True if the number is within the interval bounds
-        
-        Examples:
-            >>> 50 in Interval(0, 100)
-            True
-            >>> 180 in Interval(0, 90)
-            False
+            bool: True if the number within interval bounds
         """
-        if number == self.lower:
-            return self.includeLower
-        if number == self.upper:
-            return self.includeUpper
-        return self.lower <= number <= self.upper
-
-
-
-class I360(IBase):
-    """Interval of degrees on a circle
-    """
-
-    def __init__(self, lower: int|float = 0, upper: int|float = 360, *args, **kwargs) -> None:
-        """Initialising the interval
-
-        Args:
-            lower (int | float, optional): Lower bound. Defaults to 0.
-            upper (int | float, optional): Upper bound. Defaults to 360.
-        """
-        for angle in (lower, upper):
-            assert 0 <= angle <= 360, "Both angle bounds have to be between 0 and 360"
-        super().__init__(lower, upper, *args, **kwargs)
+        if self.isEmpty:
+            return False
+        startCondition = (self.start < number) if self.openStart else (self.start <= number)
+        endCondition = (number < self.end) if self.openEnd else (number <= self.end)
+        return startCondition and endCondition
     
-    @staticmethod
-    def clamp(lower: int|float, upper: int|float, includeLower: bool = True, includeUpper: bool = True) -> "IOperand":
-        """Creating an interval from unclamped degree values
-
-        Args:
-            lower (int | float): Unclamped lower bound
-            upper (int | float): Unclamped upper bound
-            includeLower (bool, optional): Should lower bound be included? Defaults to True.
-            includeUpper (bool, optional): Should upper bound be included? Defaults to True.
+    def __invert__(self) -> "IOperand":
+        """Inverting current interval
 
         Returns:
-            IOperand: Interval operator
+            IOperand: An interval that covers the rest of the circle
         """
-        lower, upper = (x if 0 <= x <= 360 else x % 360 for x in (lower, upper))
-        if lower < upper:
-            return I360(lower, upper, includeLower, includeUpper)
-        return I360(lower, 360, includeLower, True) | I360(0, upper, False, includeUpper)
+        if self.isEmpty:
+            return I360(0, 360, False, False)
+        if self.isFull:
+            return I360(0, 0, True, True)
+        if self.start == 0:
+            return I360(self.end, 360, not self.openEnd, not self.openStart)
+        if self.end == 360:
+            return I360(0, self.start, not self.openEnd, not self.openStart)
+        return I360(self.end, 360, not self.openEnd) | I360(0, self.start, False, not self.openStart)
     
     def generate(self, points: int) -> list:
         """Generating angles that belong to the interval
@@ -316,26 +215,10 @@ class I360(IBase):
             list: Generated angle values
         """
         return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]
-    
-    def __invert__(self) -> "IOperand":
-        """Inverting an interval
 
-        Returns:
-            IOperand: Inverted interval or a union of intervals
-        """
-        if 0 < self.lower <= self.upper < 360:
-            return I360(self.upper, 360, includeLower=not self.includeUpper, includeUpper=False) | I360(0, self.lower, includeLower=True, includeUpper=not self.includeLower)
-        if self.lower == 0:
-            return I360(self.upper, 360, includeLower=not self.includeUpper, includeUpper=not self.includeLower)
-        return I360(0, self.lower, includeLower=not self.includeUpper, includeUpper=not self.includeLower)
-    
-    def __add__(self, number: int|float) -> "IOperand":
-        """Incrementing a circular interval
 
-        Args:
-            number (int | float): Number to increment by
 
-        Returns:
-            IOperand: Either a I360 instance or a union of them
-        """
-        return self.clamp(self.lower + number, self.upper + number, self.includeLower, self.includeUpper)
+## An enpty interval, equals to I360(0, 0, False, False)
+I360.EMPTY = I360(0, 0)
+## A full interval, equals to I360(0, 360, True, True)
+I360.FULL = I360(0, 360, True, True)
