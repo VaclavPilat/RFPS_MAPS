@@ -1,5 +1,5 @@
 ## \file
-# Testing autoRepr functionality
+# Testing addInitRepr functionality
 from Utils.Decorators import addInitRepr
 import unittest
 

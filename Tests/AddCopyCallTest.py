@@ -1,5 +1,5 @@
 ## \file
-# Testing the logic of the autoCall decorator
+# Testing the logic of the addCopyCall decorator
 from Utils.Decorators import addCopyCall
 import unittest
 

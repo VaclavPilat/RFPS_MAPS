@@ -1,5 +1,5 @@
 ## \file
-# Implementations of data classes
+# Implementations of vector classes
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 
 
