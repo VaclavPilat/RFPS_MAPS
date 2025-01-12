@@ -47,9 +47,10 @@ class CenterWall(Object):
         # Inner wall
         for face in inner.cylinder(height, closed=False):
             self.face(face, inverted=True)
-        # Walls between outer and inner
-        #self.face([outer_upper[0], inner_upper[0], inner_lower[0], outer_lower[0]])
-        #self.face([inner_upper[-1], outer_upper[-1], outer_lower[-1], inner_lower[-1]])
+        # Entrance floor
+        outerPoints, innerPoints = ([x for x in circle(bounds=I360(openEnd=True)).vertices() if x not in circle.vertices()[1:-1]] for circle in (outer, inner))
+        outerPoints, innerPoints = ([x for x in points if x.x < 0] + [x for x in points if x.x >= 0] for points in (outerPoints, innerPoints))
+        self.face(outerPoints + innerPoints[::-1])
 
 
 
