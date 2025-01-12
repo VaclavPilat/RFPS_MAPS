@@ -80,11 +80,15 @@ class SpiralStairs(Object):
             self.face([x(z=i / stepCount * height) for x in rightOuterPoints[i:i+2] + rightInnerPoints[i:i+2][::-1]])
             stepBound = [rightInnerPoints[i+1], rightOuterPoints[i+1]]
             self.face([x(z=i / stepCount * height) for x in stepBound] + [x(z=(i+1) / stepCount * height) for x in stepBound[::-1]])
-        # Addind the middle floor
-        middleInnerPoints = [x for x in inner(bounds=I360()).vertices() if x not in leftInnerPoints[1:-1] and x not in rightInnerPoints[1:-1]]
-        middleOuterPoints = [x for x in outer(bounds=I360()).vertices() if x not in leftOuterPoints[1:-1] and x not in rightOuterPoints[1:-1]]
+        # Adding the middle floor
+        middleInnerPoints = [x for x in inner(bounds=I360(openEnd=True)).vertices() if x not in leftInnerPoints[1:-1] and x not in rightInnerPoints[1:-1]]
+        middleOuterPoints = [x for x in outer(bounds=I360(openEnd=True)).vertices() if x not in leftOuterPoints[1:-1] and x not in rightOuterPoints[1:-1]]
         forwardInnerPoints, forwardOuterPoints = ([x for x in points if x.y > 0] for points in (middleInnerPoints, middleOuterPoints))
         self.face([x(z=height / 2) for x in forwardOuterPoints + forwardInnerPoints[::-1]])
+        # Adding the entrance floor
+        backwardInnerPoints = [x for x in middleInnerPoints if x.y < 0 and x.x < 0] + [x for x in middleInnerPoints if x.y < 0 and x.x >= 0]
+        backwardOuterPoints = [x for x in middleOuterPoints if x.y < 0 and x.x < 0] + [x for x in middleOuterPoints if x.y < 0 and x.x >= 0]
+        self.face(backwardOuterPoints + backwardInnerPoints[::-1])
 
 
 
