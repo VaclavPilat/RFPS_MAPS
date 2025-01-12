@@ -84,6 +84,17 @@ class IIntersect(IOperand):
         for i in self.intervals[1:]:
             values = [x for x in values if x in i.generate(*args, **kwargs)]
         return values
+    
+    def __add__(self, number: int|float) -> "IIntersect":
+        """Incrementing an intersection of intervals
+
+        Args:
+            number (int | float): Number to increment by
+
+        Returns:
+            IIntersect: Incremented interval intersection
+        """
+        return IIntersect(*[x + number for x in self.intervals])
 
 
 
@@ -139,6 +150,17 @@ class IUnion(IOperand):
                 if x not in values:
                     values.append(x)
         return values
+    
+    def __add__(self, number: int|float) -> "IUnion":
+        """Incrementing a union of intervals
+
+        Args:
+            number (int | float): Number to increment by
+
+        Returns:
+            IUnion: Incremented interval union
+        """
+        return IUnion(*[x + number for x in self.intervals])
 
 
 
