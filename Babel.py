@@ -65,12 +65,21 @@ class SpiralStairs(Object):
             outer (Circle): Outer circle
             inner (Circle): inner circle
         """
+        # Getting step points
         innerIntersect, outerIntersect = (x(bounds=x.bounds & x.bounds + 180) for x in (inner, outer))
         innerPoints, outerPoints = (x.vertices() for x in (innerIntersect, outerIntersect))
         leftInnerPoints, leftOuterPoints = ([x for x in points if x.x < 0] for points in (innerPoints, outerPoints))
         rightInnerPoints, rightOuterPoints = ([x for x in points if x.x > 0] for points in (innerPoints, outerPoints))
-        self.face(leftOuterPoints + leftInnerPoints[::-1])
-        self.face(rightOuterPoints + rightInnerPoints[::-1])
+        # Adding step faces
+        stepCount = (len(leftInnerPoints) - 1) * 2
+        for i in range(stepCount // 2):
+            self.face([x(z=(i + stepCount // 2) / stepCount * height) for x in leftOuterPoints[i:i+2] + leftInnerPoints[i:i+2][::-1]])
+            stepBound = [leftInnerPoints[i+1], leftOuterPoints[i+1]]
+            self.face([x(z=(i+stepCount//2) / stepCount * height) for x in stepBound] + [x(z=(i+1+stepCount//2) / stepCount * height) for x in stepBound[::-1]])
+        for i in range(stepCount // 2):
+            self.face([x(z=i / stepCount * height) for x in rightOuterPoints[i:i+2] + rightInnerPoints[i:i+2][::-1]])
+            stepBound = [rightInnerPoints[i+1], rightOuterPoints[i+1]]
+            self.face([x(z=i / stepCount * height) for x in stepBound] + [x(z=(i+1) / stepCount * height) for x in stepBound[::-1]])
 
 
 
