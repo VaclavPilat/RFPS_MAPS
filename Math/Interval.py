@@ -19,6 +19,12 @@ class IOperand:
 
         Returns:
             IIntersect: Intersection of this and the other interval
+        
+        Examples:
+            >>> I360(0, 180) & I360(75, 135)
+            (I360(0, 180) & I360(75, 135))
+            >>> I360(90, 120) & I360(150, 180)
+            (I360(90, 120) & I360(150, 180))
         """
         return IIntersect(self, other)
 
@@ -30,8 +36,15 @@ class IOperand:
 
         Returns:
             IUnion: Union of this and the other interval
+        
+        Examples:
+            >>> I360(0, 90) | I360(60, 120)
+            (I360(0, 90) | I360(60, 120))
+            >>> I360(0, 120) | I360(180, 270)
+            (I360(0, 120) | I360(180, 270))
         """
         return IUnion(self, other)
+
 
 
 class IIntersect(IOperand):
@@ -40,7 +53,12 @@ class IIntersect(IOperand):
 
     def __init__(self, *intervals) -> None:
         """Initialising an interval intersection
+
+        Examples:
+            >>> IIntersect(I360(0, 90), I360(60, 120), I360(90, 120))
+            (I360(0, 90) & I360(60, 120) & I360(90, 120))
         """
+        ## Intervals that are a part of the intersection
         self.intervals = intervals
         super().__init__()
     
@@ -52,6 +70,12 @@ class IIntersect(IOperand):
 
         Returns:
             bool: True if the number is within all intervals
+        
+        Examples:
+            >>> 60 in I360(0, 180) & I360(75, 135)
+            False
+            >>> 120 in I360(0, 180) & I360(75, 135)
+            True
         """
         for interval in self.intervals:
             if number not in interval:
@@ -63,6 +87,10 @@ class IIntersect(IOperand):
 
         Returns:
             IUnion: Union of inverted intervals
+        
+        Examples:
+            >>> ~(I360(60, 120) & I360(90, 180))
+            ((I360(120, 360, True) | I360(0, 60, False, True)) | (I360(180, 360, True) | I360(0, 90, False, True)))
         """
         return IUnion(*[~i for i in self.intervals])
     
@@ -71,6 +99,10 @@ class IIntersect(IOperand):
 
         Returns:
             str: String representation
+        
+        Examples:
+            >>> repr(I360(0, 120) | I360(180, 270))
+            '(I360(0, 120) | I360(180, 270))'
         """
         return "(" + " & ".join((str(x) for x in self.intervals)) + ")"
     
@@ -93,6 +125,10 @@ class IIntersect(IOperand):
 
         Returns:
             IIntersect: Incremented interval intersection
+        
+        Examples:
+            >>> (I360(0, 180) & I360(75, 135)) + 180
+            (I360(180, 360, False, False) & I360(255, 315, False, False))
         """
         return IIntersect(*[x + number for x in self.intervals])
 
@@ -104,7 +140,12 @@ class IUnion(IOperand):
 
     def __init__(self, *intervals) -> None:
         """Initialising an interval union
+
+        Examples:
+            >>> IUnion(I360(0, 90), I360(60, 120), I360(90, 120))
+            (I360(0, 90) | I360(60, 120) | I360(90, 120))
         """
+        ## Intervals that are a part of a union
         self.intervals = intervals
         super().__init__()
     
@@ -116,6 +157,12 @@ class IUnion(IOperand):
 
         Returns:
             bool: True if the number is within at least one of the intervals
+        
+        Examples:
+            >>> 60 in I360(0, 180) | I360(75, 135)
+            True
+            >>> 200 in I360(0, 180) | I360(75, 135)
+            False
         """
         for interval in self.intervals:
             if number in interval:
@@ -127,6 +174,10 @@ class IUnion(IOperand):
 
         Returns:
             IIntersect: Intersection of inverted intervals
+        
+        Examples:
+            >>> ~(I360(0, 180) | I360(75, 135))
+            (I360(180, 360, True, True) & (I360(135, 360, True) | I360(0, 75, False, True)))
         """
         return IIntersect(*[~i for i in self.intervals])
     
@@ -135,6 +186,10 @@ class IUnion(IOperand):
 
         Returns:
             str: String representation
+        
+        Examples:
+            >>> repr(I360(0, 180) | I360(75, 135))
+            '(I360(0, 180) | I360(75, 135))'
         """
         return "(" + " | ".join((str(x) for x in self.intervals)) + ")"
     
@@ -159,6 +214,10 @@ class IUnion(IOperand):
 
         Returns:
             IUnion: Incremented interval union
+        
+        Examples:
+            >>> (I360(0, 180) | I360(75, 135)) + 90
+            (I360(90, 270, False, False) | I360(165, 225, False, False))
         """
         return IUnion(*[x + number for x in self.intervals])
 
@@ -177,9 +236,15 @@ class I360(IOperand):
 
         Args:
             start (int | float, optional): Start value. Defaults to 0.
-            end (int | float, opetional): End value. Defaults to 360.
+            end (int | float, optional): End value. Defaults to 360.
             openStart (bool, optional): Should the start of the interval be open? Defaults to False.
             openEnd (bool, optional): Should the end of the interval be open? Defaults to False.
+        
+        Examples:
+            >>> I360(0, 90)
+            I360(0, 90)
+            >>> I360(120, 240, True, True)
+            I360(120, 240, True, True)
         """
         assert 0 <= start <= end <= 360, "Both bounds have to be between 0 and 360, start cannot be greater than end"
         ## Interval start bound value
@@ -204,6 +269,14 @@ class I360(IOperand):
 
         Returns:
             bool: True if the number within interval bounds
+        
+        Examples:
+            >>> 90 in I360(0, 90)
+            True
+            >>> 90 in I360(0, 90, openEnd=True)
+            False
+            >>> 180 in I360(0, 90)
+            False
         """
         if self.isEmpty:
             return False
@@ -216,6 +289,12 @@ class I360(IOperand):
 
         Returns:
             IOperand: An interval that covers the rest of the circle
+        
+        Examples:
+            >>> ~I360(60, 180)
+            (I360(180, 360, True) | I360(0, 60, False, True))
+            >>> ~I360(0, 120)
+            I360(120, 360, True, True)
         """
         if self.isEmpty:
             return I360(0, 360, False, False)
@@ -264,6 +343,12 @@ class I360(IOperand):
 
         Returns:
             IOperand: Either a I360 instance or a union of them
+        
+        Examples:
+            >>> I360(0, 120) + 180
+            I360(180, 300, False, False)
+            >>> I360(300, 330) + 120
+            I360(60, 90, False, False)
         """
         return self.clamp(self.start + number, self.end + number, self.openStart, self.openEnd)
 
