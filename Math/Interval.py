@@ -215,6 +215,35 @@ class I360(IOperand):
             list: Generated angle values
         """
         return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]
+    
+    @staticmethod
+    def clamp(start: int|float, end: int|float, openStart: bool = False, openEnd: bool = False) -> "IOperand":
+        """Creating an interval from unclamped degree values
+
+        Args:
+            start (int | float): Unclamped start value
+            end (int | float): Unclamped end value
+            openStart (bool, optional): Should the start of the interval be open? Defaults to False.
+            openEnd (bool, optional): Should the end of the interval be open? Defaults to False.
+
+        Returns:
+            IOperand: Interval operator
+        """
+        start, end = (x if 0 <= x <= 360 else x % 360 for x in (start, end))
+        if start < end:
+            return I360(start, end, openStart, openEnd)
+        return I360(start, 360, openStart, True) | I360(0, end, False, openEnd)
+    
+    def __add__(self, number: int|float) -> "IOperand":
+        """Incrementing a circular interval
+
+        Args:
+            number (int | float): Number to increment by
+
+        Returns:
+            IOperand: Either a I360 instance or a union of them
+        """
+        return self.clamp(self.start + number, self.end + number, self.openStart, self.openEnd)
 
 
 
