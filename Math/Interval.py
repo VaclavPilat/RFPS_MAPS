@@ -106,15 +106,24 @@ class IIntersect(IOperand):
         """
         return "(" + " & ".join((str(x) for x in self.intervals)) + ")"
     
-    def generate(self, *args, **kwargs) -> list:
+    def __getitem__(self, points: int) -> list:
         """Generating values from an interval intersection
+
+        Args:
+            points (int): Number of values to generate
 
         Returns:
             list: List of generated values
+        
+        Examples:
+            >>> (I360(0, 180) & I360(75, 135))[16]
+            [90.0, 112.5, 135.0]
+            >>> (I360(0, 90) & I360(120, 180))[36]
+            []
         """
-        values = self.intervals[0].generate(*args, **kwargs)
+        values = self.intervals[0][points]
         for i in self.intervals[1:]:
-            values = [x for x in values if x in i.generate(*args, **kwargs)]
+            values = [x for x in values if x in i[points]]
         return values
     
     def __add__(self, number: int|float) -> "IIntersect":
@@ -193,15 +202,24 @@ class IUnion(IOperand):
         """
         return "(" + " | ".join((str(x) for x in self.intervals)) + ")"
     
-    def generate(self, *args, **kwargs) -> list:
+    def __getitem__(self, points: int) -> list:
         """Generating values from an interval union
+
+        Args:
+            points (int): Number of values to generate
 
         Returns:
             list: List of generated values
+        
+        Examples:
+            >>> (I360(0, 180) | I360(75, 135))[8]
+            [0.0, 45.0, 90.0, 135.0, 180.0]
+            >>> (I360(0, 60) | I360(90, 135))[16]
+            [0.0, 22.5, 45.0, 90.0, 112.5, 135.0]
         """
         values = []
         for i in self.intervals:
-            for x in i.generate(*args, **kwargs):
+            for x in i[points]:
                 if x not in values:
                     values.append(x)
         return values
@@ -306,7 +324,7 @@ class I360(IOperand):
             return I360(0, self.start, not self.openEnd, not self.openStart)
         return I360(self.end, 360, not self.openEnd) | I360(0, self.start, False, not self.openStart)
     
-    def generate(self, points: int) -> list:
+    def __getitem__(self, points: int) -> list:
         """Generating angles that belong to the interval
 
         Args:
@@ -314,6 +332,14 @@ class I360(IOperand):
 
         Returns:
             list: Generated angle values
+        
+        Examples:
+            >>> I360(0, 90)[16]
+            [0.0, 22.5, 45.0, 67.5, 90.0]
+            >>> I360(0, 180, True)[6]
+            [60.0, 120.0, 180.0]
+            >>> I360(openEnd=True)[4]
+            [0.0, 90.0, 180.0, 270.0]
         """
         return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]
     

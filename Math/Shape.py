@@ -43,7 +43,7 @@ class Circle:
             tuple: Tuple of generated vertex positions
         """
         ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
-        radians = [math.radians(d) for d in self.bounds.generate(self.points)]
+        radians = [math.radians(d) for d in self.bounds[self.points]]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
     
     def cylinder(self, height: int|float, closed: bool = True):
