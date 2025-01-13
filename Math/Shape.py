@@ -36,13 +36,13 @@ class Circle:
         ## Generated circle bounds
         self.bounds = bounds
     
+    ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
     def vertices(self) -> tuple:
         """Generating vertex points on a circle
 
         Returns:
             tuple: Tuple of generated vertex positions
         """
-        ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
         radians = [math.radians(d) for d in self.bounds[self.points]]
         return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
     

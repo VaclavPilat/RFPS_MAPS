@@ -249,6 +249,7 @@ class I360(IOperand):
     This class is made immutable and has automatic __repr__ and __call__ using decorators.
     """
 
+    ## \note Removal of the IUnion wrapper would result in I360.__init__ being called twice, which addInitRepr decorator does not allow
     def __new__(cls, start: int|float = 0, end: int|float = 360, openStart: bool = False, openEnd: bool = False) -> "IOperand":
         """Creating a new instance by clamping passed values
 
@@ -273,7 +274,6 @@ class I360(IOperand):
             return super().__new__(cls)
         start, end = (x if 0 <= x <= 360 else x % 360 for x in (start, end))
         if start < end:
-            ## \note Removal of the IUnion wrapper would result in I360.__init__ being called twice, which addInitRepr decorator does not allow
             return IUnion(I360(start, end, openStart, openEnd))
         return I360(start, 360, openStart, True) | I360(0, end, False, openEnd)
         
