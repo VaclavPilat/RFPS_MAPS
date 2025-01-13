@@ -59,12 +59,12 @@ class I360Test(unittest.TestCase):
         self.assertIntervalGeneration(~I360(90, 120), I360(120, 360, True) | I360(0, 90, False, True))
     
     def test_clamp(self) -> None:
-        """Testing interval clamping by generating items
+        """Testing interval value clamping by generating items
         """
-        self.assertIntervalGeneration(I360.clamp(90, 180), I360(90, 180))
-        self.assertIntervalGeneration(I360.clamp(0, 360), I360(0, 360))
-        self.assertIntervalGeneration(I360.clamp(-30, 30), I360(330, 360) | I360(0, 30))
-        self.assertIntervalGeneration(I360.clamp(180, 450), I360(180, 360) | I360(0, 90))
+        self.assertIntervalGeneration(I360(90, 180), I360(90, 180))
+        self.assertIntervalGeneration(I360(0, 360), I360(0, 360))
+        self.assertIntervalGeneration(I360(-30, 30), I360(330, 360) | I360(0, 30))
+        self.assertIntervalGeneration(I360(180, 450), I360(180, 360) | I360(0, 90))
     
     def test_union(self) -> None:
         """Testing unions of intervals

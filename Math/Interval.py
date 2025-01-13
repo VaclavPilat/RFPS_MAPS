@@ -249,6 +249,35 @@ class I360(IOperand):
     This class is made immutable and has automatic __repr__ and __call__ using decorators.
     """
 
+    def __new__(cls, start: int|float = 0, end: int|float = 360, openStart: bool = False, openEnd: bool = False) -> "IOperand":
+        """Creating a new instance by clamping passed values
+
+        Args:
+            start (int | float, optional): Start valie. Defaults to 0.
+            end (int | float, optional): End value. Defaults to 360.
+            openStart (bool, optional): Should the start of the interval be open? Defaults to False.
+            openEnd (bool, optional): Should the end of the interval be open? Defaults to False.
+
+        Returns:
+            IOperand: Either a I360 instance or a union of them
+        
+        Examples:
+            >>> I360(-30, 30)
+            (I360(330, 360, False, True) | I360(0, 30, False, False))
+            >>> I360(0, 90)
+            I360(0, 90)
+            >>> I360(450, 630)
+            (I360(90, 270, False, False))
+        """
+        if 0 <= start <= end <= 360:
+            return super().__new__(cls)
+        start, end = (x if 0 <= x <= 360 else x % 360 for x in (start, end))
+        if start < end:
+            ## \note Removal of the IUnion wrapper would result in I360.__init__ being called twice, which addInitRepr decorator does not allow
+            return IUnion(I360(start, end, openStart, openEnd))
+        return I360(start, 360, openStart, True) | I360(0, end, False, openEnd)
+        
+
     def __init__(self, start: int|float = 0, end: int|float = 360, openStart: bool = False, openEnd: bool = False) -> None:
         """Initialising a circular interval
 
@@ -343,24 +372,6 @@ class I360(IOperand):
         """
         return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]
     
-    @staticmethod
-    def clamp(start: int|float, end: int|float, openStart: bool = False, openEnd: bool = False) -> "IOperand":
-        """Creating an interval from unclamped degree values
-
-        Args:
-            start (int | float): Unclamped start value
-            end (int | float): Unclamped end value
-            openStart (bool, optional): Should the start of the interval be open? Defaults to False.
-            openEnd (bool, optional): Should the end of the interval be open? Defaults to False.
-
-        Returns:
-            IOperand: Interval operator
-        """
-        start, end = (x if 0 <= x <= 360 else x % 360 for x in (start, end))
-        if start < end:
-            return I360(start, end, openStart, openEnd)
-        return I360(start, 360, openStart, True) | I360(0, end, False, openEnd)
-    
     def __add__(self, number: int|float) -> "IOperand":
         """Incrementing a circular interval
 
@@ -376,7 +387,7 @@ class I360(IOperand):
             >>> I360(300, 330) + 120
             I360(60, 90, False, False)
         """
-        return self.clamp(self.start + number, self.end + number, self.openStart, self.openEnd)
+        return I360(self.start + number, self.end + number, self.openStart, self.openEnd)
 
 
 

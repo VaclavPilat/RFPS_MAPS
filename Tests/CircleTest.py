@@ -90,9 +90,9 @@ class CircleTest(unittest.TestCase):
         """Testing advance bound usage
         """
         circle = Circle(points=4)
-        self.assertTuplesAlmostEqual(circle(bounds=I360.clamp(90, 360)).vertices(), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
-        self.assertTuplesAlmostEqual(circle(bounds=I360.clamp(180, 270)).vertices(), (V3.LEFT, V3.BACKWARD))
-        self.assertTuplesAlmostEqual(circle(bounds=I360.clamp(-90, 90)).vertices(), (V3.BACKWARD, V3.RIGHT, V3.FORWARD))
-        self.assertTuplesAlmostEqual(circle(bounds=I360.clamp(-180, -90)).vertices(), (V3.LEFT, V3.BACKWARD))
-        self.assertTuplesAlmostEqual(circle(bounds=I360.clamp(360, 450)).vertices(), (V3.RIGHT, V3.FORWARD))
-        self.assertTuplesAlmostEqual(circle(bounds=I360.clamp(450, 720)).vertices(), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(90, 360)).vertices(), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(180, 270)).vertices(), (V3.LEFT, V3.BACKWARD))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(-90, 90)).vertices(), (V3.BACKWARD, V3.RIGHT, V3.FORWARD))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(-180, -90)).vertices(), (V3.LEFT, V3.BACKWARD))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(360, 450)).vertices(), (V3.RIGHT, V3.FORWARD))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(450, 720)).vertices(), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
