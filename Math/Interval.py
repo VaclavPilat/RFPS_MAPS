@@ -327,9 +327,13 @@ class I360(IOperand):
         """
         if self.isEmpty:
             return False
-        startCondition = (self.start < number) if self.openStart else (self.start <= number)
-        endCondition = (number < self.end) if self.openEnd else (number <= self.end)
-        return startCondition and endCondition
+        if number == self.start and not self.openStart:
+            return True
+        if number == self.end and not self.openEnd:
+            if self.start == 0 and self.end == 360:
+                return self.openEnd
+            return True
+        return self.start < number < self.end
     
     def __invert__(self) -> "IOperand":
         """Inverting current interval

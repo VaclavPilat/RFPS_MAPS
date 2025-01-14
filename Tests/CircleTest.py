@@ -77,7 +77,7 @@ class CircleTest(unittest.TestCase):
         """Testing vertices generated within bounds
         """
         circle = Circle(radius=1, points=4)
-        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 360)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT, ))
+        self.assertTuplesAlmostEqual(circle(bounds=I360(0, 360)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
         self.assertTuplesAlmostEqual(circle(bounds=I360(0, 300)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
         self.assertTuplesAlmostEqual(circle(bounds=I360(0, 270)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
         self.assertTuplesAlmostEqual(circle(bounds=I360(0, 200)).vertices(), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
