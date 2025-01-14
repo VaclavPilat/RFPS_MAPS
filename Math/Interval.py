@@ -330,7 +330,7 @@ class I360(IOperand):
         if number == self.start and not self.openStart:
             return True
         if number == self.end and not self.openEnd:
-            if self.start == 0 and self.end == 360:
+            if self.isFull:
                 return self.openEnd
             return True
         return self.start < number < self.end
@@ -391,6 +391,8 @@ class I360(IOperand):
             >>> I360(300, 330) + 120
             I360(60, 90, False, False)
         """
+        if self.isEmpty or self.isFull:
+            return self
         return I360(self.start + number, self.end + number, self.openStart, self.openEnd)
 
 
