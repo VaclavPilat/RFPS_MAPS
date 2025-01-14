@@ -5,6 +5,8 @@ import unittest
 
 
 
+## \todo Test HALF* and QUARTER* instances
+## \todo More robust addition testing
 class I360Test(unittest.TestCase):
     """Class for testing I360 implementation
     """
@@ -96,8 +98,8 @@ class I360Test(unittest.TestCase):
         self.assertIntervalEqual(I360(0, 360, True, True) + 90, I360(90, 360, True) | I360(0, 90, False, True))
         self.assertIntervalEqual(I360(90, 120, False, True) + 360, I360(90, 120, False, True))
     
-    def test_aliases(self) -> None:
-        """Testing the behaviour of named instances
+    def test_full_empty(self) -> None:
+        """Testing the behaviour of FULL and EMPTY instances
         """
         self.assertIntervalEqual(I360(openStart=False, openEnd=False), I360.FULL)
         self.assertIntervalEqual(I360(openStart=False, openEnd=True), I360.FULL)
@@ -109,10 +111,12 @@ class I360Test(unittest.TestCase):
         self.assertIntervalEqual(I360.FULL | I360.EMPTY, I360.FULL)
         self.assertIntervalEqual(~I360.FULL, I360.EMPTY)
         self.assertIntervalEqual(~I360.EMPTY, I360.FULL)
-    
-    def test_advanced_addition(self) -> None:
-        """Testing advanced addition logic on named instances
-        """
         for i in range(0, 360 + 1, 90):
             self.assertIntervalEqual(I360.EMPTY + i, I360.EMPTY)
             self.assertIntervalEqual(I360.FULL + i, I360.FULL)
+    
+    def test_halves(self) -> None:
+        """Testing the behaviour of HALF1 and 2 instances
+        """
+        self.assertIntervalEqual(I360.HALF1 | I360.HALF2, I360.FULL)
+        self.assertIntervalEqual(I360.HALF1 & I360.HALF2, I360(0, 0) | I360(180, 180))

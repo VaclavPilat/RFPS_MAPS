@@ -401,3 +401,15 @@ class I360(IOperand):
 I360.EMPTY = I360(0, 0, True, True)
 ## A full interval, equals to I360(0, 360, False, False)
 I360.FULL = I360(0, 360)
+## Interval corresponding to the first half of a circle
+I360.HALF1 = I360(0, 180)
+## Interval corresponding to the second half of a circle
+I360.HALF2 = I360(180, 360)
+## Interval corresponding to the first quarter of a circle
+I360.QUARTER1 = I360(0, 90)
+## Interval corresponding to the second quarter of a circle
+I360.QUARTER2 = I360(90, 180)
+## Interval corresponding to the third quarter of a circle
+I360.QUARTER3 = I360(180, 270)
+## Interval corresponding to the fourth quarter of a circle
+I360.QUARTER4 = I360(270, 360)
