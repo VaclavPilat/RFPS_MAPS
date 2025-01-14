@@ -48,7 +48,7 @@ class CenterWall(Object):
         for face in inner.cylinder(height, closed=False):
             self.face(face, inverted=True)
         # Entrance floor
-        outerPoints, innerPoints = ([x for x in circle(bounds=I360(openEnd=True)).vertices() if x not in circle.vertices()[1:-1]] for circle in (outer, inner))
+        outerPoints, innerPoints = ([x for x in circle(bounds=I360(openEnd=True)) if x not in tuple(circle)[1:-1]] for circle in (outer, inner))
         outerPoints, innerPoints = ([x for x in points if x.x < 0] + [x for x in points if x.x >= 0] for points in (outerPoints, innerPoints))
         self.face(outerPoints + innerPoints[::-1])
 
@@ -68,7 +68,7 @@ class SpiralStairs(Object):
         """
         # Getting step points
         innerIntersect, outerIntersect = (x(bounds=x.bounds & x.bounds + 180) for x in (inner, outer))
-        innerPoints, outerPoints = (x.vertices() for x in (innerIntersect, outerIntersect))
+        innerPoints, outerPoints = (tuple(x) for x in (innerIntersect, outerIntersect))
         leftInnerPoints, leftOuterPoints = ([x for x in points if x.x < 0] for points in (innerPoints, outerPoints))
         rightInnerPoints, rightOuterPoints = ([x for x in points if x.x > 0] for points in (innerPoints, outerPoints))
         # Adding step faces
@@ -82,8 +82,8 @@ class SpiralStairs(Object):
             stepBound = [rightInnerPoints[i+1], rightOuterPoints[i+1]]
             self.face([x(z=i / stepCount * height) for x in stepBound] + [x(z=(i+1) / stepCount * height) for x in stepBound[::-1]])
         # Adding the middle floor
-        middleInnerPoints = [x for x in inner(bounds=I360(openEnd=True)).vertices() if x not in leftInnerPoints[1:-1] and x not in rightInnerPoints[1:-1]]
-        middleOuterPoints = [x for x in outer(bounds=I360(openEnd=True)).vertices() if x not in leftOuterPoints[1:-1] and x not in rightOuterPoints[1:-1]]
+        middleInnerPoints = [x for x in inner(bounds=I360(openEnd=True)) if x not in leftInnerPoints[1:-1] and x not in rightInnerPoints[1:-1]]
+        middleOuterPoints = [x for x in outer(bounds=I360(openEnd=True)) if x not in leftOuterPoints[1:-1] and x not in rightOuterPoints[1:-1]]
         forwardInnerPoints, forwardOuterPoints = ([x for x in points if x.y > 0] for points in (middleInnerPoints, middleOuterPoints))
         self.face([x(z=height / 2) for x in forwardOuterPoints + forwardInnerPoints[::-1]])
         # Adding the entrance floor

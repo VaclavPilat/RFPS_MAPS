@@ -37,14 +37,14 @@ class Circle:
         self.bounds = bounds
     
     ## \todo Change start/end generation so that both of these points are the lines which were cut off rather than on the circle itself
-    def vertices(self) -> tuple:
+    def __iter__(self):
         """Generating vertex points on a circle
-
-        Returns:
-            tuple: Tuple of generated vertex positions
         """
-        radians = [math.radians(d) for d in self.bounds[self.points]]
-        return tuple(self.pivot + (V3.FORWARD * math.sin(r) + V3.RIGHT * math.cos(r)) * self.radius for r in radians)
+        for degree in self.bounds[self.points]:
+            radians = math.radians(degree)
+            sin = math.sin(radians)
+            cos = math.cos(radians)
+            yield self.pivot + (V3.FORWARD * sin + V3.RIGHT * cos) * self.radius
     
     def cylinder(self, height: int|float, closed: bool = True):
         """Generating cylinder walls
@@ -56,8 +56,8 @@ class Circle:
         Yields:
             tuple: Sequences of vertices for each face
         """
-        lower = self.vertices()
-        upper = self(pivot=self.pivot + V3.UP * height).vertices()
+        lower = tuple(self)
+        upper = tuple(self(pivot=self.pivot + V3.UP * height))
         for i, j in [(a-1, a) for a in range(not closed, len(lower))]:
             yield (upper[j], upper[i], lower[i], lower[j])
     
@@ -71,6 +71,6 @@ class Circle:
             tuple: Sequence of vertices
         """
         if cutout is None:
-            return self.vertices()
+            return tuple(self)
         assert cutout.radius < self.radius, "A hole has to be smaller that the object it is a part of!"
-        return self.vertices() + cutout.vertices()[::-1]
+        return tuple(self) + tuple(cutout)[::-1]
