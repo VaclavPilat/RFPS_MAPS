@@ -395,7 +395,7 @@ class I360(IOperand):
 
 
 
-## An enpty interval, equals to I360(0, 0, False, False)
-I360.EMPTY = I360(0, 0)
-## A full interval, equals to I360(0, 360, True, True)
-I360.FULL = I360(0, 360, True, True)
+## An empty interval, equals to I360(0, 0, True, True)
+I360.EMPTY = I360(0, 0, True, True)
+## A full interval, equals to I360(0, 360, False, False)
+I360.FULL = I360(0, 360)

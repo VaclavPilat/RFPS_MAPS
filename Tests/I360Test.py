@@ -95,3 +95,15 @@ class I360Test(unittest.TestCase):
         self.assertIntervalGeneration(I360(60, 120, True) + 0, I360(60, 120, True))
         self.assertIntervalGeneration(I360(0, 360, True, True) + 90, I360(90, 360, True) | I360(0, 90, False, True))
         self.assertIntervalGeneration(I360(90, 120, False, True) + 360, I360(90, 120, False, True))
+    
+    def test_aliases(self) -> None:
+        """Testing the behaviour of named instances
+        """
+        self.assertIntervalGeneration(I360(openStart=False, openEnd=False), I360.FULL)
+        self.assertIntervalGeneration(I360(openStart=False, openEnd=True), I360.FULL)
+        self.assertIntervalGeneration(I360.FULL | I360.FULL, I360.FULL)
+        self.assertIntervalGeneration(I360.FULL & I360.FULL, I360.FULL)
+        self.assertIntervalGeneration(I360.EMPTY | I360.EMPTY, I360.EMPTY)
+        self.assertIntervalGeneration(I360.EMPTY & I360.EMPTY, I360.EMPTY)
+        self.assertIntervalGeneration(I360.FULL & I360.EMPTY, I360.EMPTY)
+        self.assertIntervalGeneration(I360.FULL | I360.EMPTY, I360.FULL)
