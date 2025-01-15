@@ -6,7 +6,7 @@ Blender version **3.0.1** was used.
 
 ## How to run
 - **Run tests** : `make test`
-- **Generate models** : `blender --python-exit-code 2 --disable-abort-handler --python Babel.py` (replace `Babel.py` with the desired script file name)
+- **Show model in Blender** : `make show FILE=Babel.py` (replace the filepath with the desired script file name)
 
 ## Documentation
 - **Create documentation** : `make doc`
