@@ -7,6 +7,7 @@ from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 @addInitRepr
 @makeImmutable
 @addCopyCall("x", "y", "z")
+## \todo Named direction changes leads to chaos, make an operator for checking if a vector is in the same "direction" and another one
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
 

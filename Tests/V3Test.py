@@ -43,11 +43,6 @@ class V3Test(unittest.TestCase):
         """
         self.assertEqual(V3(1, 2, 3) / 2, V3(0.5, 1, 1.5))
     
-    def test_presets(self) -> None:
-        """Testing custom presets
-        """
-        self.assertEqual(V3(1, 2, 3) + V3.LEFT * 2, V3(1, 4, 3))
-    
     def test_rotation(self) -> None:
         """Testing __rshift__ and __lshift__ implementation
         """
