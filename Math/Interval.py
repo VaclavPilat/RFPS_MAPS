@@ -44,6 +44,17 @@ class IOperand:
             (I360(0, 120) | I360(180, 270))
         """
         return IUnion(self, other)
+    
+    def __sub__(self, number: int|float) -> "IOperand":
+        """Subtracting a number from an interval
+
+        Args:
+            number (int | float): Number to subtract by
+
+        Returns:
+            IOperand: Subtracted interval operand
+        """
+        return self.__add__(-number)
 
 
 

@@ -6,7 +6,7 @@ import unittest
 
 
 ## \todo Test HALF* and QUARTER* instances
-## \todo More robust addition testing
+## \todo More robust addition and subtraction testing
 class I360Test(unittest.TestCase):
     """Class for testing I360 implementation
     """
