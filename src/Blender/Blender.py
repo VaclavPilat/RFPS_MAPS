@@ -4,6 +4,7 @@ import bpy
 
 
 
+## \todo Move functions out of the object
 class Blender:
     """Blender setup functions
     """

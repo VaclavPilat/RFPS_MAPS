@@ -1,5 +1,6 @@
 ## \file
 # Implementation of the Babel map
+# \todo Refactor & add docs
 if __name__ == "__main__":
     import os, sys, bpy
     directory = os.path.dirname(bpy.data.filepath)

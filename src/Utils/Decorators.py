@@ -1,7 +1,6 @@
 ## \file
 # Custom decorator functions for data classes.
 # Method injection is preferred over subclassing
-# \todo Add a decorator that forces corrent argument type usage
 
 
 
@@ -40,7 +39,6 @@ def addInitRepr(cls: "cls") -> "cls":
 
 
 
-## \todo Add recursive behaviour - restricting value changes on inner fields
 def makeImmutable(cls: "cls") -> "cls":
     """Class decorator that turns the class into an makeImmutable one
 

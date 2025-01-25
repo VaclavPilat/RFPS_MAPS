@@ -8,6 +8,7 @@ import bpy, bmesh
 
 @addInitRepr
 @makeImmutable
+## \todo Refactor & add docs
 class Object:
     """Class for containing own mesh and/or other objectes
     """

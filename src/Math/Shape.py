@@ -10,6 +10,7 @@ import math
 @makeImmutable
 @addInitRepr
 @addCopyCall("radius", "points", "pivot", "bounds")
+## \todo Refactor & add docs
 class Circle:
     """Data object for storing information used for generating points in circles
 
