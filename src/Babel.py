@@ -8,25 +8,8 @@ if __name__ == "__main__":
 from Math.Vector import V3
 from Math.Interval import I360
 from Math.Shape import Circle
-from Blender.Object import Object
+from Blender.Object import createObject
 from Blender.Blender import Blender
-
-
-
-def createObject(func: "func") -> "cls":
-    """Creating an Object subclass from a generator function
-
-    Args:
-        func (func): Generator function
-
-    Returns:
-        cls: Object subclass containing the generator function
-    """
-    class Wrapped(Object):
-        pass
-    Wrapped.generate = func
-    Wrapped.__name__ = func.__name__
-    return Wrapped
 
 
 

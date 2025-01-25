@@ -116,3 +116,20 @@ class Object:
         for child in self.objects:
             child.build().parent = obj
         return obj
+
+
+
+def createObject(func: "func") -> "cls":
+    """Creating an Object subclass from a generator function
+
+    Args:
+        func (func): Generator function
+
+    Returns:
+        cls: Object subclass containing the generator function
+    """
+    class Wrapped(Object):
+        pass
+    Wrapped.generate = func
+    Wrapped.__name__ = func.__name__
+    return Wrapped
