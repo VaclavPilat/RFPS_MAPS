@@ -166,7 +166,7 @@ FILE_PATTERNS          = *.c \
                          *.qsf \
                          *.ice
 RECURSIVE              = YES
-EXCLUDE                = Tests/
+EXCLUDE                = src/Tests/
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
 EXCLUDE_SYMBOLS        =
