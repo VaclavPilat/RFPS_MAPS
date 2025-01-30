@@ -1,6 +1,7 @@
 ## \file
 # Implementations of vector classes
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
+import math
 
 
 
@@ -234,6 +235,24 @@ class V3:
             V3(2, -1, 3)
         """
         return self.__rshift__(-index)
+    
+    def __abs__(self) -> float:
+        """Calculating the magnitude of the vector
+
+        Returns:
+            float: Magnitude of a vector
+        
+        Examples:
+            >>> abs(V3())
+            0.0
+            >>> abs(V3(3, 4, 0))
+            5.0
+            >>> abs(V3(z=10))
+            10.0
+            >>> abs(V3(10, 10, 10))
+            17.320508075688775
+        """
+        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
 
 

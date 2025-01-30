@@ -1,7 +1,7 @@
 ## \file
 # Testing V3 implementation
 from Math.Vector import V3
-import unittest
+import unittest, math
 
 
 
@@ -10,7 +10,7 @@ class V3Test(unittest.TestCase):
     """
 
     def test_constructor(self) -> None:
-        """Testing __init__ and __iter__ functionality
+        """Testing __init__ and __iter__ implementation
         """
         self.assertEqual(tuple(V3(1, 2, 3)), (1, 2, 3))
         self.assertEqual(V3(1, 2, 3).x, 1)
@@ -68,3 +68,12 @@ class V3Test(unittest.TestCase):
         a = V3(1, 2, 3)
         b = a()
         self.assertEqual(a, b)
+    
+    def test_magnitude(self) -> None:
+        """Testing __abs__ implementation
+        """
+        self.assertAlmostEqual(abs(V3.ZERO), 0)
+        self.assertAlmostEqual(abs(V3.LEFT), 1)
+        self.assertAlmostEqual(abs(V3.ONE), math.sqrt(3))
+        self.assertAlmostEqual(abs(V3(z=4, y=3)), 5)
+        self.assertAlmostEqual(abs(V3(6, 8)), 10)
