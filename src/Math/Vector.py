@@ -253,6 +253,36 @@ class V3:
             17.320508075688775
         """
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
+    
+    def __contains__(self, other: "V3") -> bool:
+        """Checking whether a vector "is somewhat heading the same way" as the other one
+
+        Args:
+            other (V3): Other vector whose "direction" is being checked
+
+        Returns:
+            bool: True if this vector has greater or equal values of all non-zero values of the other vector
+        
+        Examples:
+            >>> V3() in V3(1, 2, 3)
+            True
+            >>> V3(0, 2, 1) in V3(1, 2, 3)
+            True
+            >>> V3(5) in V3(10)
+            True
+            >>> V3(-5) in V3(10)
+            False
+            >>> V3(4, 5, 6) in V3(-4, 5, 6)
+            False
+        """
+        for a, b in zip(self, other):
+            if b != 0:
+                if (a > 0 and b > 0) or (a < 0 and b < 0):
+                    if abs(a) < abs(b):
+                        return False
+                else:
+                    return False
+        return True
 
 
 

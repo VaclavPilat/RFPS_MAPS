@@ -77,3 +77,17 @@ class V3Test(unittest.TestCase):
         self.assertAlmostEqual(abs(V3.ONE), math.sqrt(3))
         self.assertAlmostEqual(abs(V3(z=4, y=3)), 5)
         self.assertAlmostEqual(abs(V3(6, 8)), 10)
+    
+    def test_direction(self) -> None:
+        """Testing __contains__ implementation
+        """
+        self.assertTrue(V3.FORWARD in V3.FORWARD)
+        self.assertTrue(V3.BACKWARD in V3.BACKWARD)
+        self.assertTrue(V3.FORWARD not in V3.BACKWARD)
+        self.assertTrue(V3.ONE in V3.ONE)
+        self.assertTrue(V3.FORWARD in V3.ONE)
+        self.assertTrue(V3.BACKWARD not in V3.ONE)
+        self.assertTrue(V3(y=-1) in V3(0, -5, 10))
+        self.assertTrue(V3(z=5) in V3(0, -5, 10))
+        self.assertTrue(V3(5, 10, 15) in V3(5, 10, 15))
+        self.assertTrue(V3(5, 10, 15) not in V3(5, -10, 15))
