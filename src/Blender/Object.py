@@ -120,7 +120,7 @@ class Object:
 
 
 
-def createObject(func: "func") -> "cls":
+def createObjectSubclass(func: "func") -> "cls":
     """Creating an Object subclass from a generator function
 
     Args:

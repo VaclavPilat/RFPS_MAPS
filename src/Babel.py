@@ -9,12 +9,12 @@ if __name__ == "__main__":
 from Math.Vector import V3
 from Math.Interval import I360
 from Math.Shape import Circle
-from Blender.Object import createObject
+from Blender.Object import createObjectSubclass
 from Blender.Blender import Blender
 
 
 
-@createObject
+@createObjectSubclass
 def Column(self, height: int|float, circle: Circle) -> None:
     """Generating a column
 
@@ -27,7 +27,7 @@ def Column(self, height: int|float, circle: Circle) -> None:
 
 
 
-@createObject
+@createObjectSubclass
 def CenterWall(self, height: int|float, outer: Circle, inner: Circle) -> None:
     """Generating walls around spiral
 
@@ -49,7 +49,7 @@ def CenterWall(self, height: int|float, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObject
+@createObjectSubclass
 def SpiralStairs(self, height: int|float, outer: Circle, inner: Circle) -> None:
     """Generating a spiral staircase
 
@@ -85,7 +85,7 @@ def SpiralStairs(self, height: int|float, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObject
+@createObjectSubclass
 def Center(self, height: int|float, outer: Circle) -> None:
     """Generating a central column with a spiral staircase inside
 
@@ -101,7 +101,7 @@ def Center(self, height: int|float, outer: Circle) -> None:
 
 
 
-@createObject
+@createObjectSubclass
 def AtriumFloor(self, height: int|float, outer: Circle, inner: Circle) -> None:
     """Generating atrium floor
 
@@ -114,7 +114,7 @@ def AtriumFloor(self, height: int|float, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObject
+@createObjectSubclass
 def Atrium(self, height: int|float, outer: Circle) -> None:
     """Generating the atrium in the center of the map
 
@@ -131,7 +131,7 @@ def Atrium(self, height: int|float, outer: Circle) -> None:
 
 
 
-@createObject
+@createObjectSubclass
 def Babel(self, height: int|float = 5) -> None:
     """Generating a floor of a tower of Babel
 
