@@ -10,7 +10,6 @@ from Math.Vector import V3
 from Math.Interval import I360
 from Math.Shape import Circle
 from Blender.Object import createObjectSubclass
-from Blender.Blender import Blender
 
 
 
@@ -144,8 +143,9 @@ def Babel(self, height: int|float = 5) -> None:
 
 
 if __name__ == "__main__":
-    Blender.setup()
-    Blender.purge()
+    from Blender.Functions import setupForDevelopment, purgeExistingObjects
+    setupForDevelopment()
+    purgeExistingObjects()
     Babel("Tower of Babel").print().build()
     #Babel("Tower of Babel (above copy)", V3.UP * 5).build()
     #Babel("Tower of Babel (below copy)", V3.DOWN * 5).build()
