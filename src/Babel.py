@@ -9,39 +9,7 @@ if __name__ == "__main__":
 from Math.Vector import V3
 from Math.Interval import I360
 from Math.Shape import Circle
-from Blender.Object import createObjectSubclass, Object
-from Utils.Decorators import defaultKwargsValues
-
-
-
-class ModuloObject(Object):
-    """Object subclass that applies modulo to face vertices on the z-axis
-    """
-
-    def __init__(self, *args, height: int|float = None, **kwargs) -> None:
-        """Initialising a modulo object
-
-        Args:
-            height (int | float, optional): Object height. Defaults to None.
-        """
-        assert height is not None, "Object height has to be defined"
-        ## Object height
-        self.height = height
-        super().__init__(*args, **kwargs)
-    
-    @defaultKwargsValues("height")
-    def load(self, *args, **kwargs) -> None:
-        """Loading a new object with a preset height
-        """
-        super().load(*args, **kwargs)
-
-    def face(self, vertices: list|tuple, **settings) -> None:
-        """Creating a new face with with modulo applied to face vertices
-
-        Args:
-            vertices (list | tuple): List of vertices defining the face
-        """
-        super().face(vertices, **settings)
+from Blender.Object import createObjectSubclass, ModuloObject
 
 
 
