@@ -9,11 +9,25 @@ if __name__ == "__main__":
 from Math.Vector import V3
 from Math.Interval import I360
 from Math.Shape import Circle
-from Blender.Object import createObjectSubclass
+from Blender.Object import createObjectSubclass, Object
 
 
 
-@createObjectSubclass
+class ModuloObject(Object):
+    """Object subclass that applies modulo to face vertices on the z-axis
+    """
+
+    def face(self, vertices: list|tuple, **settings) -> None:
+        """Creating a new face with with modulo applied to face vertices
+
+        Args:
+            vertices (list | tuple): List of vertices defining the face
+        """
+        super().face(vertices, **settings)
+
+
+
+@createObjectSubclass(ModuloObject)
 def Column(self, height: int|float, circle: Circle) -> None:
     """Generating a column
 
@@ -26,7 +40,7 @@ def Column(self, height: int|float, circle: Circle) -> None:
 
 
 
-@createObjectSubclass
+@createObjectSubclass(ModuloObject)
 def CenterWall(self, height: int|float, outer: Circle, inner: Circle) -> None:
     """Generating walls around spiral
 
@@ -48,7 +62,7 @@ def CenterWall(self, height: int|float, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObjectSubclass
+@createObjectSubclass(ModuloObject)
 def SpiralStairs(self, height: int|float, outer: Circle, inner: Circle) -> None:
     """Generating a spiral staircase
 
@@ -84,7 +98,7 @@ def SpiralStairs(self, height: int|float, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObjectSubclass
+@createObjectSubclass(ModuloObject)
 def Center(self, height: int|float, outer: Circle) -> None:
     """Generating a central column with a spiral staircase inside
 
@@ -100,7 +114,7 @@ def Center(self, height: int|float, outer: Circle) -> None:
 
 
 
-@createObjectSubclass
+@createObjectSubclass(ModuloObject)
 def AtriumFloor(self, height: int|float, outer: Circle, inner: Circle) -> None:
     """Generating atrium floor
 
@@ -113,7 +127,7 @@ def AtriumFloor(self, height: int|float, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObjectSubclass
+@createObjectSubclass(ModuloObject)
 def Atrium(self, height: int|float, outer: Circle) -> None:
     """Generating the atrium in the center of the map
 
@@ -130,7 +144,7 @@ def Atrium(self, height: int|float, outer: Circle) -> None:
 
 
 
-@createObjectSubclass
+@createObjectSubclass(ModuloObject)
 def Babel(self, height: int|float = 5) -> None:
     """Generating a floor of a tower of Babel
 

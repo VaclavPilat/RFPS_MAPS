@@ -83,7 +83,7 @@ class Object:
         """Creating a new face
 
         Args:
-            vertices (list[V3] | tuple[V3]): List of bounding vertex positions
+            vertices (list[V3] | tuple[V3]): List of vertices defining the face
             inverted (bool, optional): Should the face be inverted? Defaults to False.
         """
         self.faces.append(vertices if not inverted else vertices[::-1])
@@ -120,17 +120,19 @@ class Object:
 
 
 
-def createObjectSubclass(func: "func") -> "cls":
-    """Creating an Object subclass from a generator function
+def createObjectSubclass(template: "cls" = Object) -> "func":
+    """Decorator for creating an Object subclass from a generator function
 
     Args:
-        func (func): Generator function
+        template (cls, optional): Object or its subclass type. Defaults to Object.
 
     Returns:
-        cls: Object subclass containing the generator function
+        cls: Decorator for making a subclass of the template class
     """
-    class Wrapped(Object):
-        pass
-    Wrapped.generate = func
-    Wrapped.__name__ = func.__name__
-    return Wrapped
+    def wrapper(func: "func") -> "cls":
+        class Wrapped(template):
+            pass
+        Wrapped.generate = func
+        Wrapped.__name__ = func.__name__
+        return Wrapped
+    return wrapper
