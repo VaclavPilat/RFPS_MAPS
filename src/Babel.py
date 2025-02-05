@@ -17,6 +17,18 @@ class ModuloObject(Object):
     """Object subclass that applies modulo to face vertices on the z-axis
     """
 
+    def __init__(self, *args, height: int|float = None, **kwargs) -> None:
+        """Initialising a modulo object
+
+        Args:
+            height (int | float, optional): Object height. Defaults to None.
+        """
+        if height is None:
+            raise ValueError("Object height is not provided")
+        ## Object height
+        self.height = height
+        super().__init__(*args, **kwargs)
+
     def face(self, vertices: list|tuple, **settings) -> None:
         """Creating a new face with with modulo applied to face vertices
 
@@ -28,32 +40,31 @@ class ModuloObject(Object):
 
 
 @createObjectSubclass(ModuloObject)
-def Column(self, height: int|float, circle: Circle) -> None:
+def Column(self, circle: Circle) -> None:
     """Generating a column
 
     Args:
         height (int | float): Column height.
         circle (Circle): Column radius.
     """
-    for face in circle.cylinder(height):
+    for face in circle.cylinder(self.height):
         self.face(face)
 
 
 
 @createObjectSubclass(ModuloObject)
-def CenterWall(self, height: int|float, outer: Circle, inner: Circle) -> None:
+def CenterWall(self, outer: Circle, inner: Circle) -> None:
     """Generating walls around spiral
 
     Args:
-        height (int | float): Object height
         outer (Circle): Outer wall circle
         inner (Circle): Inner wall circle
     """
     # Outer wall
-    for face in outer.cylinder(height, closed=False):
+    for face in outer.cylinder(self.height, closed=False):
         self.face(face)
     # Inner wall
-    for face in inner.cylinder(height, closed=False):
+    for face in inner.cylinder(self.height, closed=False):
         self.face(face, inverted=True)
     # Entrance floor
     outerPoints, innerPoints = ([x for x in circle(bounds=I360(openEnd=True)) if x not in tuple(circle)[1:-1]] for circle in (outer, inner))
@@ -63,11 +74,10 @@ def CenterWall(self, height: int|float, outer: Circle, inner: Circle) -> None:
 
 
 @createObjectSubclass(ModuloObject)
-def SpiralStairs(self, height: int|float, outer: Circle, inner: Circle) -> None:
+def SpiralStairs(self, outer: Circle, inner: Circle) -> None:
     """Generating a spiral staircase
 
     Args:
-        height (int|float): Floor height
         outer (Circle): Outer circle
         inner (Circle): inner circle
     """
@@ -79,18 +89,18 @@ def SpiralStairs(self, height: int|float, outer: Circle, inner: Circle) -> None:
     # Adding step faces
     stepCount = (len(leftInnerPoints) - 1) * 2
     for i in range(stepCount // 2):
-        self.face([x(z=(i + stepCount // 2) / stepCount * height) for x in leftOuterPoints[i:i+2] + leftInnerPoints[i:i+2][::-1]])
+        self.face([x(z=(i + stepCount // 2) / stepCount * self.height) for x in leftOuterPoints[i:i+2] + leftInnerPoints[i:i+2][::-1]])
         stepBound = [leftInnerPoints[i+1], leftOuterPoints[i+1]]
-        self.face([x(z=(i+stepCount//2) / stepCount * height) for x in stepBound] + [x(z=(i+1+stepCount//2) / stepCount * height) for x in stepBound[::-1]])
+        self.face([x(z=(i+stepCount//2) / stepCount * self.height) for x in stepBound] + [x(z=(i+1+stepCount//2) / stepCount * self.height) for x in stepBound[::-1]])
     for i in range(stepCount // 2):
-        self.face([x(z=i / stepCount * height) for x in rightOuterPoints[i:i+2] + rightInnerPoints[i:i+2][::-1]])
+        self.face([x(z=i / stepCount * self.height) for x in rightOuterPoints[i:i+2] + rightInnerPoints[i:i+2][::-1]])
         stepBound = [rightInnerPoints[i+1], rightOuterPoints[i+1]]
-        self.face([x(z=i / stepCount * height) for x in stepBound] + [x(z=(i+1) / stepCount * height) for x in stepBound[::-1]])
+        self.face([x(z=i / stepCount * self.height) for x in stepBound] + [x(z=(i+1) / stepCount * self.height) for x in stepBound[::-1]])
     # Adding the middle floor
     middleInnerPoints = [x for x in inner(bounds=I360(openEnd=True)) if x not in leftInnerPoints[1:-1] and x not in rightInnerPoints[1:-1]]
     middleOuterPoints = [x for x in outer(bounds=I360(openEnd=True)) if x not in leftOuterPoints[1:-1] and x not in rightOuterPoints[1:-1]]
     forwardInnerPoints, forwardOuterPoints = ([x for x in points if x.y > 0] for points in (middleInnerPoints, middleOuterPoints))
-    self.face([x(z=height / 2) for x in forwardOuterPoints + forwardInnerPoints[::-1]])
+    self.face([x(z=self.height / 2) for x in forwardOuterPoints + forwardInnerPoints[::-1]])
     # Adding the entrance floor
     backwardInnerPoints = [x for x in middleInnerPoints if x.y < 0 and x.x < 0] + [x for x in middleInnerPoints if x.y < 0 and x.x >= 0]
     backwardOuterPoints = [x for x in middleOuterPoints if x.y < 0 and x.x < 0] + [x for x in middleOuterPoints if x.y < 0 and x.x >= 0]
@@ -99,60 +109,54 @@ def SpiralStairs(self, height: int|float, outer: Circle, inner: Circle) -> None:
 
 
 @createObjectSubclass(ModuloObject)
-def Center(self, height: int|float, outer: Circle) -> None:
+def Center(self, outer: Circle) -> None:
     """Generating a central column with a spiral staircase inside
 
     Args:
-        height (int | float): Object height
         outer (Circle): Outer circle
     """
     inner = outer(radius=outer.radius - 0.5)
     column = Circle(radius=1, points=outer.points)
-    self.load(Column, "Central pillar", height=height, circle=column)
-    self.load(CenterWall, "Central wall", height=height, outer=outer, inner=inner)
-    self.load(SpiralStairs, "Spiral stairs", height=height, outer=inner, inner=column(bounds=inner.bounds))
+    self.load(Column, "Central pillar", height=self.height, circle=column)
+    self.load(CenterWall, "Central wall", height=self.height, outer=outer, inner=inner)
+    self.load(SpiralStairs, "Spiral stairs", height=self.height, outer=inner, inner=column(bounds=inner.bounds))
 
 
 
 @createObjectSubclass(ModuloObject)
-def AtriumFloor(self, height: int|float, outer: Circle, inner: Circle) -> None:
+def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
     """Generating atrium floor
 
     Args:
-        height (int | float): Floor height
         outer (Circle): Outer circle
         inner (Circle): Inner circle
     """
-    self.face(outer.face(cutout=inner))
+    for bounds in (I360.HALF1, I360.HALF2):
+        self.face(outer(bounds=bounds).face(cutout=inner(bounds=bounds)))
 
 
 
 @createObjectSubclass(ModuloObject)
-def Atrium(self, height: int|float, outer: Circle) -> None:
+def Atrium(self, outer: Circle) -> None:
     """Generating the atrium in the center of the map
 
     Args:
-        height (int | float): Floor height
         outer (Circle): Outer circle
     """
     center = Circle(radius=4, points=32, bounds=I360(30, -30%360))
-    self.load(Center, "Central staircase", height=height, outer=center)
-    for bounds in (I360(0, 180), I360(180, 360)):
-        self.load(AtriumFloor, "Atrium floor", height=height, outer=outer(bounds=bounds), inner=center(bounds=bounds))
+    self.load(Center, "Central staircase", height=self.height, outer=center)
+    self.load(AtriumFloor, "Atrium floor", height=self.height, outer=outer, inner=center)
     #for position in Circle(radius=Math.average(outer.radius, center.radius), points=8.vertices():
     #    self.load(Column, "Atrium pillar", height=3, circle=Circle(0.5, 8, position))
 
 
 
 @createObjectSubclass(ModuloObject)
-def Babel(self, height: int|float = 5) -> None:
+def Babel(self) -> None:
     """Generating a floor of a tower of Babel
-
-    Args:
-        height (int | float, optional): Floor height. Defaults to 5.
     """
     atrium = Circle(10, 64)
-    self.load(Atrium, "Atrium", height=height, outer=atrium)
+    self.load(Atrium, "Atrium", outer=atrium, height=self.height)
 
 
 
@@ -160,6 +164,4 @@ if __name__ == "__main__":
     from Blender.Functions import setupForDevelopment, purgeExistingObjects
     setupForDevelopment()
     purgeExistingObjects()
-    Babel("Tower of Babel").print().build()
-    #Babel("Tower of Babel (above copy)", V3.UP * 5).build()
-    #Babel("Tower of Babel (below copy)", V3.DOWN * 5).build()
+    Babel("Tower of Babel", height=5).print().build()
