@@ -10,6 +10,7 @@ from Math.Vector import V3
 from Math.Interval import I360
 from Math.Shape import Circle
 from Blender.Object import createObjectSubclass, Object
+from Utils.Decorators import defaultKwargsValues
 
 
 
@@ -23,11 +24,16 @@ class ModuloObject(Object):
         Args:
             height (int | float, optional): Object height. Defaults to None.
         """
-        if height is None:
-            raise ValueError("Object height is not provided")
+        assert height is not None, "Object height has to be defined"
         ## Object height
         self.height = height
         super().__init__(*args, **kwargs)
+    
+    @defaultKwargsValues("height")
+    def load(self, *args, **kwargs) -> None:
+        """Loading a new object with a preset height
+        """
+        super().load(*args, **kwargs)
 
     def face(self, vertices: list|tuple, **settings) -> None:
         """Creating a new face with with modulo applied to face vertices
@@ -117,9 +123,9 @@ def Center(self, outer: Circle) -> None:
     """
     inner = outer(radius=outer.radius - 0.5)
     column = Circle(radius=1, points=outer.points)
-    self.load(Column, "Central pillar", height=self.height, circle=column)
-    self.load(CenterWall, "Central wall", height=self.height, outer=outer, inner=inner)
-    self.load(SpiralStairs, "Spiral stairs", height=self.height, outer=inner, inner=column(bounds=inner.bounds))
+    self.load(Column, "Central pillar", circle=column)
+    self.load(CenterWall, "Central wall", outer=outer, inner=inner)
+    self.load(SpiralStairs, "Spiral stairs", outer=inner, inner=column(bounds=inner.bounds))
 
 
 
@@ -144,8 +150,8 @@ def Atrium(self, outer: Circle) -> None:
         outer (Circle): Outer circle
     """
     center = Circle(radius=4, points=32, bounds=I360(30, -30%360))
-    self.load(Center, "Central staircase", height=self.height, outer=center)
-    self.load(AtriumFloor, "Atrium floor", height=self.height, outer=outer, inner=center)
+    self.load(Center, "Central staircase", outer=center)
+    self.load(AtriumFloor, "Atrium floor", outer=outer, inner=center)
     #for position in Circle(radius=Math.average(outer.radius, center.radius), points=8.vertices():
     #    self.load(Column, "Atrium pillar", height=3, circle=Circle(0.5, 8, position))
 
@@ -156,7 +162,7 @@ def Babel(self) -> None:
     """Generating a floor of a tower of Babel
     """
     atrium = Circle(10, 64)
-    self.load(Atrium, "Atrium", outer=atrium, height=self.height)
+    self.load(Atrium, "Atrium", outer=atrium)
 
 
 

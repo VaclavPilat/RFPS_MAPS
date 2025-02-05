@@ -40,7 +40,7 @@ def addInitRepr(cls: "cls") -> "cls":
 
 
 def makeImmutable(cls: "cls") -> "cls":
-    """Class decorator that turns the class into an makeImmutable one
+    """Class decorator that turns the class into an immutable one
 
     Args:
         cls (cls): Data class type to wrap
@@ -105,4 +105,33 @@ def addCopyCall(*fields) -> "func":
             return cls(**data)
         cls.__call__ = new_call
         return cls
+    return decorator
+
+
+
+def defaultKwargsValues(*fields) -> "func":
+    """Creating a decorator that adds default values for kwargs from self fields
+
+    Returns:
+        func: Decorator that adds default values to kwargs
+    
+    Examples:
+        >>> class Test:
+        ...     def __init__(self, value):
+        ...             self.value = value
+        ...     @defaultKwargsValues("value")
+        ...     def stringify(self, value):
+        ...             return str(value)
+        ... 
+        >>> Test(10).stringify()
+        '10'
+        >>> Test(10).stringify(value=20)
+        '20'
+    """
+    def decorator(method: "func"):
+        def wrapper(self, *args, **kwargs):
+            data = {field: getattr(self, field) for field in fields}
+            data.update(**kwargs)
+            return method(self, *args, **data)
+        return wrapper
     return decorator

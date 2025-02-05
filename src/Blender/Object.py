@@ -120,19 +120,19 @@ class Object:
 
 
 
-def createObjectSubclass(template: "cls" = Object) -> "func":
+def createObjectSubclass(cls: "cls" = Object) -> "func":
     """Decorator for creating an Object subclass from a generator function
 
     Args:
-        template (cls, optional): Object or its subclass type. Defaults to Object.
+        cls (cls, optional): Object or its subclass type. Defaults to Object.
 
     Returns:
-        cls: Decorator for making a subclass of the template class
+        cls: Decorator for making a subclass of the provided class type
     """
-    def wrapper(func: "func") -> "cls":
-        class Wrapped(template):
+    def decorator(func: "func") -> "cls":
+        class Wrapped(cls):
             pass
         Wrapped.generate = func
         Wrapped.__name__ = func.__name__
         return Wrapped
-    return wrapper
+    return decorator
