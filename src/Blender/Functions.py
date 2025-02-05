@@ -1,5 +1,5 @@
 ## \file
-# Functions for setting up Blender
+# Functions for working with Blender
 import bpy
 
 
@@ -23,6 +23,6 @@ def purgeExistingObjects() -> None:
     """Clearing all objects and collections in scene
     """
     for collection in bpy.context.scene.collection.children:
-        for obj in collection.objects:
-            bpy.data.objects.remove(obj)
         bpy.context.scene.collection.children.unlink(collection)
+    for obj in bpy.context.scene.objects:
+        bpy.data.objects.remove(obj)
