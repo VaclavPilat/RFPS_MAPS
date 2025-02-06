@@ -10,7 +10,7 @@ class Wrapped:
     """Example class being wrapped
     """
 
-    def __init__(self, value: int = 10):
+    def __init__(self, value: int = 10) -> None:
         """Initialising an optional value
 
         Args:

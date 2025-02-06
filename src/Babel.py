@@ -18,11 +18,23 @@ def Column(self, circle: Circle) -> None:
     """Generating a column
 
     Args:
-        height (int | float): Column height.
         circle (Circle): Column radius.
     """
     for face in circle.cylinder(self.height):
         self.face(face)
+
+
+
+@createObjectSubclass(ModuloObject)
+def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
+    """Generating atrium floor
+
+    Args:
+        outer (Circle): Outer circle
+        inner (Circle): Inner circle
+    """
+    for bounds in (I360.HALF1, I360.HALF2):
+        self.face(outer(bounds=bounds).face(cutout=inner(bounds=bounds)))
 
 
 
@@ -94,19 +106,6 @@ def Center(self, outer: Circle) -> None:
     self.load(Column, "Central pillar", circle=column)
     self.load(CenterWall, "Central wall", outer=outer, inner=inner)
     self.load(SpiralStairs, "Spiral stairs", outer=inner, inner=column(bounds=inner.bounds))
-
-
-
-@createObjectSubclass(ModuloObject)
-def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
-    """Generating atrium floor
-
-    Args:
-        outer (Circle): Outer circle
-        inner (Circle): Inner circle
-    """
-    for bounds in (I360.HALF1, I360.HALF2):
-        self.face(outer(bounds=bounds).face(cutout=inner(bounds=bounds)))
 
 
 

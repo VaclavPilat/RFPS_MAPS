@@ -110,7 +110,8 @@ def addCopyCall(*fields) -> "func":
 
 
 def defaultKwargsValues(*fields) -> "func":
-    """Creating a decorator that adds default values for kwargs from self fields
+    """Creating a decorator that adds default values for kwargs from self fields.
+    Providing new values in meant to be done only using kwargs.
 
     Returns:
         func: Decorator that adds default values to kwargs
