@@ -53,9 +53,9 @@ def CenterWall(self, outer: Circle, inner: Circle) -> None:
     for face in inner.cylinder(self.height, closed=False):
         self.face(face, inverted=True)
     # Entrance floor
-    outerPoints, innerPoints = ([x for x in circle(bounds=I360(openEnd=True)) if x not in tuple(circle)[1:-1]] for circle in (outer, inner))
+    """outerPoints, innerPoints = ([x for x in circle(bounds=I360(openEnd=True)) if x not in tuple(circle)[1:-1]] for circle in (outer, inner))
     outerPoints, innerPoints = ([x for x in points if x.x < 0] + [x for x in points if x.x >= 0] for points in (outerPoints, innerPoints))
-    self.face(outerPoints + innerPoints[::-1])
+    self.face(outerPoints + innerPoints[::-1])"""
 
 
 
@@ -102,10 +102,10 @@ def Center(self, outer: Circle) -> None:
         outer (Circle): Outer circle
     """
     inner = outer(radius=outer.radius - 0.5)
-    column = Circle(radius=1, points=outer.points)
+    column = Circle(radius=1, points=outer.points//4)
     self.load(Column, "Central pillar", circle=column)
     self.load(CenterWall, "Central wall", outer=outer, inner=inner)
-    self.load(SpiralStairs, "Spiral stairs", outer=inner, inner=column(bounds=inner.bounds))
+    #self.load(SpiralStairs, "Spiral stairs", outer=inner, inner=column(bounds=inner.bounds))
 
 
 
@@ -116,9 +116,9 @@ def Atrium(self, outer: Circle) -> None:
     Args:
         outer (Circle): Outer circle
     """
-    center = Circle(radius=4, points=32, bounds=I360(30, -30%360))
-    self.load(Center, "Central staircase", outer=center)
+    center = Circle(radius=4, points=outer.points//2, bounds=I360(30, -30%360))
     self.load(AtriumFloor, "Atrium floor", outer=outer, inner=center)
+    self.load(Center, "Central staircase", outer=center)
     #for position in Circle(radius=Math.average(outer.radius, center.radius), points=8.vertices():
     #    self.load(Column, "Atrium pillar", height=3, circle=Circle(0.5, 8, position))
 
@@ -128,7 +128,7 @@ def Atrium(self, outer: Circle) -> None:
 def Babel(self) -> None:
     """Generating a floor of a tower of Babel
     """
-    atrium = Circle(10, 64)
+    atrium = Circle(10, 512)
     self.load(Atrium, "Atrium", outer=atrium)
 
 
