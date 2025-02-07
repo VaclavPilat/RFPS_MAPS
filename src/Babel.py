@@ -27,7 +27,7 @@ def Column(self, circle: Circle) -> None:
 
 @createObjectSubclass(ModuloObject)
 def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
-    """Generating atrium floor
+    """Generating atrium floor, split into two halves
 
     Args:
         outer (Circle): Outer circle
@@ -40,7 +40,7 @@ def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
 
 @createObjectSubclass(ModuloObject)
 def CenterWall(self, outer: Circle, inner: Circle) -> None:
-    """Generating walls around spiral
+    """Generating walls around spiral staircase in the middle of the map
 
     Args:
         outer (Circle): Outer wall circle

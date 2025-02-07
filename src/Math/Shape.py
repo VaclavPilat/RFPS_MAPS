@@ -30,6 +30,7 @@ class Circle:
         assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
         ## Number of points on the whole circle
+        # \todo Add back an assert for checking that point count is a power of 2
         assert points > 0, "Point count has to be a positive number"
         self.points = points
         ## Position of the center of the circle
