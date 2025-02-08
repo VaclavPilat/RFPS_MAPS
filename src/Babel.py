@@ -18,32 +18,33 @@ class BabelObject(Object):
     """Object subclass used for all Babel objects
     """
 
-    def __init__(self, *args, height: int|float, **kwargs) -> None:
-        """Initialising a modulo object
+    def __init__(self, *args, floorHeight: int|float, **kwargs) -> None:
+        """Initialising a Babel object.
 
         Args:
-            height (int | float): Object height.
+            floorHeight (int | float): Floor height
         """
-        ## Object height
-        self.height = height
+        ## Floor height
+        self.floorHeight = floorHeight
         super().__init__(*args, **kwargs)
     
-    @defaultKwargsValues("height")
+    @defaultKwargsValues("floorHeight")
     def load(self, *args, **kwargs) -> None:
-        """Loading a new object with a preset height
+        """Loading a new object with preset values
         """
         super().load(*args, **kwargs)
 
 
 
 @createObjectSubclass(BabelObject)
-def Column(self, circle: Circle) -> None:
+def Column(self, circle: Circle, height: int|float) -> None:
     """Generating a column
 
     Args:
         circle (Circle): Column radius.
+        height (int | float): Column height.
     """
-    for face in circle.cylinder(self.height):
+    for face in circle.cylinder(height):
         self.face(face)
 
 
@@ -70,10 +71,10 @@ def CenterWall(self, outer: Circle, inner: Circle) -> None:
         inner (Circle): Inner wall circle
     """
     # Outer wall
-    for face in outer.cylinder(self.height, closed=False):
+    for face in outer.cylinder(self.floorHeight, closed=False):
         self.face(face)
     # Inner wall
-    for face in inner.cylinder(self.height, closed=False):
+    for face in inner.cylinder(self.floorHeight, closed=False):
         self.face(face, inverted=True)
     # Entrance floor
     """outerPoints, innerPoints = ([x for x in circle(bounds=I360(openEnd=True)) if x not in tuple(circle)[1:-1]] for circle in (outer, inner))
@@ -98,18 +99,18 @@ def SpiralStairs(self, outer: Circle, inner: Circle) -> None:
     # Adding step faces
     stepCount = (len(leftInnerPoints) - 1) * 2
     for i in range(stepCount // 2):
-        self.face([x(z=(i + stepCount // 2) / stepCount * self.height) for x in leftOuterPoints[i:i+2] + leftInnerPoints[i:i+2][::-1]])
+        self.face([x(z=(i + stepCount // 2) / stepCount * self.floorHeight) for x in leftOuterPoints[i:i+2] + leftInnerPoints[i:i+2][::-1]])
         stepBound = [leftInnerPoints[i+1], leftOuterPoints[i+1]]
-        self.face([x(z=(i+stepCount//2) / stepCount * self.height) for x in stepBound] + [x(z=(i+1+stepCount//2) / stepCount * self.height) for x in stepBound[::-1]])
+        self.face([x(z=(i+stepCount//2) / stepCount * self.floorHeight) for x in stepBound] + [x(z=(i+1+stepCount//2) / stepCount * self.floorHeight) for x in stepBound[::-1]])
     for i in range(stepCount // 2):
-        self.face([x(z=i / stepCount * self.height) for x in rightOuterPoints[i:i+2] + rightInnerPoints[i:i+2][::-1]])
+        self.face([x(z=i / stepCount * self.floorHeight) for x in rightOuterPoints[i:i+2] + rightInnerPoints[i:i+2][::-1]])
         stepBound = [rightInnerPoints[i+1], rightOuterPoints[i+1]]
-        self.face([x(z=i / stepCount * self.height) for x in stepBound] + [x(z=(i+1) / stepCount * self.height) for x in stepBound[::-1]])
+        self.face([x(z=i / stepCount * self.floorHeight) for x in stepBound] + [x(z=(i+1) / stepCount * self.floorHeight) for x in stepBound[::-1]])
     # Adding the middle floor
     middleInnerPoints = [x for x in inner(bounds=I360(openEnd=True)) if x not in leftInnerPoints[1:-1] and x not in rightInnerPoints[1:-1]]
     middleOuterPoints = [x for x in outer(bounds=I360(openEnd=True)) if x not in leftOuterPoints[1:-1] and x not in rightOuterPoints[1:-1]]
     forwardInnerPoints, forwardOuterPoints = ([x for x in points if x.y > 0] for points in (middleInnerPoints, middleOuterPoints))
-    self.face([x(z=self.height / 2) for x in forwardOuterPoints + forwardInnerPoints[::-1]])
+    self.face([x(z=self.floorHeight / 2) for x in forwardOuterPoints + forwardInnerPoints[::-1]])
     # Adding the entrance floor
     backwardInnerPoints = [x for x in middleInnerPoints if x.y < 0 and x.x < 0] + [x for x in middleInnerPoints if x.y < 0 and x.x >= 0]
     backwardOuterPoints = [x for x in middleOuterPoints if x.y < 0 and x.x < 0] + [x for x in middleOuterPoints if x.y < 0 and x.x >= 0]
@@ -127,7 +128,7 @@ def Center(self, outer: Circle) -> None:
     """
     inner = outer(radius=outer.radius - 0.5).gap(3)
     column = Circle(radius=1, points=outer.points//4)
-    self.load(Column, "Central pillar", circle=column)
+    self.load(Column, "Central pillar", circle=column, height=self.floorHeight)
     self.load(CenterWall, "Central wall", outer=outer, inner=inner)
     #self.load(SpiralStairs, "Spiral stairs", outer=inner, inner=column(bounds=inner.bounds))
 
@@ -162,4 +163,4 @@ if __name__ == "__main__":
     from Blender.Functions import setupForDevelopment, purgeExistingObjects
     setupForDevelopment()
     purgeExistingObjects()
-    Babel("Tower of Babel", height=5).print().build()
+    Babel("Tower of Babel", floorHeight=5).print().build()
