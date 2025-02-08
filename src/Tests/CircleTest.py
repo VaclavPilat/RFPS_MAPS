@@ -16,8 +16,8 @@ class CircleTest(unittest.TestCase):
     def test_points(self) -> None:
         """Testing that circle returns the correct base amount of vertices
         """
-        for i in range(1, 20 + 1):
-            self.assertEqual(len(tuple(Circle(radius=1, points=i))), i)
+        for points in [2**i for i in range(1, 10)]:
+            self.assertEqual(len(tuple(Circle(radius=1, points=points))), points)
     
     def assertVerticesEqual(self, first: Circle, second: tuple) -> None:
         """Asserting that both tuples have roughly the same vertices

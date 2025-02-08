@@ -116,6 +116,7 @@ def Atrium(self, outer: Circle) -> None:
     Args:
         outer (Circle): Outer circle
     """
+    ## \todo Calculate the correct Circle instance based on gap size by using arc-goniometric functions
     center = Circle(radius=4, points=outer.points//2, bounds=I360(30, -30%360))
     self.load(AtriumFloor, "Atrium floor", outer=outer, inner=center)
     self.load(Center, "Central staircase", outer=center)

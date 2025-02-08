@@ -2,6 +2,7 @@
 # Implementations of shapes and and their vertex generation
 from Math.Vector import V3
 from Math.Interval import I360
+from Math.Functions import isPow2
 from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
 import math
 
@@ -30,8 +31,7 @@ class Circle:
         assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
         ## Number of points on the whole circle
-        # \todo Add back an assert for checking that point count is a power of 2
-        assert points > 0, "Point count has to be a positive number"
+        assert isPow2(points), "Point count has to be a power of 2"
         self.points = points
         ## Position of the center of the circle
         self.pivot = pivot
