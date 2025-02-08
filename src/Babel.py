@@ -18,17 +18,26 @@ class BabelObject(Object):
     """Object subclass used for all Babel objects
     """
 
-    def __init__(self, *args, floorHeight: int|float, **kwargs) -> None:
+    def __init__(self, *args, floorHeight: float, wallWidth: float, archWidth: float, archHeight: float, **kwargs) -> None:
         """Initialising a Babel object.
 
         Args:
-            floorHeight (int | float): Floor height
+            floorHeight (float): Floor height
+            wallWidth (float): Wall width
+            archWidth (float): Archway width
+            archHeight (float): Archway height (at the top)
         """
-        ## Floor height
+        ## Total floor height
         self.floorHeight = floorHeight
+        ## Wall width
+        self.wallWidth = wallWidth
+        ## Archway width
+        self.archWidth = archWidth
+        ## Archway height (at the top)
+        self.archHeight = archHeight
         super().__init__(*args, **kwargs)
     
-    @defaultKwargsValues("floorHeight")
+    @defaultKwargsValues("floorHeight", "wallWidth", "archWidth", "archHeight")
     def load(self, *args, **kwargs) -> None:
         """Loading a new object with preset values
         """
@@ -126,7 +135,7 @@ def Center(self, outer: Circle) -> None:
     Args:
         outer (Circle): Outer circle
     """
-    inner = outer(radius=outer.radius - 0.5).gap(3)
+    inner = outer(radius=outer.radius - self.wallWidth).gap(self.archWidth)
     column = Circle(radius=1, points=outer.points//4)
     self.load(Column, "Central pillar", circle=column, height=self.floorHeight)
     self.load(CenterWall, "Central wall", outer=outer, inner=inner)
@@ -142,7 +151,7 @@ def Atrium(self, outer: Circle) -> None:
     Args:
         outer (Circle): Outer circle
     """
-    center = Circle(radius=4, points=outer.points//2).gap(3)
+    center = Circle(radius=4, points=outer.points//2).gap(self.archWidth)
     self.load(AtriumFloor, "Atrium floor", outer=outer, inner=center)
     self.load(Center, "Central staircase", outer=center)
     #for position in Circle(radius=Math.average(outer.radius, center.radius), points=8.vertices():
@@ -163,4 +172,10 @@ if __name__ == "__main__":
     from Blender.Functions import setupForDevelopment, purgeExistingObjects
     setupForDevelopment()
     purgeExistingObjects()
-    Babel("Tower of Babel", floorHeight=5).print().build()
+    settings = {
+        "floorHeight": 5,
+        "wallWidth": 0.5,
+        "archWidth": 3,
+        "archHeight": 3,
+    }
+    Babel("Tower of Babel", **settings).print().build()
