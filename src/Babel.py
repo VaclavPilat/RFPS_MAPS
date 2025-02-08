@@ -9,11 +9,34 @@ if __name__ == "__main__":
 from Math.Vector import V3
 from Math.Interval import I360
 from Math.Shape import Circle
-from Blender.Object import createObjectSubclass, ModuloObject
+from Blender.Object import createObjectSubclass, Object
+from Utils.Decorators import defaultKwargsValues
 
 
 
-@createObjectSubclass(ModuloObject)
+class BabelObject(Object):
+    """Object subclass used for all Babel objects
+    """
+
+    def __init__(self, *args, height: int|float, **kwargs) -> None:
+        """Initialising a modulo object
+
+        Args:
+            height (int | float): Object height.
+        """
+        ## Object height
+        self.height = height
+        super().__init__(*args, **kwargs)
+    
+    @defaultKwargsValues("height")
+    def load(self, *args, **kwargs) -> None:
+        """Loading a new object with a preset height
+        """
+        super().load(*args, **kwargs)
+
+
+
+@createObjectSubclass(BabelObject)
 def Column(self, circle: Circle) -> None:
     """Generating a column
 
@@ -25,7 +48,7 @@ def Column(self, circle: Circle) -> None:
 
 
 
-@createObjectSubclass(ModuloObject)
+@createObjectSubclass(BabelObject)
 def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
     """Generating atrium floor, split into two halves
 
@@ -38,7 +61,7 @@ def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObjectSubclass(ModuloObject)
+@createObjectSubclass(BabelObject)
 def CenterWall(self, outer: Circle, inner: Circle) -> None:
     """Generating walls around spiral staircase in the middle of the map
 
@@ -59,7 +82,7 @@ def CenterWall(self, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObjectSubclass(ModuloObject)
+@createObjectSubclass(BabelObject)
 def SpiralStairs(self, outer: Circle, inner: Circle) -> None:
     """Generating a spiral staircase
 
@@ -94,7 +117,7 @@ def SpiralStairs(self, outer: Circle, inner: Circle) -> None:
 
 
 
-@createObjectSubclass(ModuloObject)
+@createObjectSubclass(BabelObject)
 ## \todo Refactor by adding/modifying an Object subclass with floor height, floor thickness, arch height, arch gap etc.
 def Center(self, outer: Circle) -> None:
     """Generating a central column with a spiral staircase inside
@@ -110,7 +133,7 @@ def Center(self, outer: Circle) -> None:
 
 
 
-@createObjectSubclass(ModuloObject)
+@createObjectSubclass(BabelObject)
 ## \todo Same issue as in Center
 def Atrium(self, outer: Circle) -> None:
     """Generating the atrium in the center of the map
@@ -126,7 +149,7 @@ def Atrium(self, outer: Circle) -> None:
 
 
 
-@createObjectSubclass(ModuloObject)
+@createObjectSubclass(BabelObject)
 def Babel(self) -> None:
     """Generating a floor of a tower of Babel
     """
