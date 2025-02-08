@@ -76,3 +76,15 @@ class Circle:
             return tuple(self)
         assert cutout.radius < self.radius, "A hole has to be smaller that the object it is a part of!"
         return tuple(self) + tuple(cutout)[::-1]
+    
+    def gap(self, gap: int|float) -> "Circle":
+        """Create a new circle with a hole the size of the gap
+
+        Args:
+            gap (int | float): Gap size
+
+        Returns:
+            Circle: New circle with correct interval values
+        """
+        angle = round(math.degrees(math.asin(gap/2 / self.radius)))
+        return self(bounds=I360(angle, 360-angle))

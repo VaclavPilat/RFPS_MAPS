@@ -95,13 +95,14 @@ def SpiralStairs(self, outer: Circle, inner: Circle) -> None:
 
 
 @createObjectSubclass(ModuloObject)
+## \todo Refactor by adding/modifying an Object subclass with floor height, floor thickness, arch height, arch gap etc.
 def Center(self, outer: Circle) -> None:
     """Generating a central column with a spiral staircase inside
 
     Args:
         outer (Circle): Outer circle
     """
-    inner = outer(radius=outer.radius - 0.5)
+    inner = outer(radius=outer.radius - 0.5).gap(3)
     column = Circle(radius=1, points=outer.points//4)
     self.load(Column, "Central pillar", circle=column)
     self.load(CenterWall, "Central wall", outer=outer, inner=inner)
@@ -110,14 +111,14 @@ def Center(self, outer: Circle) -> None:
 
 
 @createObjectSubclass(ModuloObject)
+## \todo Same issue as in Center
 def Atrium(self, outer: Circle) -> None:
     """Generating the atrium in the center of the map
 
     Args:
         outer (Circle): Outer circle
     """
-    ## \todo Calculate the correct Circle instance based on gap size by using arc-goniometric functions
-    center = Circle(radius=4, points=outer.points//2, bounds=I360(30, -30%360))
+    center = Circle(radius=4, points=outer.points//2).gap(3)
     self.load(AtriumFloor, "Atrium floor", outer=outer, inner=center)
     self.load(Center, "Central staircase", outer=center)
     #for position in Circle(radius=Math.average(outer.radius, center.radius), points=8.vertices():
