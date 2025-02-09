@@ -48,6 +48,14 @@ class Circle:
             cos = math.cos(radians)
             yield self.pivot + (V3.FORWARD * sin + V3.RIGHT * cos) * self.radius
     
+    def __pos__(self) -> list:
+        """Returning a list of generated vertices
+
+        Returns:
+            list: List of generated vertex positions
+        """
+        return list(self)
+    
     def cylinder(self, height: int|float, closed: bool = True):
         """Generating cylinder walls
 

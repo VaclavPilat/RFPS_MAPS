@@ -80,7 +80,7 @@ def CenterWall(self, outer: Circle, inner: Circle) -> None:
         inner (Circle): Inner wall circle
     """
     # Outer wall
-    for face in outer.cylinder(self.floorHeight, closed=False):
+    for face in outer.cylinder(self.archHeight, closed=False):
         self.face(face)
     # Inner wall
     for face in inner.cylinder(self.floorHeight, closed=False):
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     settings = {
         "floorHeight": 5,
         "wallWidth": 0.5,
-        "archWidth": 3,
+        "archWidth": 2.5,
         "archHeight": 3,
     }
     Babel("Tower of Babel", **settings).print().build()
