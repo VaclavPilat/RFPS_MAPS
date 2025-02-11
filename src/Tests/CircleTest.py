@@ -17,7 +17,7 @@ class CircleTest(unittest.TestCase):
         """Testing that circle returns the correct base amount of vertices
         """
         for points in [2**i for i in range(1, 10)]:
-            self.assertEqual(len(tuple(Circle(radius=1, points=points))), points)
+            self.assertEqual(len(tuple(Circle(radius=1, bounds=I360(points=points)))), points)
     
     def assertVerticesEqual(self, first: Circle, second: tuple) -> None:
         """Asserting that both tuples have roughly the same vertices
@@ -48,51 +48,51 @@ class CircleTest(unittest.TestCase):
     def test_almost_equal(self) -> None:
         """Testing cases when generated vertices are almost equal
         """
-        circle = Circle(radius=1)
-        self.assertVerticesEqual(circle(points=1), (V3.RIGHT, ))
-        self.assertVerticesEqual(circle(points=2), (V3.RIGHT, V3.LEFT))
-        self.assertVerticesEqual(circle(points=4), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD))
+        circle = Circle()
+        self.assertVerticesEqual(circle(bounds=I360(points=1)), (V3.RIGHT, ))
+        self.assertVerticesEqual(circle(bounds=I360(points=2)), (V3.RIGHT, V3.LEFT))
+        self.assertVerticesEqual(circle(bounds=I360(points=4)), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD))
         with self.assertRaises(AssertionError):
-            self.assertVerticesEqual(circle(points=1), (V3.LEFT, ))
+            self.assertVerticesEqual(circle(bounds=I360(points=1)), (V3.LEFT, ))
         with self.assertRaises(AssertionError):
-            self.assertVerticesEqual(circle(points=2), (V3.RIGHT, V3.RIGHT))
+            self.assertVerticesEqual(circle(bounds=I360(points=2)), (V3.RIGHT, V3.RIGHT))
         with self.assertRaises(AssertionError):
-            self.assertVerticesEqual(circle(points=4), (V3.RIGHT, V3.BACKWARD, V3.LEFT, V3.FORWARD))
+            self.assertVerticesEqual(circle(bounds=I360(points=4)), (V3.RIGHT, V3.BACKWARD, V3.LEFT, V3.FORWARD))
     
     def test_not_almost_equal(self) -> None:
         """Testing cases when generated vertices are not almost equal
         """
-        circle = Circle(radius=1)
+        circle = Circle()
         with self.assertRaises(AssertionError):
-            self.assertVerticesNotEqual(circle(points=1), (V3.RIGHT, ))
+            self.assertVerticesNotEqual(circle(bounds=I360(points=1)), (V3.RIGHT, ))
         with self.assertRaises(AssertionError):
-            self.assertVerticesNotEqual(circle(points=2), (V3.RIGHT, V3.LEFT))
+            self.assertVerticesNotEqual(circle(bounds=I360(points=2)), (V3.RIGHT, V3.LEFT))
         with self.assertRaises(AssertionError):
-            self.assertVerticesNotEqual(circle(points=4), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD))
-        self.assertVerticesNotEqual(circle(points=1), (V3.LEFT, ))
-        self.assertVerticesNotEqual(circle(points=2), (V3.RIGHT, V3.RIGHT))
-        self.assertVerticesNotEqual(circle(points=4), (V3.RIGHT, V3.BACKWARD, V3.LEFT, V3.FORWARD))
+            self.assertVerticesNotEqual(circle(bounds=I360(points=4)), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD))
+        self.assertVerticesNotEqual(circle(bounds=I360(points=1)), (V3.LEFT, ))
+        self.assertVerticesNotEqual(circle(bounds=I360(points=2)), (V3.RIGHT, V3.RIGHT))
+        self.assertVerticesNotEqual(circle(bounds=I360(points=4)), (V3.RIGHT, V3.BACKWARD, V3.LEFT, V3.FORWARD))
     
     def test_bounds(self) -> None:
         """Testing vertices generated within bounds
         """
-        circle = Circle(radius=1, points=4)
-        self.assertVerticesEqual(circle(bounds=I360(0, 360)), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
-        self.assertVerticesEqual(circle(bounds=I360(0, 300)), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
-        self.assertVerticesEqual(circle(bounds=I360(0, 270)), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
-        self.assertVerticesEqual(circle(bounds=I360(0, 200)), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
-        self.assertVerticesEqual(circle(bounds=I360(0, 180)), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
-        self.assertVerticesEqual(circle(bounds=I360(0, 150)), (V3.RIGHT, V3.FORWARD, ))
-        self.assertVerticesEqual(circle(bounds=I360(0, 90)), (V3.RIGHT, V3.FORWARD, ))
-        self.assertVerticesEqual(circle(bounds=I360(0, 60)), (V3.RIGHT, ))
+        circle = Circle()
+        self.assertVerticesEqual(circle(bounds=I360(0, 360, points=4)), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
+        self.assertVerticesEqual(circle(bounds=I360(0, 300, points=4)), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
+        self.assertVerticesEqual(circle(bounds=I360(0, 270, points=4)), (V3.RIGHT, V3.FORWARD, V3.LEFT, V3.BACKWARD, ))
+        self.assertVerticesEqual(circle(bounds=I360(0, 200, points=4)), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
+        self.assertVerticesEqual(circle(bounds=I360(0, 180, points=4)), (V3.RIGHT, V3.FORWARD, V3.LEFT, ))
+        self.assertVerticesEqual(circle(bounds=I360(0, 150, points=4)), (V3.RIGHT, V3.FORWARD, ))
+        self.assertVerticesEqual(circle(bounds=I360(0, 90, points=4)), (V3.RIGHT, V3.FORWARD, ))
+        self.assertVerticesEqual(circle(bounds=I360(0, 60, points=4)), (V3.RIGHT, ))
     
     def test_advanced_bounds(self) -> None:
-        """Testing advance bound usage
+        """Testing advanced bound usage
         """
-        circle = Circle(points=4)
-        self.assertVerticesEqual(circle(bounds=I360(90, 360)), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
-        self.assertVerticesEqual(circle(bounds=I360(180, 270)), (V3.LEFT, V3.BACKWARD))
-        self.assertVerticesEqual(circle(bounds=I360(-90, 90)), (V3.BACKWARD, V3.RIGHT, V3.FORWARD))
-        self.assertVerticesEqual(circle(bounds=I360(-180, -90)), (V3.LEFT, V3.BACKWARD))
-        self.assertVerticesEqual(circle(bounds=I360(360, 450)), (V3.RIGHT, V3.FORWARD))
-        self.assertVerticesEqual(circle(bounds=I360(450, 720)), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
+        circle = Circle()
+        self.assertVerticesEqual(circle(bounds=I360(90, 360, points=4)), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))
+        self.assertVerticesEqual(circle(bounds=I360(180, 270, points=4)), (V3.LEFT, V3.BACKWARD))
+        self.assertVerticesEqual(circle(bounds=I360(-90, 90, points=4)), (V3.BACKWARD, V3.RIGHT, V3.FORWARD))
+        self.assertVerticesEqual(circle(bounds=I360(-180, -90, points=4)), (V3.LEFT, V3.BACKWARD))
+        self.assertVerticesEqual(circle(bounds=I360(360, 450, points=4)), (V3.RIGHT, V3.FORWARD))
+        self.assertVerticesEqual(circle(bounds=I360(450, 720, points=4)), (V3.FORWARD, V3.LEFT, V3.BACKWARD, V3.RIGHT))

@@ -10,7 +10,7 @@ import math
 
 @makeImmutable
 @addInitRepr
-@addCopyCall("radius", "points", "pivot", "bounds")
+@addCopyCall("radius", "pivot", "bounds")
 ## \todo Refactor & add docs
 class Circle:
     """Data object for storing information used for generating points in circles
@@ -18,21 +18,17 @@ class Circle:
     Made immutable and has an automatic __repr__() implementation by using decorators
     """
 
-    def __init__(self, radius: int|float = 1, points: int = 8, pivot: V3 = V3.ZERO, bounds: I360 = I360(openEnd=True)) -> None:
+    def __init__(self, radius: int|float = 1, pivot: V3 = V3.ZERO, bounds: I360 = I360(openEnd=True)) -> None:
         """Initializing an Circle instance
 
         Args:
             radius (int | float, optional): Circle radius, in meters. Defaults to 1.
-            points (int, optional): Number of points in circle, should be a power of 2. Defaults to 8.
             pivot (V3, optional): Circle pivot point. Defaults to V3.ZERO.
             bounds (I360, optional): Angle bound values in degrees. Defaults to I360().
         """
         ## Circle radius
         assert radius > 0, "Radius has to be a positive number"
         self.radius = radius
-        ## Number of points on the whole circle
-        assert isPow2(points), "Point count has to be a power of 2"
-        self.points = points
         ## Position of the center of the circle
         self.pivot = pivot
         ## Generated circle bounds
@@ -42,7 +38,7 @@ class Circle:
     def __iter__(self):
         """Generating vertex points on a circle
         """
-        for degree in self.bounds[self.points]:
+        for degree in self.bounds:
             radians = math.radians(degree)
             sin = math.sin(radians)
             cos = math.cos(radians)
