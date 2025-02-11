@@ -66,8 +66,10 @@ def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
         outer (Circle): Outer circle
         inner (Circle): Inner circle
     """
-    for bounds in (I360.HALF1, I360.HALF2):
-        self.face(outer(bounds=bounds).face(cutout=inner(bounds=bounds)))
+    for interval in (I360.HALF1, I360.HALF2):
+        outerWithPoints = outer(bounds=interval(points=outer.bounds.points))
+        innerWithPoints = inner(bounds=interval(points=inner.bounds.points))
+        self.face(outerWithPoints.face(cutout=innerWithPoints))
 
 
 
@@ -136,7 +138,7 @@ def Center(self, outer: Circle) -> None:
         outer (Circle): Outer circle
     """
     inner = outer(radius=outer.radius - self.wallWidth).gap(self.archWidth)
-    column = Circle(radius=1, points=outer.points//4)
+    column = Circle(radius=1, bounds=I360(points=outer.bounds.points//4))
     self.load(Column, "Central pillar", circle=column, height=self.floorHeight)
     self.load(CenterWall, "Central wall", outer=outer, inner=inner)
     #self.load(SpiralStairs, "Spiral stairs", outer=inner, inner=column(bounds=inner.bounds))
@@ -151,11 +153,9 @@ def Atrium(self, outer: Circle) -> None:
     Args:
         outer (Circle): Outer circle
     """
-    center = Circle(radius=4, points=outer.points//2).gap(self.archWidth)
+    center = Circle(radius=4, bounds=I360(points=outer.bounds.points//2)).gap(self.archWidth)
     self.load(AtriumFloor, "Atrium floor", outer=outer, inner=center)
     self.load(Center, "Central staircase", outer=center)
-    #for position in Circle(radius=Math.average(outer.radius, center.radius), points=8.vertices():
-    #    self.load(Column, "Atrium pillar", height=3, circle=Circle(0.5, 8, position))
 
 
 
@@ -163,7 +163,7 @@ def Atrium(self, outer: Circle) -> None:
 def Babel(self) -> None:
     """Generating a floor of a tower of Babel
     """
-    atrium = Circle(10, 512)
+    atrium = Circle(10, bounds=I360(points=512))
     self.load(Atrium, "Atrium", outer=atrium)
 
 

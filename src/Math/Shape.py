@@ -91,4 +91,4 @@ class Circle:
             Circle: New circle with correct interval values
         """
         angle = round(math.degrees(math.asin(gap/2 / self.radius)))
-        return self(bounds=I360(angle, 360-angle))
+        return self(bounds=I360(angle, 360-angle, points=self.bounds.points))
