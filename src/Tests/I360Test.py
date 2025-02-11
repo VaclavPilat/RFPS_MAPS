@@ -26,21 +26,21 @@ class I360Test(unittest.TestCase):
         """Testing point generation with/without including bounds
         """
         x = I360()
-        self.assertEqual(x[1], [0])
-        self.assertEqual(x[2], [0, 180])
-        self.assertEqual(x[3], [0, 120, 240])
+        self.assertEqual(list(x(points=1)), [0])
+        self.assertEqual(list(x(points=2)), [0, 180])
+        self.assertEqual(list(x(points=3)), [0, 120, 240])
         x = I360(0, 360, False, True)
-        self.assertEqual(x[1], [0])
-        self.assertEqual(x[2], [0, 180])
-        self.assertEqual(x[3], [0, 120, 240])
+        self.assertEqual(list(x(points=1)), [0])
+        self.assertEqual(list(x(points=2)), [0, 180])
+        self.assertEqual(list(x(points=3)), [0, 120, 240])
         x = I360(0, 360, True)
-        self.assertEqual(x[1], [])
-        self.assertEqual(x[2], [180])
-        self.assertEqual(x[3], [120, 240])
+        self.assertEqual(list(x(points=1)), [])
+        self.assertEqual(list(x(points=2)), [180])
+        self.assertEqual(list(x(points=3)), [120, 240])
         x = I360(0, 360, True, True)
-        self.assertEqual(x[1], [])
-        self.assertEqual(x[2], [180])
-        self.assertEqual(x[3], [120, 240])
+        self.assertEqual(list(x(points=1)), [])
+        self.assertEqual(list(x(points=2)), [180])
+        self.assertEqual(list(x(points=3)), [120, 240])
     
     def assertIntervalEqual(self, first: IOperand, second: IOperand, count: int = 30) -> None:
         """Asserting that both intervals generate the same points
@@ -48,9 +48,8 @@ class I360Test(unittest.TestCase):
         Args:
             first (IOperand): First interval
             second (IOperand): Second interval
-            count (int, optional): Point count. Defaults to 30.
         """
-        self.assertEqual(first[count], second[count])
+        self.assertEqual(list(first), list(second))
     
     def test_inversion(self) -> None:
         """Testing generation after interval inversion

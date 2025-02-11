@@ -117,25 +117,19 @@ class IIntersect(IOperand):
         """
         return "(" + " & ".join((str(x) for x in self.intervals)) + ")"
     
-    def __getitem__(self, points: int) -> list:
+    def __iter__(self) -> list:
         """Generating values from an interval intersection
-
-        Args:
-            points (int): Number of values to generate
-
-        Returns:
-            list: List of generated values
         
         Examples:
-            >>> (I360(0, 180) & I360(75, 135))[16]
+            >>> list((I360(0, 180, points=16) & I360(75, 135, points=16)))
             [90.0, 112.5, 135.0]
-            >>> (I360(0, 90) & I360(120, 180))[36]
+            >>> list((I360(0, 90, points=36) & I360(120, 180, points=36)))
             []
         """
-        values = self.intervals[0][points]
-        for i in self.intervals[1:]:
-            values = [x for x in values if x in i[points]]
-        return values
+        values = list(self.intervals[0])
+        for interval in self.intervals[1:]:
+            values = [x for x in values if x in list(interval)]
+        return iter(values)
     
     def __add__(self, number: int|float) -> "IIntersect":
         """Incrementing an intersection of intervals
@@ -213,27 +207,21 @@ class IUnion(IOperand):
         """
         return "(" + " | ".join((str(x) for x in self.intervals)) + ")"
     
-    def __getitem__(self, points: int) -> list:
+    def __iter__(self) -> list:
         """Generating values from an interval union
-
-        Args:
-            points (int): Number of values to generate
-
-        Returns:
-            list: List of generated values
         
         Examples:
-            >>> (I360(0, 180) | I360(75, 135))[8]
+            >>> list((I360(0, 180, points=8) | I360(75, 135, points=8)))
             [0.0, 45.0, 90.0, 135.0, 180.0]
-            >>> (I360(0, 60) | I360(90, 135))[16]
+            >>> list((I360(0, 60, points=16) | I360(90, 135, points=16)))
             [0.0, 22.5, 45.0, 90.0, 112.5, 135.0]
         """
         values = []
-        for i in self.intervals:
-            for x in i[points]:
+        for interval in self.intervals:
+            for x in interval:
                 if x not in values:
                     values.append(x)
-        return values
+        return iter(values)
     
     def __add__(self, number: int|float) -> "IUnion":
         """Incrementing a union of intervals
@@ -261,7 +249,7 @@ class I360(IOperand):
     """
 
     ## \note Removal of the IUnion wrapper would result in I360.__init__ being called twice, which addInitRepr decorator does not allow
-    def __new__(cls, start: int|float = 0, end: int|float = 360, openStart: bool = False, openEnd: bool = False) -> "IOperand":
+    def __new__(cls, start: int|float = 0, end: int|float = 360, openStart: bool = False, openEnd: bool = False, points: int = 8) -> "IOperand":
         """Creating a new instance by clamping passed values
 
         Args:
@@ -269,6 +257,7 @@ class I360(IOperand):
             end (int | float, optional): End value. Defaults to 360.
             openStart (bool, optional): Should the start of the interval be open? Defaults to False.
             openEnd (bool, optional): Should the end of the interval be open? Defaults to False.
+            points (int, optional): Point count in a circle. Defaults to 8.
 
         Returns:
             IOperand: Either a I360 instance or a union of them
@@ -285,11 +274,11 @@ class I360(IOperand):
             return super().__new__(cls)
         start, end = (x if 0 <= x <= 360 else x % 360 for x in (start, end))
         if start < end:
-            return IUnion(I360(start, end, openStart, openEnd))
-        return I360(start, 360, openStart, True) | I360(0, end, False, openEnd)
+            return IUnion(I360(start, end, openStart, openEnd, points))
+        return I360(start, 360, openStart, True, points) | I360(0, end, False, openEnd, points)
         
 
-    def __init__(self, start: int|float = 0, end: int|float = 360, openStart: bool = False, openEnd: bool = False) -> None:
+    def __init__(self, start: int|float = 0, end: int|float = 360, openStart: bool = False, openEnd: bool = False, points: int = 8) -> None:
         """Initialising a circular interval
 
         Args:
@@ -297,6 +286,7 @@ class I360(IOperand):
             end (int | float, optional): End value. Defaults to 360.
             openStart (bool, optional): Should the start of the interval be open? Defaults to False.
             openEnd (bool, optional): Should the end of the interval be open? Defaults to False.
+            points (int, optional): Point count in a circle. Defaults to 8.
         
         Examples:
             >>> I360(0, 90)
@@ -313,6 +303,9 @@ class I360(IOperand):
         self.openStart = openStart
         ## Is interval open at end?
         self.openEnd = openEnd
+        assert points > 0, "Point count has to be a positive number"
+        ## Point count
+        self.points = points
         ## Is the interval empty?
         self.isEmpty = start == end and openStart and openEnd
         ## Is the interval the whole circle?
@@ -359,33 +352,30 @@ class I360(IOperand):
             I360(120, 360, True, True)
         """
         if self.isEmpty:
-            return I360(0, 360, False, False)
+            return I360(0, 360, False, False, self.points)
         if self.isFull:
-            return I360(0, 0, True, True)
+            return I360(0, 0, True, True, self.points)
         if self.start == 0:
-            return I360(self.end, 360, not self.openEnd, not self.openStart)
+            return I360(self.end, 360, not self.openEnd, not self.openStart, self.points)
         if self.end == 360:
-            return I360(0, self.start, not self.openEnd, not self.openStart)
-        return I360(self.end, 360, not self.openEnd) | I360(0, self.start, False, not self.openStart)
+            return I360(0, self.start, not self.openEnd, not self.openStart, self.points)
+        return I360(self.end, 360, not self.openEnd, self.points) | I360(0, self.start, False, not self.openStart, self.points)
     
-    def __getitem__(self, points: int) -> list:
+    def __iter__(self):
         """Generating angles that belong to the interval
-
-        Args:
-            points (int): Number of angles to generate
-
-        Returns:
-            list: Generated angle values
         
         Examples:
-            >>> I360(0, 90)[16]
+            >>> list(I360(0, 90, points=16))
             [0.0, 22.5, 45.0, 67.5, 90.0]
-            >>> I360(0, 180, True)[6]
+            >>> list(I360(0, 180, True, points=6))
             [60.0, 120.0, 180.0]
-            >>> I360(openEnd=True)[4]
+            >>> list(I360(openEnd=True, points=4))
             [0.0, 90.0, 180.0, 270.0]
         """
-        return [p % 360 for p in (360 * i / points for i in range(points + 1)) if p in self]
+        for i in range(self.points + 1):
+            angle = 360 * i / self.points
+            if angle in self:
+                yield angle % 360
     
     def __add__(self, number: int|float) -> "IOperand":
         """Incrementing a circular interval
@@ -404,7 +394,7 @@ class I360(IOperand):
         """
         if self.isEmpty or self.isFull:
             return self
-        return I360(self.start + number, self.end + number, self.openStart, self.openEnd)
+        return I360(self.start + number, self.end + number, self.openStart, self.openEnd, self.points)
 
 
 
