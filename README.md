@@ -1,4 +1,4 @@
-# About RFPS Maps
+# About RFPS MAPS
 
 This project contains scripts for creating maps and other 3D models for the **RFPS** project using Blender's Python support.
 

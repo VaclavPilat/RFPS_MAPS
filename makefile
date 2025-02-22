@@ -13,10 +13,10 @@ doc:
 	@doxygen Doxyfile
 
 cloc:
-	cloc src/ --include-lang=Python --exclude-dir=Tests --by-file
+	@cloc src/ --include-lang=Python --exclude-dir=Tests --by-file
 
 clean:
-	rm -rf docs/html/
+	@rm -rf docs/html/
 
 show:
 	@cd src; \

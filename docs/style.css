@@ -1,0 +1,16 @@
+#projectlogo {
+    vertical-align: middle;
+}
+
+#projectlogo img {
+    aspect-ratio: 1/1;
+    height: 45px;
+}
+
+:is(#projectlogo, .image) img {
+    margin: 5px;
+}
+
+.image {
+    display: inline-block;
+}
