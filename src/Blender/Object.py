@@ -13,15 +13,15 @@ class Object:
     """Class for containing own mesh and/or other objectes
     """
 
-    def __init__(self, name: str = "New object", pivot: V3 = V3.ZERO, *args, **kwargs) -> None:
+    def __init__(self, name: str = "New object", position: V3 = V3.ZERO, *args, **kwargs) -> None:
         """Creating a new object
 
         Args:
             name (str, optional): Object name. Defaults to "New object".
-            pivot (V3, optional): Pivot positions. Defaults to V3.ZERO.
+            position (V3, optional): Object location. Defaults to V3.ZERO.
         """
         self.name = name
-        self.pivot = pivot
+        self.position = position
         self.objects = []
         self.faces = []
         self.generate(*args, **kwargs)
@@ -79,7 +79,7 @@ class Object:
         """
         raise NotImplementedError("Object generation method was not overriden")
 
-    def face(self, vertices: list[V3]|tuple[V3], inverted: bool = False) -> None:
+    def face(self, *vertices: list[V3]|tuple[V3], inverted: bool = False) -> None:
         """Creating a new face
 
         Args:
@@ -112,7 +112,7 @@ class Object:
             bpy object: Built blender object
         """
         obj = bpy.data.objects.new(self.name, self.create() if len(self.faces) else None)
-        obj.location = list(self.pivot)
+        obj.location = list(self.position)
         bpy.context.scene.collection.objects.link(obj)
         for child in self.objects:
             child.build().parent = obj
