@@ -10,7 +10,56 @@ from Math.Vector import V3
 from Math.Interval import I360
 from Math.Shape import Circle
 from Blender.Object import createObjectSubclass, Object
-from Utils.Decorators import defaultKwargsValues
+from Utils.Decorators import defaultKwargsValues, makeImmutable
+
+
+
+@makeImmutable
+class BabelSettings:
+    """Class for storing common Babel map settings
+    """
+
+    def __init__(self, floorHeight: float = 5, floorThickness: float = 0.5, wallWidth: float = 0.5, archWidth: float = 2.5,
+    archHeight: float = 3, teamCount: int = 2, atriumSegments: int = 8, atriumRadius: float = 10, pillarHeight: float = 3.5,
+    pillarRadius: float = 0.5) -> None:
+        """Initialising Babel settings
+
+        Args:
+            floorHeight (float, optional): Floor height. Defaults to 5.
+            floorThickness (float, optional): Floor thickness. Defaults to 0.5.
+            wallWidth (float, optional): Wall width. Defaults to 0.5.
+            archWidth (float, optional): Arch width. Defaults to 2.5.
+            archHeight (float, optional): Arch height. Defaults to 3.
+            teamCount (int, optional): Number of team areas. Defaults to 2.
+            atriumSegments (int, optional): Number of atrium segments. Defaults to 8.
+            atriumRadius (float, optional): Atrium radius. Defaults to 10.
+            pillarHeight (float, optional): Pillar height. Defaults to 3.5.
+            pillarRadius (float, optional): Pillar radius. Defaults to 0.5.
+        """
+        ## Babel floor height
+        self.floorHeight = floorHeight
+        ## Floor thickness
+        self.floorThickness = floorThickness
+        ## Wall width
+        self.wallWidth = wallWidth
+        ## Arch width
+        self.archWidth = archWidth
+        ## Arch height
+        assert archHeight < pillarHeight, "Arch height has to be lesser than pillar height"
+        self.archHeight = archHeight
+        ## Number of team areas
+        assert teamCount >= 2, "At least two team areas are required"
+        self.teamCount = teamCount
+        ## Number of atrium segments
+        assert atriumSegments >= 3, "At least 3 atrium segments are required"
+        assert atriumSegments % teamCount == 0, "Atrium segment count has to be divisible by team count"
+        self.atriumSegments = atriumSegments
+        ## Atrium radius
+        self.atriumRadius = atriumRadius
+        ## Pillar height. Anything above is a part of the ceiling.
+        self.pillarHeight = pillarHeight
+        ## Pillar radius
+        self.pillarRadius = pillarRadius
 
 
 
@@ -18,26 +67,17 @@ class BabelObject(Object):
     """Object subclass used for all Babel objects
     """
 
-    def __init__(self, *args, floorHeight: float, wallWidth: float, archWidth: float, archHeight: float, **kwargs) -> None:
+    def __init__(self, *args, settings: BabelSettings = BabelSettings(), **kwargs) -> None:
         """Initialising a Babel object.
 
         Args:
-            floorHeight (float): Floor height
-            wallWidth (float): Wall width
-            archWidth (float): Archway width
-            archHeight (float): Archway height (at the top)
+            settings (BabelSettings, optional): Babel map settings. Defaults to BabelSettings().
         """
-        ## Total floor height
-        self.floorHeight = floorHeight
-        ## Wall width
-        self.wallWidth = wallWidth
-        ## Archway width
-        self.archWidth = archWidth
-        ## Archway height (at the top)
-        self.archHeight = archHeight
+        ## Common map settings
+        self.settings = settings
         super().__init__(*args, **kwargs)
     
-    @defaultKwargsValues("floorHeight", "wallWidth", "archWidth", "archHeight")
+    @defaultKwargsValues("settings")
     def load(self, *args, **kwargs) -> None:
         """Loading a new object with preset values
         """
@@ -46,116 +86,11 @@ class BabelObject(Object):
 
 
 @createObjectSubclass(BabelObject)
-def Column(self, circle: Circle, height: int|float) -> None:
-    """Generating a column
-
-    Args:
-        circle (Circle): Column radius.
-        height (int | float): Column height.
+def Pillar(self) -> None:
+    """Generating a pillar
     """
-    for face in circle.cylinder(height):
+    for face in Circle(self.settings.pillarRadius, self.pivot, I360(points=16)).cylinder(self.settings.pillarHeight):
         self.face(face)
-
-
-
-@createObjectSubclass(BabelObject)
-def AtriumFloor(self, outer: Circle, inner: Circle) -> None:
-    """Generating atrium floor, split into two halves
-
-    Args:
-        outer (Circle): Outer circle
-        inner (Circle): Inner circle
-    """
-    for interval in (I360.HALF1, I360.HALF2):
-        outerWithPoints = outer(bounds=interval(points=outer.bounds.points))
-        innerWithPoints = inner(bounds=interval(points=inner.bounds.points))
-        self.face(outerWithPoints.face(cutout=innerWithPoints))
-
-
-
-@createObjectSubclass(BabelObject)
-def CenterWall(self, outer: Circle, inner: Circle) -> None:
-    """Generating walls around spiral staircase in the middle of the map
-
-    Args:
-        outer (Circle): Outer wall circle
-        inner (Circle): Inner wall circle
-    """
-    # Outer wall
-    for face in outer.cylinder(self.archHeight, closed=False):
-        self.face(face)
-    # Inner wall
-    for face in inner.cylinder(self.floorHeight, closed=False):
-        self.face(face, inverted=True)
-    # Entrance floor
-    """outerPoints, innerPoints = ([x for x in circle(bounds=I360(openEnd=True)) if x not in tuple(circle)[1:-1]] for circle in (outer, inner))
-    outerPoints, innerPoints = ([x for x in points if x.x < 0] + [x for x in points if x.x >= 0] for points in (outerPoints, innerPoints))
-    self.face(outerPoints + innerPoints[::-1])"""
-
-
-
-@createObjectSubclass(BabelObject)
-def SpiralStairs(self, outer: Circle, inner: Circle) -> None:
-    """Generating a spiral staircase
-
-    Args:
-        outer (Circle): Outer circle
-        inner (Circle): inner circle
-    """
-    # Getting step points
-    innerIntersect, outerIntersect = (x(bounds=x.bounds & x.bounds + 180) for x in (inner, outer))
-    innerPoints, outerPoints = (tuple(x) for x in (innerIntersect, outerIntersect))
-    leftInnerPoints, leftOuterPoints = ([x for x in points if x.x < 0] for points in (innerPoints, outerPoints))
-    rightInnerPoints, rightOuterPoints = ([x for x in points if x.x > 0] for points in (innerPoints, outerPoints))
-    # Adding step faces
-    stepCount = (len(leftInnerPoints) - 1) * 2
-    for i in range(stepCount // 2):
-        self.face([x(z=(i + stepCount // 2) / stepCount * self.floorHeight) for x in leftOuterPoints[i:i+2] + leftInnerPoints[i:i+2][::-1]])
-        stepBound = [leftInnerPoints[i+1], leftOuterPoints[i+1]]
-        self.face([x(z=(i+stepCount//2) / stepCount * self.floorHeight) for x in stepBound] + [x(z=(i+1+stepCount//2) / stepCount * self.floorHeight) for x in stepBound[::-1]])
-    for i in range(stepCount // 2):
-        self.face([x(z=i / stepCount * self.floorHeight) for x in rightOuterPoints[i:i+2] + rightInnerPoints[i:i+2][::-1]])
-        stepBound = [rightInnerPoints[i+1], rightOuterPoints[i+1]]
-        self.face([x(z=i / stepCount * self.floorHeight) for x in stepBound] + [x(z=(i+1) / stepCount * self.floorHeight) for x in stepBound[::-1]])
-    # Adding the middle floor
-    middleInnerPoints = [x for x in inner(bounds=I360(openEnd=True)) if x not in leftInnerPoints[1:-1] and x not in rightInnerPoints[1:-1]]
-    middleOuterPoints = [x for x in outer(bounds=I360(openEnd=True)) if x not in leftOuterPoints[1:-1] and x not in rightOuterPoints[1:-1]]
-    forwardInnerPoints, forwardOuterPoints = ([x for x in points if x.y > 0] for points in (middleInnerPoints, middleOuterPoints))
-    self.face([x(z=self.floorHeight / 2) for x in forwardOuterPoints + forwardInnerPoints[::-1]])
-    # Adding the entrance floor
-    backwardInnerPoints = [x for x in middleInnerPoints if x.y < 0 and x.x < 0] + [x for x in middleInnerPoints if x.y < 0 and x.x >= 0]
-    backwardOuterPoints = [x for x in middleOuterPoints if x.y < 0 and x.x < 0] + [x for x in middleOuterPoints if x.y < 0 and x.x >= 0]
-    self.face(backwardOuterPoints + backwardInnerPoints[::-1])
-
-
-
-@createObjectSubclass(BabelObject)
-## \todo Refactor by adding/modifying an Object subclass with floor height, floor thickness, arch height, arch gap etc.
-def Center(self, outer: Circle) -> None:
-    """Generating a central column with a spiral staircase inside
-
-    Args:
-        outer (Circle): Outer circle
-    """
-    inner = outer(radius=outer.radius - self.wallWidth).gap(self.archWidth)
-    column = Circle(radius=1, bounds=I360(points=outer.bounds.points//4))
-    self.load(Column, "Central pillar", circle=column, height=self.floorHeight)
-    self.load(CenterWall, "Central wall", outer=outer, inner=inner)
-    #self.load(SpiralStairs, "Spiral stairs", outer=inner, inner=column(bounds=inner.bounds))
-
-
-
-@createObjectSubclass(BabelObject)
-## \todo Same issue as in Center
-def Atrium(self, outer: Circle) -> None:
-    """Generating the atrium in the center of the map
-
-    Args:
-        outer (Circle): Outer circle
-    """
-    center = Circle(radius=4, bounds=I360(points=outer.bounds.points//2)).gap(self.archWidth)
-    self.load(AtriumFloor, "Atrium floor", outer=outer, inner=center)
-    self.load(Center, "Central staircase", outer=center)
 
 
 
@@ -163,8 +98,8 @@ def Atrium(self, outer: Circle) -> None:
 def Babel(self) -> None:
     """Generating a floor of a tower of Babel
     """
-    atrium = Circle(10, bounds=I360(points=512))
-    self.load(Atrium, "Atrium", outer=atrium)
+    for point in Circle(self.settings.atriumRadius, bounds=I360(points=self.settings.atriumSegments)):
+        self.load(Pillar, "Atrium wall pillar", point)
 
 
 
@@ -172,10 +107,4 @@ if __name__ == "__main__":
     from Blender.Functions import setupForDevelopment, purgeExistingObjects
     setupForDevelopment()
     purgeExistingObjects()
-    settings = {
-        "floorHeight": 5,
-        "wallWidth": 0.5,
-        "archWidth": 2.5,
-        "archHeight": 3,
-    }
-    Babel("Tower of Babel", **settings).print().build()
+    Babel("Tower of Babel").print().build()
