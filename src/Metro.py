@@ -32,7 +32,7 @@ class Tile(Object):
     """Base class for all Metro Objects
     """
 
-    def __init__(self, name: str, position: V3, width: float, height: float, pivot: Pivot = Pivot.TOP_LEFT, rotation: int = 0) -> None:
+    def __init__(self, name: str, position: V3, width: float, height: float, pivot: Pivot = Pivot.TOP_LEFT, rotation: int = 0, *args, **kwargs) -> None:
         """Initialising a Metro tile
 
         Args:
@@ -59,7 +59,7 @@ class Tile(Object):
             self.BR = self.BL + V3.RIGHT * width
         else:
             raise ValueError("Unexpected Pivot value")
-        super().__init__(name, position)
+        super().__init__(name, position, *args, **kwargs)
     
     def rotate(self, point: V3) -> V3:
         """Rotating a point around tile pivot
@@ -71,14 +71,20 @@ class Tile(Object):
             V3: Rotated point
         """
         return ((point - self.position) >> self.rotation) + self.position
+    
+    def face(self, *points, **kwargs) -> None:
+        points = list(map(self.rotate, points))
+        super().face(*points, **kwargs)
 
 
 
 @createObjectSubclass(Tile)
-def Rectangle(self) -> None:
-    """Simple rectangle
-    """
-    self.face(self.TR, self.TL, self.BL, self.BR)
+def Slopes(self, depth: float) -> None:
+    LTR, LBR = map(lambda x: x + V3.DOWN * depth, (self.TR, self.BR))
+    self.face(LTR, self.TL, self.BL, LBR)
+    self.face(self.TR, self.TL, LTR)
+    self.face(self.BL, self.BR, LBR)
+    
 
 
 
@@ -86,7 +92,8 @@ def Rectangle(self) -> None:
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(Rectangle, "Test", V3.ZERO, 2, 1)
+    for i in range(4):
+        self.load(Slopes, "Test", V3.ZERO, 3, 3, rotation=i, depth=3)
 
 
 
