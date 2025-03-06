@@ -13,18 +13,23 @@ from enum import Enum
 
 
 class Pivot(Enum):
-    """Enum for tile bound generation
+    """Enum for containing all pivot types of a Tile.
+
+    Pivot is the origin point of a Tile instance.
+    Tile is built and rotated around a pivot.
     """
 
+    ## Top left corner
     TOP_LEFT = 0
-    TOP = 1
-    TOP_RIGHT = 2
-    LEFT = 3
-    CENTER = 4
-    RIGHT = 5
-    BOTTOM_LEFT = 6
-    BOTTOM = 7
-    BOTTOM_RIGHT = 8
+
+    ## Top right corner
+    TOP_RIGHT = 1
+
+    ## Bottom left corner
+    BOTTOM_LEFT = 2
+
+    ## Bottom right corner
+    BOTTOM_RIGHT = 3
 
 
 
@@ -87,7 +92,6 @@ def Slopes(self, depth: float) -> None:
     
 
 
-
 @createObjectSubclass(Object)
 def Metro(self) -> None:
     """Generating the Metro station
@@ -98,7 +102,7 @@ def Metro(self) -> None:
 
 
 if __name__ == "__main__":
-    from Blender.Functions import setupForDevelopment, purgeExistingObjects
+    """from Blender.Functions import setupForDevelopment, purgeExistingObjects
     setupForDevelopment()
     purgeExistingObjects()
-    Metro("Metro station").print().build()
+    Metro("Metro station").print().build()"""
