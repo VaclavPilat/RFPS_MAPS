@@ -1,10 +1,14 @@
 ## \file
 # Implementation of the Metro station map
 if __name__ == "__main__":
-    import os, sys, bpy
-    directory = os.path.dirname(bpy.data.filepath)
-    if not directory in sys.path:
-        sys.path.append(directory)
+    try:
+        import os, sys, bpy
+        IN_BLENDER = True
+        directory = os.path.dirname(bpy.data.filepath)
+        if not directory in sys.path:
+            sys.path.append(directory)
+    except ImportError:
+        IN_BLENDER = False
 from Math.Vector import V3
 from Blender.Object import createObjectSubclass, Object
 from Utils.Decorators import defaultKwargsValues, makeImmutable
@@ -78,6 +82,8 @@ class Tile(Object):
         return ((point - self.position) >> self.rotation) + self.position
     
     def face(self, *points, **kwargs) -> None:
+        """Rotating face around tile pivot
+        """
         points = list(map(self.rotate, points))
         super().face(*points, **kwargs)
 
@@ -102,7 +108,11 @@ def Metro(self) -> None:
 
 
 if __name__ == "__main__":
-    """from Blender.Functions import setupForDevelopment, purgeExistingObjects
-    setupForDevelopment()
-    purgeExistingObjects()
-    Metro("Metro station").print().build()"""
+    if IN_BLENDER:
+        from Blender.Functions import setupForDevelopment, purgeExistingObjects
+        setupForDevelopment()
+        purgeExistingObjects()
+    metro = Metro("Metro station")
+    metro.print()
+    if IN_BLENDER:
+        metro.build()
