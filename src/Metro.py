@@ -10,8 +10,12 @@ if __name__ == "__main__":
     except ImportError:
         IN_BLENDER = False
 from Math.Vector import V3
-from Blender.Object import createObjectSubclass, Object
+from Mesh.Object import createObjectSubclass
 from Utils.Decorators import defaultKwargsValues, makeImmutable
+if IN_BLENDER:
+    from Blender.Object import Object
+else:
+    from Mesh.Object import Object
 from enum import Enum
 
 
