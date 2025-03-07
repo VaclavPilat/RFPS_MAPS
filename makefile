@@ -18,6 +18,13 @@ cloc:
 clean:
 	@rm -rf docs/html/
 
+run:
+	@cd src; \
+	for file in $(FILE); do \
+		$(PYTHON) $(FILE); \
+	done; \
+	cd ..
+
 show:
 	@cd src; \
 	for file in $(FILE); do \
