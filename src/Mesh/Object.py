@@ -35,8 +35,8 @@ class Object:
         for obj in self.objects:
             yield from obj
     
-    def hierearchy(self, indent: str = "", itemIndent: str = "") -> str:
-        """Getting the string representation of object hierearchy
+    def hierarchy(self, indent: str = "", itemIndent: str = "") -> str:
+        """Getting the string representation of object hierarchy
 
         Args:
             indent (str, optional): Default line indent. Defaults to "".
@@ -48,9 +48,9 @@ class Object:
         output = indent + repr(self) + "\n"
         for index, child in enumerate(self.objects):
             if index < len(self.objects) - 1:
-                output += child.hierearchy(itemIndent + "├──", itemIndent + "│  ")
+                output += child.hierarchy(itemIndent + "├──", itemIndent + "│  ")
             else:
-                output += child.hierearchy(itemIndent + "└──", itemIndent + "   ")
+                output += child.hierarchy(itemIndent + "└──", itemIndent + "   ")
         return output
 
     def load(self, obj: "Object", *args, **kwargs) -> None:

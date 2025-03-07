@@ -3,16 +3,16 @@
 if __name__ == "__main__":
     try:
         import os, sys, bpy
-        IN_BLENDER = True
+        BLENDER = True
         directory = os.path.dirname(bpy.data.filepath)
         if not directory in sys.path:
             sys.path.append(directory)
     except ImportError:
-        IN_BLENDER = False
+        BLENDER = False
 from Math.Vector import V3
 from Mesh.Object import createObjectSubclass
 from Utils.Decorators import defaultKwargsValues, makeImmutable
-if IN_BLENDER:
+if BLENDER:
     from Blender.Object import Object
 else:
     from Mesh.Object import Object
@@ -112,11 +112,11 @@ def Metro(self) -> None:
 
 
 if __name__ == "__main__":
-    if IN_BLENDER:
+    if BLENDER:
         from Blender.Functions import setupForDevelopment, purgeExistingObjects
         setupForDevelopment()
         purgeExistingObjects()
     metro = Metro("Metro station")
-    print(metro.hierearchy())
-    if IN_BLENDER:
+    print(metro.hierarchy())
+    if BLENDER:
         metro.build()
