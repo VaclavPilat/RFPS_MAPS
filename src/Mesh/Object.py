@@ -35,7 +35,7 @@ class Object:
         for obj in self.objects:
             yield from obj
     
-    def __str__(self, indent: str = "", itemIndent: str = "") -> str:
+    def hierearchy(self, indent: str = "", itemIndent: str = "") -> str:
         """Getting the string representation of object hierearchy
 
         Args:
@@ -48,19 +48,10 @@ class Object:
         output = indent + repr(self) + "\n"
         for index, child in enumerate(self.objects):
             if index < len(self.objects) - 1:
-                output += child.__str__(itemIndent + "├──", itemIndent + "│  ")
+                output += child.hierearchy(itemIndent + "├──", itemIndent + "│  ")
             else:
-                output += child.__str__(itemIndent + "└──", itemIndent + "   ")
+                output += child.hierearchy(itemIndent + "└──", itemIndent + "   ")
         return output
-    
-    def print(self) -> "Object":
-        """Printing object structure
-
-        Returns:
-            Object: Self reference
-        """
-        print(self)
-        return self
 
     def load(self, obj: "Object", *args, **kwargs) -> None:
         """Creating a object instance using class type and its constructor arguments

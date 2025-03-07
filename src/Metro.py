@@ -117,6 +117,6 @@ if __name__ == "__main__":
         setupForDevelopment()
         purgeExistingObjects()
     metro = Metro("Metro station")
-    metro.print()
+    print(metro.hierearchy())
     if IN_BLENDER:
         metro.build()
