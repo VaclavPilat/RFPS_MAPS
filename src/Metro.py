@@ -161,27 +161,31 @@ def Stairs(self, D: float, G: int = 3, H: float = 0.2, L: float = 0.3) -> None:
         L (float, optional): Step length. Defaults to 0.3.
     """
     assert G >= 1, "At least 1 step group required"
-    S = D // H # Total step count
-    assert S * L < abs(self.TL - self.TR), "Steps are longer than the flight of stairs itself!"
-    for g in range(G): # Group index
-        s = int(S // (G - g)) # Step count within the current group
-        S -= s
-        for i in range(s):
-            STL = self.TL + V3.RIGHT * i * L
-            SBL = self.BL + V3.RIGHT * i * L
-            STR = STL + V3.RIGHT * L
-            SBR = SBL + V3.RIGHT * L
-            self.face(STR, STL, SBL, SBR)
-    self.face(self.TR, self.TL, self.BL, self.BR)
-    
+    VF = int(D // H) # Vertical face count
+    HF = VF + 1 # Horizontal face count
+    assert HF * L < abs(self.TR - self.TL), "Steps will not fit horizontally"
+    TL, BL = (self.TL, self.BL)
+    for i in range(VF + HF):
+        if i == VF + HF - 1: # Final horizontal face
+            self.face(self.TR(z=TL.z), TL, BL, self.BR(z=BL.z))
+        else:
+            if i % 2 == 0: # Making a horizontal face
+                TL1 = TL + V3.RIGHT * L
+                BL1 = BL + V3.RIGHT * L
+            else: # Making a vertical face
+                z = (self.TL + V3.DOWN * D * (i // 2 + 1) / VF).z
+                TL1 = TL(z=z)
+                BL1 = BL(z=z)
+            self.face(TL1, TL, BL, BL1)
+            TL, BL = (TL1, BL1)
+ 
 
 
 @createObjectSubclass(Object)
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    for i in range(1):
-        self.load(Stairs, "Test", V3.ZERO, 10, 3, rotation=i, D=3).printGrid()
+    self.load(Stairs, "Test", V3.ZERO, 10, 3, D=3).printGrid()
 
 
 
