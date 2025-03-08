@@ -45,9 +45,9 @@ class Object:
         print(indent + repr(self))
         for index, child in enumerate(self.objects):
             if index < len(self.objects) - 1:
-                child.printHierarchy(itemIndent + "├──", itemIndent + "│  ")
+                child.printHierarchy(itemIndent + "┣━╸", itemIndent + "┃  ")
             else:
-                child.printHierarchy(itemIndent + "└──", itemIndent + "   ")
+                child.printHierarchy(itemIndent + "┗━╸", itemIndent + "   ")
 
     def load(self, obj: "Object", *args, **kwargs) -> "Object":
         """Creating a object instance using class type and its constructor arguments
