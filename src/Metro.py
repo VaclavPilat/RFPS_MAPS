@@ -120,23 +120,23 @@ class Tile(Object):
             print(" " * (Xjust + 1), end="")
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    print(" " * int(Ydiff[j-1] // Ymin), end="")
+                    print(" " * int(Ydiff[j-1] // Ymin *2-1), end="")
                 print(str(y).rjust(Yjust)[i], end="")
             print()
         # Body
         for i, x in enumerate(Xvals):
             if i > 0:
                 for j in range(int(Xdiff[i-1] // Xmin) - 1):
-                    print(" " * (Xjust + 2), end="")
+                    print(" " * (Xjust + 1), end="")
                     for k, y in enumerate(Yvals):
                         if k > 0:
-                            print(" " * int(Ydiff[k-1] // Ymin), end="")
+                            print(" " * int(Ydiff[k-1] // Ymin *2-1), end="")
                         print("┃", end="")
                     print()
             print(str(x).rjust(Xjust) + "╺", end="")
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    print("━" * int(Ydiff[j-1] // Ymin), end="")
+                    print("━" * int(Ydiff[j-1] // Ymin *2-1), end="")
                 print("╋", end="")
             print("╸" + str(x))
         # Footer
@@ -144,7 +144,7 @@ class Tile(Object):
             print(" " * (Xjust + 1), end="")
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    print(" " * int(Ydiff[j-1] // Ymin), end="")
+                    print(" " * int(Ydiff[j-1] // Ymin *2-1), end="")
                 print(str(y).ljust(Yjust)[i], end="")
             print()
 
@@ -172,6 +172,7 @@ def Stairs(self, D: float, G: int = 3, H: float = 0.2, L: float = 0.3) -> None:
             STR = STL + V3.RIGHT * L
             SBR = SBL + V3.RIGHT * L
             self.face(STR, STL, SBL, SBR)
+    self.face(self.TR, self.TL, self.BL, self.BR)
     
 
 
