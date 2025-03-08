@@ -117,37 +117,36 @@ class Tile(Object):
         Ydiff.reverse()
         # Header
         for i in range(Yjust + 1):
-            output = " " * (Xjust + 2)
+            print(" " * (Xjust + 2), end="")
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    output += " " * int(Ydiff[j-1] // Ymin)
-                output += (str(y).rjust(Yjust) + "╷")[i]
-            print(output)
+                    print(" " * int(Ydiff[j-1] // Ymin), end="")
+                print((str(y).rjust(Yjust) + "╷")[i], end="")
+            print()
         # Body
         for i, x in enumerate(Xvals):
             if i > 0:
                 for j in range(int(Xdiff[i-1] // Xmin) - 1):
-                    output = " " * (Xjust + 2)
+                    print(" " * (Xjust + 2), end="")
                     for k, y in enumerate(Yvals):
                         if k > 0:
-                            output += " " * int(Ydiff[k-1] // Ymin)
-                        output += "┆"
-                    print(output)
-            output = str(x).rjust(Xjust) + "╶╌"
+                            print(" " * int(Ydiff[k-1] // Ymin), end="")
+                        print("│", end="")
+                    print()
+            print(str(x).rjust(Xjust) + "╶─", end="")
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    output += "╌" * int(Ydiff[j-1] // Ymin)
-                output += "┼"
-            output += "╌╴" + str(x)
-            print(output)
+                    print("─" * int(Ydiff[j-1] // Ymin), end="")
+                print("┼", end="")
+            print("─╴" + str(x))
         # Footer
         for i in range(Yjust + 1):
-            output = " " * (Xjust + 2)
+            print(" " * (Xjust + 2), end="")
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    output += " " * int(Ydiff[j-1] // Ymin)
-                output += ("╵" + str(y).ljust(Yjust))[i]
-            print(output)
+                    print(" " * int(Ydiff[j-1] // Ymin), end="")
+                print(("╵" + str(y).ljust(Yjust))[i], end="")
+            print()
 
 
 
