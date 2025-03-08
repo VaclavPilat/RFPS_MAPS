@@ -2,13 +2,14 @@
 # Classes for creating objects
 from Math.Vector import V3
 from Utils.Decorators import addInitRepr, makeImmutable, defaultKwargsValues
+from Utils.Grid import Grid
 
 
 
 @addInitRepr
 @makeImmutable
 ## \todo Refactor & add docs
-class Object:
+class Object(Grid):
     """Class for containing own mesh and/or other objectes
     """
 
