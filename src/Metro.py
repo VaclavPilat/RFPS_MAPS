@@ -114,13 +114,32 @@ class Tile(Object):
         """
         Xvals, Xdiff, Xmin, Xjust = self.gridAxis("x")
         Yvals, Ydiff, Ymin, Yjust = self.gridAxis("y")
-        for i in range(Yjust):
-            output = " " * Xjust
-            for v in Yvals:
-                output += (str(v).rjust(Yjust))[i]
+        Yvals.reverse()
+        Ydiff.reverse()
+        # Header
+        for i in range(Yjust + 1):
+            output = " " * (Xjust + 2)
+            for j, y in enumerate(Yvals):
+                if j > 0:
+                    output += " " * (Ydiff[j-1] // Ymin)
+                output += (str(y).rjust(Yjust) + "╷")[i]
             print(output)
-        for v in Xvals:
-            output = str(v).rjust(Xjust)
+        # Body
+        for x in Xvals:
+            output = str(x).rjust(Xjust) + "╶╌"
+            for j, y in enumerate(Yvals):
+                if j > 0:
+                    output += "╌" * (Ydiff[j-1] // Ymin)
+                output += "┼"
+            output += "╌╴" + str(x)
+            print(output)
+        # Footer
+        for i in range(Yjust + 1):
+            output = " " * (Xjust + 2)
+            for j, y in enumerate(Yvals):
+                if j > 0:
+                    output += " " * (Ydiff[j-1] // Ymin)
+                output += ("╵" + str(y).ljust(Yjust))[i]
             print(output)
 
 
