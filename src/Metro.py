@@ -121,7 +121,7 @@ class Tile(Object):
             for j, y in enumerate(Yvals):
                 if j > 0:
                     print(" " * int(Ydiff[j-1] // Ymin), end="")
-                print((str(y).rjust(Yjust) + "╷")[i], end="")
+                print((str(y).rjust(Yjust) + "╻")[i], end="")
             print()
         # Body
         for i, x in enumerate(Xvals):
@@ -131,21 +131,21 @@ class Tile(Object):
                     for k, y in enumerate(Yvals):
                         if k > 0:
                             print(" " * int(Ydiff[k-1] // Ymin), end="")
-                        print("│", end="")
+                        print("┃", end="")
                     print()
-            print(str(x).rjust(Xjust) + "╶─", end="")
+            print(str(x).rjust(Xjust) + "╺━", end="")
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    print("─" * int(Ydiff[j-1] // Ymin), end="")
-                print("┼", end="")
-            print("─╴" + str(x))
+                    print("━" * int(Ydiff[j-1] // Ymin), end="")
+                print("╋", end="")
+            print("━╸" + str(x))
         # Footer
         for i in range(Yjust + 1):
             print(" " * (Xjust + 2), end="")
             for j, y in enumerate(Yvals):
                 if j > 0:
                     print(" " * int(Ydiff[j-1] // Ymin), end="")
-                print(("╵" + str(y).ljust(Yjust))[i], end="")
+                print(("╹" + str(y).ljust(Yjust))[i], end="")
             print()
 
 
