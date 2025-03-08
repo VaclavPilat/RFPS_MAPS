@@ -100,7 +100,7 @@ class Tile(Object):
         Returns:
             tuple: Tuple (axis values, differences, min difference, just)
         """
-        values = sorted(set(getattr(vertex, axis) for face in self.faces for vertex in face))
+        values = sorted(set(round(getattr(vertex, axis), 3) for face in self.faces for vertex in face))
         differences = [values[i] - values[i-1] for i in range(1, len(values))]
         minimum = min(differences)
         just = max(map(lambda value: len(str(value)), values))
@@ -109,6 +109,8 @@ class Tile(Object):
     def printGrid(self) -> None:
         """Printing out a string representation of an object in a grid view
         """
+        if not self.faces:
+            return
         Xvals, Xdiff, Xmin, Xjust = self.gridAxis("x")
         Yvals, Ydiff, Ymin, Yjust = self.gridAxis("y")
         Yvals.reverse()
@@ -118,23 +120,23 @@ class Tile(Object):
             output = " " * (Xjust + 2)
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    output += " " * (Ydiff[j-1] // Ymin)
+                    output += " " * int(Ydiff[j-1] // Ymin)
                 output += (str(y).rjust(Yjust) + "╷")[i]
             print(output)
         # Body
         for i, x in enumerate(Xvals):
             if i > 0:
-                for j in range(Xdiff[j-1] // Xmin - 1):
+                for j in range(int(Xdiff[i-1] // Xmin) - 1):
                     output = " " * (Xjust + 2)
                     for k, y in enumerate(Yvals):
                         if k > 0:
-                            output += " " * (Ydiff[k-1] // Ymin)
+                            output += " " * int(Ydiff[k-1] // Ymin)
                         output += "┆"
                     print(output)
             output = str(x).rjust(Xjust) + "╶╌"
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    output += "╌" * (Ydiff[j-1] // Ymin)
+                    output += "╌" * int(Ydiff[j-1] // Ymin)
                 output += "┼"
             output += "╌╴" + str(x)
             print(output)
@@ -143,18 +145,34 @@ class Tile(Object):
             output = " " * (Xjust + 2)
             for j, y in enumerate(Yvals):
                 if j > 0:
-                    output += " " * (Ydiff[j-1] // Ymin)
+                    output += " " * int(Ydiff[j-1] // Ymin)
                 output += ("╵" + str(y).ljust(Yjust))[i]
             print(output)
 
 
 
 @createObjectSubclass(Tile)
-def Slopes(self, depth: float) -> None:
-    LTR, LBR = map(lambda x: x + V3.DOWN * depth, (self.TR, self.BR))
-    self.face(LTR, self.TL, self.BL, LBR)
-    self.face(self.TR, self.TL, LTR)
-    self.face(self.BL, self.BR, LBR)
+def Stairs(self, D: float, G: int = 3, H: float = 0.2, L: float = 0.3) -> None:
+    """Generating a flight of stairs with multiple possible step groups
+
+    Args:
+        D (float): Total staircase depth
+        G (int, optional): Number of step groups. Defaults to 3.
+        H (float, optional): Step height (will be adjusted). Defaults to 0.2.
+        L (float, optional): Step length. Defaults to 0.3.
+    """
+    assert G >= 1, "At least 1 step group required"
+    S = D // H # Total step count
+    assert S * L < abs(self.TL - self.TR), "Steps are longer than the flight of stairs itself!"
+    for g in range(G): # Group index
+        s = int(S // (G - g)) # Step count within the current group
+        S -= s
+        for i in range(s):
+            STL = self.TL + V3.RIGHT * i * L
+            SBL = self.BL + V3.RIGHT * i * L
+            STR = STL + V3.RIGHT * L
+            SBR = SBL + V3.RIGHT * L
+            self.face(STR, STL, SBL, SBR)
     
 
 
@@ -163,7 +181,7 @@ def Metro(self) -> None:
     """Generating the Metro station
     """
     for i in range(1):
-        self.load(Slopes, "Test", V3.ZERO, 3, 3, rotation=i, depth=3).printGrid()
+        self.load(Stairs, "Test", V3.ZERO, 10, 3, rotation=i, D=3).printGrid()
 
 
 
