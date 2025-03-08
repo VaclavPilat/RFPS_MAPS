@@ -106,11 +106,8 @@ class Tile(Object):
         just = max(map(lambda value: len(str(value)), values))
         return (values, differences, minimum, just)
     
-    def grid(self) -> str:
-        """Getting a string representation of an object in a grid view
-
-        Returns:
-            str: Grid representation of this object as a string
+    def printGrid(self) -> None:
+        """Printing out a string representation of an object in a grid view
         """
         Xvals, Xdiff, Xmin, Xjust = self.gridAxis("x")
         Yvals, Ydiff, Ymin, Yjust = self.gridAxis("y")
@@ -125,7 +122,15 @@ class Tile(Object):
                 output += (str(y).rjust(Yjust) + "╷")[i]
             print(output)
         # Body
-        for x in Xvals:
+        for i, x in enumerate(Xvals):
+            if i > 0:
+                for j in range(Xdiff[j-1] // Xmin - 1):
+                    output = " " * (Xjust + 2)
+                    for k, y in enumerate(Yvals):
+                        if k > 0:
+                            output += " " * (Ydiff[k-1] // Ymin)
+                        output += "┆"
+                    print(output)
             output = str(x).rjust(Xjust) + "╶╌"
             for j, y in enumerate(Yvals):
                 if j > 0:
@@ -158,7 +163,7 @@ def Metro(self) -> None:
     """Generating the Metro station
     """
     for i in range(1):
-        print(self.load(Slopes, "Test", V3.ZERO, 3, 3, rotation=i, depth=3).grid())
+        self.load(Slopes, "Test", V3.ZERO, 3, 3, rotation=i, depth=3).printGrid()
 
 
 
