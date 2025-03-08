@@ -90,6 +90,38 @@ class Tile(Object):
         """
         points = list(map(self.rotate, points))
         super().face(*points, **kwargs)
+    
+    def gridAxis(self, axis: str) -> tuple:
+        """Getting axis information
+
+        Args:
+            axis (str): Axis name (x/y/z)
+
+        Returns:
+            tuple: Tuple (axis values, differences, min difference, just)
+        """
+        values = sorted(set(getattr(vertex, axis) for face in self.faces for vertex in face))
+        differences = [values[i] - values[i-1] for i in range(1, len(values))]
+        minimum = min(differences)
+        just = max(map(lambda value: len(str(value)), values))
+        return (values, differences, minimum, just)
+    
+    def grid(self) -> str:
+        """Getting a string representation of an object in a grid view
+
+        Returns:
+            str: Grid representation of this object as a string
+        """
+        Xvals, Xdiff, Xmin, Xjust = self.gridAxis("x")
+        Yvals, Ydiff, Ymin, Yjust = self.gridAxis("y")
+        for i in range(Yjust):
+            output = " " * Xjust
+            for v in Yvals:
+                output += (str(v).rjust(Yjust))[i]
+            print(output)
+        for v in Xvals:
+            output = str(v).rjust(Xjust)
+            print(output)
 
 
 
@@ -106,8 +138,8 @@ def Slopes(self, depth: float) -> None:
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    for i in range(4):
-        self.load(Slopes, "Test", V3.ZERO, 3, 3, rotation=i, depth=3)
+    for i in range(1):
+        print(self.load(Slopes, "Test", V3.ZERO, 3, 3, rotation=i, depth=3).grid())
 
 
 

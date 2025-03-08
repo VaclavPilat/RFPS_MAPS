@@ -53,13 +53,18 @@ class Object:
                 output += child.hierarchy(itemIndent + "└──", itemIndent + "   ")
         return output
 
-    def load(self, obj: "Object", *args, **kwargs) -> None:
+    def load(self, obj: "Object", *args, **kwargs) -> "Object":
         """Creating a object instance using class type and its constructor arguments
 
         Args:
             obj (Object): Object type to create
+
+        Returns:
+            Object: Created object instance
         """
-        self.objects.append(obj(*args, **kwargs))
+        instance = obj(*args, **kwargs)
+        self.objects.append(instance)
+        return instance
     
     def generate(self) -> None:
         """Generating the object
