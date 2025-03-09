@@ -104,23 +104,25 @@ def Stairs(self, D: float, G: int = 3, H: float = 0.2, L: float = 0.3) -> None:
         L (float, optional): Step length. Defaults to 0.3.
     """
     assert G >= 1, "At least 1 step group required"
-    VF = int(D // H) # Vertical face count
+    VF = round(D / H) # Vertical face count
     HF = VF + 1 # Horizontal face count
     assert HF * L < abs(self.TR - self.TL), "Steps will not fit horizontally"
     TL, BL = (self.TL, self.BL)
-    for i in range(VF + HF):
-        if i == VF + HF - 1: # Final horizontal face
+    if G >= 2:
+        R = (abs(self.TR - self.TL) - (HF - G + 1) * L) / (G - 1) # Resting place length
+    I = set(int(i / G * HF) for i in range(1, G)) # Resting place indices
+    for i in range(HF):
+        if i == HF - 1: # Final horizontal face
             self.face(self.TR(z=TL.z), TL, BL, self.BR(z=BL.z))
-        else:
-            if i % 2 == 0: # Making a horizontal face
-                TL1 = TL + V3.RIGHT * L
-                BL1 = BL + V3.RIGHT * L
-            else: # Making a vertical face
-                z = (self.TL + V3.DOWN * D * (i // 2 + 1) / VF).z
-                TL1 = TL(z=z)
-                BL1 = BL(z=z)
-            self.face(TL1, TL, BL, BL1)
-            TL, BL = (TL1, BL1)
+            break
+        # Making a horizontal face
+        TL1, BL1 = map(lambda x: x + V3.RIGHT * (R if i in I else L), (TL, BL))
+        self.face(TL1, TL, BL, BL1)
+        # Making a vertical face
+        z = (self.TL + V3.DOWN * D * (i + 1) / VF).z
+        TL2, BL2 = map(lambda x: x(z=z), (TL1, BL1))
+        self.face(TL2, TL1, BL1, BL2)
+        TL, BL = (TL2, BL2)
  
 
 
