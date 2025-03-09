@@ -33,6 +33,14 @@ class Axis:
         assert self.min > 0, "Minimal difference has to be positive"
         ## Most amount of space a single axis value can take up
         self.just = max(map(lambda value: len(str(value)), self.labels))
+    
+    def match(self) -> "func":
+        """Returns a function for checking whether a vertex point matches an axis value
+
+        Returns:
+            func: Matching function
+        """
+        return lambda vertex, value: getattr(vertex, self.name) == value
 
 
 
@@ -45,10 +53,35 @@ class Grid:
     ## Grid colors, from coldest to hottest
     GRID_COLORS = ("\033[37m", "\033[34m", "\033[36m", "\033[32m", "\033[33m", "\033[31m", "\033[35m")
 
+    ## "Reset" color
+    NO_COLOR = "\033[0m"
+
     def gridLegend(self) -> None:
         """Printing out a legend for grid colors
         """
         print(" ".join(self.GRID_COLORS[i] + str(i) for i in range(len(self.GRID_COLORS))), end="+\033[0m\n")
+    
+    def pointColor(self, V: Axis, H: Axis, VV: float, HV: float) -> str:
+        """Getting a color of a single point
+
+        Args:
+            V (Axis): Vertical axis
+            H (Axis): Horizontal axis
+            VV (float): Vertical axis value
+            HV (float): Horizontal axis value
+
+        Returns:
+            str: ANSI color representing the point
+        """
+        count = 0
+        for face in self.faces:
+            for vertex in face:
+                if V.match()(vertex, VV) and H.match()(vertex, HV):
+                    count += 1
+                    break
+        if count > len(self.GRID_COLORS):
+            count = len(self.GRID_COLORS) - 1
+        return self.GRID_COLORS[count]
     
     def gridHeader(self, V: Axis, H: Axis) -> None:
         """Printing out grid header
@@ -59,10 +92,10 @@ class Grid:
         """
         for i in range(H.just):
             print(" " * (V.just + 1), end="")
-            for j, y in enumerate(H.labels):
+            for j, h in enumerate(H.labels):
                 if j > 0:
                     print(" " * int(H.diffs[j-1] // H.min *2-1), end="")
-                print(str(y).rjust(H.just)[i], end="")
+                print(str(h).rjust(H.just)[i], end="")
             print()
     
     def gridBody(self, V: Axis, H: Axis) -> None:
@@ -72,21 +105,21 @@ class Grid:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
-        for i, x in enumerate(V.labels):
+        for i, v in enumerate(V.labels):
             if i > 0:
                 for j in range(int(V.diffs[i-1] // V.min) - 1):
                     print(" " * (V.just + 1), end="")
-                    for k, y in enumerate(H.labels):
+                    for k, h in enumerate(H.labels):
                         if k > 0:
                             print(" " * int(H.diffs[k-1] // H.min *2-1), end="")
                         print("┃", end="")
                     print()
-            print(str(x).rjust(V.just) + "╺", end="")
-            for j, y in enumerate(H.labels):
+            print(str(v).rjust(V.just) + "╺", end="")
+            for j, h in enumerate(H.labels):
                 if j > 0:
                     print("━" * int(H.diffs[j-1] // H.min *2-1), end="")
-                print("╋", end="")
-            print("╸" + str(x))
+                print(f"{self.pointColor(V, H, V.values[i], H.values[j])}╋{self.NO_COLOR}", end="")
+            print("╸" + str(v))
     
     def gridFooter(self, V: Axis, H: Axis) -> None:
         """Printing out grid footer
@@ -97,10 +130,10 @@ class Grid:
         """
         for i in range(H.just):
             print(" " * (V.just + 1), end="")
-            for j, y in enumerate(H.labels):
+            for j, h in enumerate(H.labels):
                 if j > 0:
                     print(" " * int(H.diffs[j-1] // H.min *2-1), end="")
-                print(str(y).ljust(H.just)[i], end="")
+                print(str(h).ljust(H.just)[i], end="")
             print()
 
     def printGrid(self, V: Axis, H: Axis) -> None:
@@ -110,6 +143,7 @@ class Grid:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
+        self.gridLegend()
         for method in (self.gridHeader, self.gridBody, self.gridFooter):
             method(V, H)
     
@@ -123,7 +157,6 @@ class Grid:
         """
         if not self.faces:
             return
-        self.gridLegend()
         if top:
             self.printGrid(Axis(self, "x"), Axis(self, "y", True))
         if side:
