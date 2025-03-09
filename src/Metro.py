@@ -11,7 +11,7 @@ if __name__ == "__main__":
         BLENDER = False
 from Math.Vector import V3
 from Mesh.Object import createObjectSubclass
-from Utils.Decorators import defaultKwargsValues, makeImmutable
+from Utils.Decorators import defaultKwargsValues, makeImmutable, addInitRepr
 if BLENDER:
     from Blender.Object import Object
 else:
@@ -41,6 +41,7 @@ class Pivot(Enum):
 
 
 
+@addInitRepr
 class Tile(Object):
     """Base class for all Metro Objects
     """

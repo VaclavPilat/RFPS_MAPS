@@ -29,7 +29,8 @@ def addInitRepr(cls: "cls") -> "cls":
     """
     old_init = cls.__init__
     def new_init(self, *args, **kwargs) -> None:
-        self._argstring = ", ".join([repr(a) for a in args] + [f"{key}={repr(value)}" for (key, value) in kwargs.items()])
+        if getattr(self, "_argstring", None) is None:
+            self._argstring = ", ".join([repr(a) for a in args] + [f"{key}={repr(value)}" for (key, value) in kwargs.items()])
         old_init(self, *args, **kwargs)
     def new_repr(self) -> str:
         return f"{self.__class__.__name__}({self._argstring})"
