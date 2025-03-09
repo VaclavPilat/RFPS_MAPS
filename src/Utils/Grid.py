@@ -78,12 +78,12 @@ class Grid:
         Returns:
             str: ANSI color representing the point
         """
-        count = 0
+        vertices = set()
         for face in self.faces:
             for vertex in face:
                 if V.match(vertex, VV) and H.match(vertex, HV):
-                    count += 1
-                    break
+                    vertices.add(vertex)
+        count = len(vertices)
         if count > len(self.GRID_COLORS):
             count = len(self.GRID_COLORS) - 1
         return self.GRID_COLORS[count]
