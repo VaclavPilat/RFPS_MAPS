@@ -1,6 +1,7 @@
 ## \file
 # Functionality for rendering Object structure in console
 from Utils.Decorators import makeImmutable
+from Math.Vector import V3
 
 
 
@@ -34,13 +35,17 @@ class Axis:
         ## Most amount of space a single axis value can take up
         self.just = max(map(lambda value: len(str(value)), self.labels))
     
-    def match(self) -> "func":
-        """Returns a function for checking whether a vertex point matches an axis value
+    def match(self, vertex: V3, value: float) -> bool:
+        """Checking whether an axis value "matches" a vertex point
+
+        Args:
+            vertex (V3): Vertex to check
+            value (float): Value on the current axis
 
         Returns:
-            func: Matching function
+            func: True if the vertex has the value as a component of the current axis
         """
-        return lambda vertex, value: getattr(vertex, self.name) == value
+        return getattr(vertex, self.name) == value
 
 
 
@@ -59,7 +64,7 @@ class Grid:
     def gridLegend(self) -> None:
         """Printing out a legend for grid colors
         """
-        print(" ".join(self.GRID_COLORS[i] + str(i) for i in range(len(self.GRID_COLORS))), end="+\033[0m\n")
+        print(" ".join(self.GRID_COLORS[i] + str(i) for i in range(len(self.GRID_COLORS))), end=f"+{self.NO_COLOR}\n")
     
     def pointColor(self, V: Axis, H: Axis, VV: float, HV: float) -> str:
         """Getting a color of a single point
@@ -76,7 +81,7 @@ class Grid:
         count = 0
         for face in self.faces:
             for vertex in face:
-                if V.match()(vertex, VV) and H.match()(vertex, HV):
+                if V.match(vertex, VV) and H.match(vertex, HV):
                     count += 1
                     break
         if count > len(self.GRID_COLORS):
@@ -143,7 +148,6 @@ class Grid:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
-        self.gridLegend()
         for method in (self.gridHeader, self.gridBody, self.gridFooter):
             method(V, H)
     
@@ -157,6 +161,7 @@ class Grid:
         """
         if not self.faces:
             return
+        self.gridLegend()
         if top:
             self.printGrid(Axis(self, "x"), Axis(self, "y", True))
         if side:
