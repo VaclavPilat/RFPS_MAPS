@@ -50,14 +50,13 @@ class Grid:
         """
         print(" ".join(self.GRID_COLORS[i] + str(i) for i in range(len(self.GRID_COLORS))), end="+\033[0m\n")
     
-    def printGrid(self, V: Axis, H: Axis) -> None:
-        """Printing out a grid
+    def gridHeader(self, V: Axis, H: Axis) -> None:
+        """Printing out grid header
 
         Args:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
-        # Header
         for i in range(H.just):
             print(" " * (V.just + 1), end="")
             for j, y in enumerate(H.labels):
@@ -65,7 +64,14 @@ class Grid:
                     print(" " * int(H.diffs[j-1] // H.min *2-1), end="")
                 print(str(y).rjust(H.just)[i], end="")
             print()
-        # Body
+    
+    def gridBody(self, V: Axis, H: Axis) -> None:
+        """Printing out grid body
+
+        Args:
+            V (Axis): Vertical axis
+            H (Axis): Horizontal axis
+        """
         for i, x in enumerate(V.labels):
             if i > 0:
                 for j in range(int(V.diffs[i-1] // V.min) - 1):
@@ -81,7 +87,14 @@ class Grid:
                     print("━" * int(H.diffs[j-1] // H.min *2-1), end="")
                 print("╋", end="")
             print("╸" + str(x))
-        # Footer
+    
+    def gridFooter(self, V: Axis, H: Axis) -> None:
+        """Printing out grid footer
+
+        Args:
+            V (Axis): Vertical axis
+            H (Axis): Horizontal axis
+        """
         for i in range(H.just):
             print(" " * (V.just + 1), end="")
             for j, y in enumerate(H.labels):
@@ -89,6 +102,16 @@ class Grid:
                     print(" " * int(H.diffs[j-1] // H.min *2-1), end="")
                 print(str(y).ljust(H.just)[i], end="")
             print()
+
+    def printGrid(self, V: Axis, H: Axis) -> None:
+        """Printing out a grid
+
+        Args:
+            V (Axis): Vertical axis
+            H (Axis): Horizontal axis
+        """
+        for method in (self.gridHeader, self.gridBody, self.gridFooter):
+            method(V, H)
     
     def printGrids(self, top: bool = True, side: bool = True, front: bool = True) -> None:
         """Printing out a string representations of an object in a grid view
