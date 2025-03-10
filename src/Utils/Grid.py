@@ -30,8 +30,11 @@ class Axis:
         ## Axis value labels
         self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
         ## Minimum axis value difference
-        self.min = min(self.diffs)
-        assert self.min > 0, "Minimal difference has to be positive"
+        if self.diffs:
+            self.min = min(self.diffs)
+            assert self.min > 0, "Minimal difference has to be positive"
+        else:
+            self.min = 0
         ## Most amount of space a single axis value can take up
         self.just = max(map(lambda value: len(str(value)), self.labels))
     

@@ -124,14 +124,21 @@ def Stairs(self, D: float, G: int = 3, H: float = 0.2, L: float = 0.3) -> None:
         TL2, BL2 = map(lambda x: x(z=z), (TL1, BL1))
         self.face(TL2, TL1, BL1, BL2)
         TL, BL = (TL2, BL2)
- 
+
+
+
+@createObjectSubclass(Tile)
+def Slopes(self, D: float, S: int = 3) -> None:
+    self.face(self.TR, self.TL, self.BL, self.BR)
+
 
 
 @createObjectSubclass(Object)
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(Stairs, "Test", V3.ZERO, 10, 3, D=3).printGrids()
+    self.load(Stairs, "Underpass entrance stairs", V3.ZERO, 10, 3, D=4).printGrids()
+    self.load(Slopes, "Underpass entrance slopes", V3.BACKWARD * 3, 15, 3, D=4).printGrids()
 
 
 
