@@ -156,12 +156,40 @@ def Slopes(self, D: float, S: int = 3, R: float = 8) -> None:
 
 
 
+@createObjectSubclass(Tile)
+def UnderpassEntrance(self, H: float = 0.1, W: float = 0.3) -> None:
+    """Generating an underpass entrance
+
+    Args:
+        H (float, optional): Curb height (in meters). Defaults to 0.1.
+        W (float, optional): Curb width (in meters). Defaults to 0.3.
+    """
+    TLI, TRI = map(lambda v: v + V3.BACKWARD * W, (self.TL, self.TR))
+    BLI, BRI = map(lambda v: v + V3.FORWARD * W, (self.BL, self.BR))
+    TRI, BRI = map(lambda v: v + V3.LEFT * W, (TRI, BRI))
+    TL1, TR1, BL1, BR1 = map(lambda v: v + V3.UP * H, (self.TL, self.TR, self.BL, self.BR))
+    TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + V3.UP * H, (TLI, TRI, BLI, BRI))
+    self.face(TR1, TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1) # Top face
+    # Outer faces
+    self.face(TR1, BR1, self.BR, self.TR)
+    self.face(TL1, TR1, self.TR, self.TL)
+    self.face(BR1, BL1, self.BL, self.BR)
+    self.face(TLI1, TL1, self.TL, TLI)
+    self.face(BL1, BLI1, BLI, self.BL)
+    # Inner faces
+    self.face(BLI1, BRI1, BRI, BLI)
+    self.face(BRI1, TRI1, TRI, BRI)
+    self.face(TRI1, TLI1, TLI, TRI)
+
+
+
 @createObjectSubclass(Object)
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(Stairs, "Underpass entrance stairs", V3.ZERO, 10, 3, D=4)
-    self.load(Slopes, "Underpass entrance slopes", V3.BACKWARD * 3, 40, 3, D=4).printGrids()
+    #self.load(Stairs, "Underpass entrance stairs", V3.ZERO, 10, 3, D=4)
+    #self.load(Slopes, "Underpass entrance slopes", V3.BACKWARD * 3, 40, 3, D=4)
+    self.load(UnderpassEntrance, "Underpass entrance", V3.ZERO, 10, 3).printGrids()
 
 
 

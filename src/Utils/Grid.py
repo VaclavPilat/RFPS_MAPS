@@ -166,7 +166,7 @@ class Grid:
             return
         self.gridLegend()
         if top:
-            self.printGrid(Axis(self, "x"), Axis(self, "y", True))
+            self.printGrid(Axis(self, "x", True), Axis(self, "y", True))
         if side:
             self.printGrid(Axis(self, "z", True), Axis(self, "y", True))
         if front:
