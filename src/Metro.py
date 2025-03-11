@@ -138,17 +138,21 @@ def Slopes(self, D: float, S: int = 3, R: float = 8) -> None:
     """
     assert S >= 1, "At least 1 slope is required"
     assert D * R < self.width, "Slopes would not fit horizontally"
-    G = (self.width - D * R) / (S - 1) # Resting place (gap) length
+    if S > 1:
+        G = (self.width - D * R) / (S - 1) # Resting place (gap) length
     TL, BL = (self.TL, self.BL)
-    for i in range(S):
-        # Making a slope face
-        z = (self.TL + V3.DOWN * D * (i + 1) / S).z
-        TL1, BL1 = map(lambda v: (v + V3.RIGHT * (TL.z - z) * R)(z=z), (TL, BL))
+    C = 1 if S == 1 else S - 1 # Resting place count
+    for i in range(S + C):
+        if i > 0 and i == S + C - 1: # Final face, whatever it might be
+            self.face(TL, BL, *map(lambda v: v + V3.DOWN * D, (self.BR, self.TR)))
+            break
+        if i % 2 == 0: # Making a slope face
+            z = (self.TL + V3.DOWN * D * (i // 2 + 1) / S).z
+            TL1, BL1 = map(lambda v: (v + V3.RIGHT * (TL.z - z) * R)(z=z), (TL, BL))
+        else: # Making a horizontal face
+            TL1, BL1 = map(lambda v: v + V3.RIGHT * G, (TL, BL))
         self.face(TL1, TL, BL, BL1)
-        # Making a horizontal face
-        TL2, BL2 = map(lambda v: v + V3.RIGHT * G, (TL1, BL1))
-        self.face(TL2, TL1, BL1, BL2)
-        TL, BL = (TL2, BL2)
+        TL, BL = (TL1, BL1)
 
 
 
