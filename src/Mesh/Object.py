@@ -1,8 +1,8 @@
 ## \file
 # Classes for creating objects
+from .Grid import Grid
 from Math.Vector import V3
 from Utils.Decorators import addInitRepr, makeImmutable, defaultKwargsValues
-from Utils.Grid import Grid
 
 
 
