@@ -36,19 +36,23 @@ class Object(Grid):
         for obj in self.objects:
             yield from obj
     
-    def printHierarchy(self, indent: str = "", itemIndent: str = "") -> None:
+    HIERARCHY_COLORS = ("\033[34m", "\033[35m", "\033[36m", "\033[31m", "\033[32m", "\033[33m")
+    
+    def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
         """Printing string representation of object hierarchy
 
         Args:
-            indent (str, optional): Default line indent. Defaults to "".
-            itemIndent (str, optional): Default item line indent to be passed deeper. Defaults to "".
+            current (str, optional): Current line indent. Defaults to "".
+            children (str, optional): Line indent for child items. Defaults to "".
+            layer (int, optional): Current layer index. Defaults to 0.
         """
-        print(indent + repr(self))
+        print(f"{current}\033[0m{repr(self)}")
         for index, child in enumerate(self.objects):
-            if index < len(self.objects) - 1:
-                child.printHierarchy(itemIndent + "┣━╸", itemIndent + "┃  ")
-            else:
-                child.printHierarchy(itemIndent + "┗━╸", itemIndent + "   ")
+            color = self.HIERARCHY_COLORS[layer % len(self.HIERARCHY_COLORS)]
+            last = index < len(self.objects) - 1
+            newCurrent = f"{children}{color}{'┣' if last else '┗'}━╸"
+            newChildren = f"{children}{color}{'┃' if last else ' '}  "
+            child.printHierarchy(newCurrent, newChildren, layer + 1)
 
     def load(self, obj: "Object", *args, **kwargs) -> "Object":
         """Creating a object instance using class type and its constructor arguments
