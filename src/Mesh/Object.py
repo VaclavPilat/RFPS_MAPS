@@ -20,9 +20,13 @@ class Object(Grid):
             name (str, optional): Object name. Defaults to "New object".
             position (V3, optional): Object location. Defaults to V3.ZERO.
         """
+        ## Object name
         self.name = name
+        ## Object location
         self.position = position
+        ## List of child objects
         self.objects = []
+        ## List of mesh faces
         self.faces = []
         self.generate(*args, **kwargs)
     
@@ -36,6 +40,7 @@ class Object(Grid):
         for obj in self.objects:
             yield from obj
     
+    ## Hierarchy colors
     HIERARCHY_COLORS = ("\033[34m", "\033[35m", "\033[36m", "\033[31m", "\033[32m", "\033[33m")
     
     def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:

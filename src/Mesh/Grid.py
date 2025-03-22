@@ -154,20 +154,12 @@ class Grid:
         for method in (self.gridHeader, self.gridBody, self.gridFooter):
             method(V, H)
     
-    def printGrids(self, top: bool = True, side: bool = True, front: bool = True) -> None:
+    def printGrids(self) -> None:
         """Printing out a string representations of an object in a grid view
-
-        Args:
-            top (bool, optional): Render a top view? Defaults to True.
-            side (bool, optional): Render a side view? Defaults to True.
-            front (bool, optional): Render a front view? Defaults to True.
         """
         if not self.faces:
             return
         self.gridLegend()
-        if top:
-            self.printGrid(Axis(self, "x", True), Axis(self, "y", True))
-        if side:
-            self.printGrid(Axis(self, "z", True), Axis(self, "y", True))
-        if front:
-            self.printGrid(Axis(self, "z", True), Axis(self, "x"))
+        self.printGrid(Axis(self, "x", True), Axis(self, "y", True))
+        self.printGrid(Axis(self, "z", True), Axis(self, "y", True))
+        self.printGrid(Axis(self, "z", True), Axis(self, "x"))
