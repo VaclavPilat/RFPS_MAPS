@@ -6,10 +6,24 @@ from Utils.Decorators import addInitRepr, makeImmutable, defaultKwargsValues
 
 
 
+class Repr(type):
+    """Custom type for having a __repr__ method that returns type name
+    """
+
+    def __repr__(cls) -> str:
+        """Returns name of current type
+
+        Returns:
+            str: Name of the current type
+        """
+        return cls.__name__
+
+
+
 @addInitRepr
 @makeImmutable
 ## \todo Refactor & add docs
-class Object(Grid):
+class Object(Grid, metaclass=Repr):
     """Class for containing own mesh and/or other objectes
     """
 
@@ -90,16 +104,16 @@ class Object(Grid):
 
 
 
-def createObjectSubclass(cls: "cls" = Object) -> "func":
+def createObjectSubclass(cls: type = Object) -> "func":
     """Decorator for creating an Object subclass from a generator function
 
     Args:
-        cls (cls, optional): Object or its subclass type. Defaults to Object.
+        cls (type, optional): Object or its subclass type. Defaults to Object.
 
     Returns:
         cls: Decorator for making a subclass of the provided class type
     """
-    def decorator(func: "func") -> "cls":
+    def decorator(func: "func") -> type:
         class Wrapped(cls):
             pass
         Wrapped.generate = func

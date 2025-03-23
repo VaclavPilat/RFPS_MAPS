@@ -81,12 +81,13 @@ def Slopes(self, D: float, S: int = 3, R: float = 8) -> None:
 
 
 @createObjectSubclass(Tile)
-def UnderpassEntrance(self, H: float = 0.1, W: float = 0.3) -> None:
+def UnderpassEntrance(self, H: float = 0.1, W: float = 0.3, C: type = None) -> None:
     """Generating an underpass entrance
 
     Args:
         H (float, optional): Curb height (in meters). Defaults to 0.1.
         W (float, optional): Curb width (in meters). Defaults to 0.3.
+        C (type, optional): Class for generating descent. Defaults to None.
     """
     TLI, TRI = map(lambda v: v + V3.BACKWARD * W, (self.bounds.TL, self.bounds.TR))
     BLI, BRI = map(lambda v: v + V3.FORWARD * W, (self.bounds.BL, self.bounds.BR))
@@ -113,7 +114,7 @@ def Metro(self) -> None:
     """
     self.load(Stairs, "Underpass entrance stairs", Box(V3.ZERO, 10, 3), D=4)
     self.load(Slopes, "Underpass entrance slopes", Box(V3.BACKWARD * 3, 40, 3), D=4)
-    self.load(UnderpassEntrance, "Underpass entrance", Box(V3.ZERO, 10, 3)).printGrids()
+    self.load(UnderpassEntrance, "Underpass entrance", Box(V3.ZERO, 10, 3), C=Slopes).printGrids()
 
 
 
