@@ -105,6 +105,9 @@ def UnderpassEntrance(self, H: float = 0.1, W: float = 0.3, C: type = None) -> N
     self.face(BLI1, BRI1, BRI, BLI)
     self.face(BRI1, TRI1, TRI, BRI)
     self.face(TRI1, TLI1, TLI, TRI)
+    # Generating descenting mesh
+    if C is not None:
+        self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=4)
 
 
 
@@ -112,9 +115,8 @@ def UnderpassEntrance(self, H: float = 0.1, W: float = 0.3, C: type = None) -> N
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(Stairs, "Underpass entrance stairs", Box(V3.ZERO, 10, 3), D=4)
-    self.load(Slopes, "Underpass entrance slopes", Box(V3.BACKWARD * 3, 40, 3), D=4)
-    self.load(UnderpassEntrance, "Underpass entrance", Box(V3.ZERO, 10, 3), C=Slopes).printGrids()
+    self.load(UnderpassEntrance, "Underpass entrance", Box(V3.ZERO, 10, 3), C=Stairs)
+    self.load(UnderpassEntrance, "Underpass entrance", Box(V3.BACKWARD * 3, 40, 3), C=Slopes)
 
 
 
