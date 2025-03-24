@@ -12,9 +12,41 @@ if __name__ == "__main__":
 from Math.Vector import V3
 from Mesh.Object import Object, createObjectSubclass
 from Mesh.Tile import Tile, Bounds, Box, Anchor
+from Utils.Decorators import makeImmutable
 if BLENDER:
     from Blender.Object import Blender
     Object.__bases__ = (Blender,) + Object.__bases__
+
+
+
+@makeImmutable
+class Settings:
+    """Class for containing readonly object settings
+    """
+
+    def __init__(self, **kwargs) -> None:
+        """Initialising a Settings instance with kwarg values
+        """
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
+
+SETTINGS = Settings(
+    UECH = 0.1, # Underpass entrance curb height
+    UECW = 0.3, # Underpass entrance curb width
+    UEWD = 3, # Underpass entrance width
+    UHDP = 1, # Underpass hallway depth
+    UHHG = 3, # Underpass hallway height
+    UHWD = 4, # Underpass hallway width
+    USCL = 10, # Underpass staircase length
+    USLC = 3, # Underpass slope count
+    USLL = 40, # Underpass slope length
+    USLR = 8, # Underpass slope ratio
+    USTG = 3, # Underpass step groups
+    USTH = 0.2, # Underpass step height
+    USTW = 0.3, # Underpass step width
+)
 
 
 
