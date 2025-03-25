@@ -33,32 +33,32 @@ class Settings:
 
 
 SETTINGS = Settings(
-    UECH = 0.1, # Underpass entrance curb height
-    UECW = 0.3, # Underpass entrance curb width
-    UEWD = 3, # Underpass entrance width
-    UHDP = 1, # Underpass hallway depth
-    UHHG = 3, # Underpass hallway height
-    UHWD = 4, # Underpass hallway width
-    USCL = 10, # Underpass staircase length
+    UECH = 0.1, # Underpass entrance curb height (in meters)
+    UECW = 0.3, # Underpass entrance curb width (in meters)
+    UEWD = 3, # Underpass entrance width (in meters)
+    UHDP = 1, # Underpass hallway depth (in meters)
+    UHHG = 3, # Underpass hallway height (in meters)
+    UHWD = 4, # Underpass hallway width (in meters)
+    USCL = 10, # Underpass staircase length (in meters)
     USLC = 3, # Underpass slope count
-    USLL = 40, # Underpass slope length
+    USLL = 40, # Underpass slope length (in meters)
     USLR = 8, # Underpass slope ratio
-    USTG = 3, # Underpass step groups
-    USTH = 0.2, # Underpass step height
-    USTW = 0.3, # Underpass step width
+    USTG = 3, # Underpass step group count
+    USTH = 0.2, # Underpass step height (in meters)
+    USTL = 0.3, # Underpass step length (in meters)
 )
 
 
 
 @createObjectSubclass(Tile)
-def Stairs(self, D: float, G: int = 3, H: float = 0.2, L: float = 0.3) -> None:
+def Stairs(self, D: float, G: int, H: float, L: float) -> None:
     """Generating multiple flights of stairs with resting places in between
 
     Args:
         D (float): Total staircase depth (in meters)
-        G (int, optional): Number of step groups. Defaults to 3.
-        H (float, optional): Step height (in meters, will be adjusted). Defaults to 0.2.
-        L (float, optional): Step length (in meters). Defaults to 0.3.
+        G (int): Number of step groups
+        H (float): Step height (in meters, will be adjusted)
+        L (float): Step length (in meters)
     """
     assert G >= 1, "At least 1 step group required"
     VF = round(D / H) # Vertical face count
@@ -84,13 +84,13 @@ def Stairs(self, D: float, G: int = 3, H: float = 0.2, L: float = 0.3) -> None:
 
 
 @createObjectSubclass(Tile)
-def Slopes(self, D: float, S: int = 3, R: float = 8) -> None:
+def Slopes(self, D: float, S: int, R: float) -> None:
     """Generating multiple (wheelchair accessible) slopes with resting places in between
 
     Args:
         D (float): Total depth (in meters)
-        S (int, optional): Slope count. Defaults to 3.
-        R (float, optional): Slope ratio (slope length per meter of descent). Defaults to 8.
+        S (int): Slope count
+        R (float): Slope ratio (slope length per meter of descent)
     """
     assert S >= 1, "At least 1 slope is required"
     assert D * R < self.bounds.W, "Slopes would not fit horizontally"
@@ -113,19 +113,17 @@ def Slopes(self, D: float, S: int = 3, R: float = 8) -> None:
 
 
 @createObjectSubclass(Tile)
-def UnderpassEntrance(self, H: float = 0.1, W: float = 0.3, C: type = None) -> None:
+def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     """Generating an underpass entrance
 
     Args:
-        H (float, optional): Curb height (in meters). Defaults to 0.1.
-        W (float, optional): Curb width (in meters). Defaults to 0.3.
         C (type, optional): Class for generating descent. Defaults to None.
     """
-    TLI, TRI = map(lambda v: v + V3.BACKWARD * W, (self.bounds.TL, self.bounds.TR))
-    BLI, BRI = map(lambda v: v + V3.FORWARD * W, (self.bounds.BL, self.bounds.BR))
-    TRI, BRI = map(lambda v: v + V3.LEFT * W, (TRI, BRI))
-    TL1, TR1, BL1, BR1 = map(lambda v: v + V3.UP * H, (self.bounds.TL, self.bounds.TR, self.bounds.BL, self.bounds.BR))
-    TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + V3.UP * H, (TLI, TRI, BLI, BRI))
+    TLI, TRI = map(lambda v: v + V3.BACKWARD * SETTINGS.UECW, (self.bounds.TL, self.bounds.TR))
+    BLI, BRI = map(lambda v: v + V3.FORWARD * SETTINGS.UECW, (self.bounds.BL, self.bounds.BR))
+    TRI, BRI = map(lambda v: v + V3.LEFT * SETTINGS.UECW, (TRI, BRI))
+    TL1, TR1, BL1, BR1 = map(lambda v: v + V3.UP * SETTINGS.UECH, (self.bounds.TL, self.bounds.TR, self.bounds.BL, self.bounds.BR))
+    TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + V3.UP * SETTINGS.UECH, (TLI, TRI, BLI, BRI))
     self.face(TR1, TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1) # Top face
     # Outer faces
     self.face(TR1, BR1, self.bounds.BR, self.bounds.TR)
@@ -139,7 +137,7 @@ def UnderpassEntrance(self, H: float = 0.1, W: float = 0.3, C: type = None) -> N
     self.face(TRI1, TLI1, TLI, TRI)
     # Generating descenting mesh
     if C is not None:
-        self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=4)
+        self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=SETTINGS.UHDP+SETTINGS.UHHG, **kwargs)
 
 
 
@@ -147,8 +145,8 @@ def UnderpassEntrance(self, H: float = 0.1, W: float = 0.3, C: type = None) -> N
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(UnderpassEntrance, "Underpass entrance", Box(V3.ZERO, 10, 3), C=Stairs)
-    self.load(UnderpassEntrance, "Underpass entrance", Box(V3.BACKWARD * 3, 40, 3), C=Slopes)
+    self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, 10, 3), C=Stairs, G=SETTINGS.USTG, H=SETTINGS.USTH, L=SETTINGS.USTL)
+    self.load(UnderpassEntrance, "Underpass slope entrance", Box(V3.BACKWARD * 3, 40, 3), C=Slopes, S=SETTINGS.USLC, R=SETTINGS.USLR)
 
 
 
