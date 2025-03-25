@@ -29,7 +29,6 @@ class Pivot(Enum):
 
 
 @makeImmutable
-## \todo Make bounds values relative (start at 0)
 class Bounds:
     """Class for representing Tile bounds
     """
@@ -38,28 +37,28 @@ class Bounds:
         """Initialising Tile boundaries
 
         Args:
-            O (V3): Tile origin (pivot) point
-            TL (V3): Top left tile corner
-            BR (V3): Bottom right tile corner
+            O (V3): Tile origin (pivot) point (relative to parent's origin)
+            TL (V3): Top left tile corner (relative to parent's origin)
+            BR (V3): Bottom right tile corner (relative to parent's origin)
             R (int, optional): Rotation index. Defaults to 0.
         """
-        ## Tile origin (pivot) point
+        ## Tile origin (pivot) point (relative to parent's origin)
         self.O = O
-        ## Top left tile corner
+        ## Top left tile corner position (relative to origin)
         assert TL.z == BR.z, "All bounds have to have the same z-value"
-        self.TL = TL
-        ## Top right tile corner
-        self.TR = TL(y=BR.y)
-        ## Bottom left tile corner
-        self.BL = TL(x=BR.x)
-        ## Bottom right tile corner
-        self.BR = BR
-        ## Tile rotation index
+        self.TL = TL - O
+        ## Bottom right tile corner position (relative to origin)
+        self.BR = BR - O
+        ## Top right tile corner position (relative to origin)
+        self.TR = self.TL(y=self.BR.y)
+        ## Bottom left tile corner position (relative to origin)
+        self.BL = self.TL(x=self.BR.x)
+        ## Tile rotation index as a value from 0 to 3
         self.R = R
-        ## Tile width
+        ## Tile width (in meters)
         self.W = abs(self.TL - self.TR)
         assert self.W > 0, "Tile width has to be positive"
-        ## Tile height
+        ## Tile height (in meters)
         self.H = abs(self.TL - self.BL)
         assert self.H > 0, "Tile height has to be positive"
 
@@ -85,9 +84,9 @@ class Box(Bounds):
         """Initialising a bounding box
 
         Args:
-            O (V3): Tile origin (pivot) point
-            W (float): Tile width
-            H (float): Tile height
+            O (V3): Tile origin (pivot) point (relative to parent's origin)
+            W (float): Tile width (in meters)
+            H (float): Tile height (in meters)
             P (Pivot, optional): Pivot location. Defaults to Pivot.TL.
             R (int, optional): Rotation index. Defaults to 0.
         """
@@ -109,8 +108,8 @@ class Anchor(Bounds):
         """Initialising anchor bounds
 
         Args:
-            TL (V3): Top left tile corner
-            BR (V3): Bottom right tile corner
+            TL (V3): Top left tile corner (relative to parent's origin)
+            BR (V3): Bottom right tile corner (relative to parent's origin)
             P (Pivot, optional): Pivot location. Defaults to Pivot.TL.
             R (int, optional): Rotation index. Defaults to 0.
         """
