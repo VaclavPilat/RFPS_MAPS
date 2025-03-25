@@ -52,6 +52,7 @@ class Axis:
 
 
 
+## \todo Add functionality for generating grid recursively (the whole hierarchy, not just one object)
 class Grid:
     """Functionality for rendering Object vertices in console from multiple perspectives
 

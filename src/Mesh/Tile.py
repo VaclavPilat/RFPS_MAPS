@@ -29,6 +29,7 @@ class Pivot(Enum):
 
 
 @makeImmutable
+## \todo Make bounds values relative (start at 0)
 class Bounds:
     """Class for representing Tile bounds
     """

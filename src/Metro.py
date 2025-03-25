@@ -32,7 +32,8 @@ class Settings:
 
 
 
-SETTINGS = Settings(
+## Setting constants used in the Metro map
+METRO = Settings(
     UECH = 0.1, # Underpass entrance curb height (in meters)
     UECW = 0.3, # Underpass entrance curb width (in meters)
     UEWD = 3, # Underpass entrance width (in meters)
@@ -119,11 +120,11 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     Args:
         C (type, optional): Class for generating descent. Defaults to None.
     """
-    TLI, TRI = map(lambda v: v + V3.BACKWARD * SETTINGS.UECW, (self.bounds.TL, self.bounds.TR))
-    BLI, BRI = map(lambda v: v + V3.FORWARD * SETTINGS.UECW, (self.bounds.BL, self.bounds.BR))
-    TRI, BRI = map(lambda v: v + V3.LEFT * SETTINGS.UECW, (TRI, BRI))
-    TL1, TR1, BL1, BR1 = map(lambda v: v + V3.UP * SETTINGS.UECH, (self.bounds.TL, self.bounds.TR, self.bounds.BL, self.bounds.BR))
-    TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + V3.UP * SETTINGS.UECH, (TLI, TRI, BLI, BRI))
+    TLI, TRI = map(lambda v: v + V3.BACKWARD * METRO.UECW, (self.bounds.TL, self.bounds.TR))
+    BLI, BRI = map(lambda v: v + V3.FORWARD * METRO.UECW, (self.bounds.BL, self.bounds.BR))
+    TRI, BRI = map(lambda v: v + V3.LEFT * METRO.UECW, (TRI, BRI))
+    TL1, TR1, BL1, BR1 = map(lambda v: v + V3.UP * METRO.UECH, (self.bounds.TL, self.bounds.TR, self.bounds.BL, self.bounds.BR))
+    TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + V3.UP * METRO.UECH, (TLI, TRI, BLI, BRI))
     self.face(TR1, TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1) # Top face
     # Outer faces
     self.face(TR1, BR1, self.bounds.BR, self.bounds.TR)
@@ -137,7 +138,7 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     self.face(TRI1, TLI1, TLI, TRI)
     # Generating descenting mesh
     if C is not None:
-        self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=SETTINGS.UHDP+SETTINGS.UHHG, **kwargs)
+        self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=METRO.UHDP+METRO.UHHG, **kwargs)
 
 
 
@@ -145,8 +146,8 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, 10, 3), C=Stairs, G=SETTINGS.USTG, H=SETTINGS.USTH, L=SETTINGS.USTL)
-    self.load(UnderpassEntrance, "Underpass slope entrance", Box(V3.BACKWARD * 3, 40, 3), C=Slopes, S=SETTINGS.USLC, R=SETTINGS.USLR)
+    self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs, G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
+    self.load(UnderpassEntrance, "Underpass slope entrance", Box(V3.BACKWARD * 3, METRO.USLL, METRO.UEWD), C=Slopes, S=METRO.USLC, R=METRO.USLR)
 
 
 
