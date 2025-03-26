@@ -118,7 +118,7 @@ class Grid:
             print(" " * (V.just + 1), end="")
             for j, h in enumerate(H.labels):
                 if j > 0:
-                    print(" " * int(H.diffs[j-1] // H.min *2-1), end="")
+                    print(" " * round(H.diffs[j-1] / H.min *2-1), end="")
                 print(str(h).rjust(H.just)[i], end="")
             print()
     
@@ -131,17 +131,17 @@ class Grid:
         """
         for i, v in enumerate(V.labels):
             if i > 0:
-                for j in range(int(V.diffs[i-1] // V.min) - 1):
+                for j in range(round(V.diffs[i-1] / V.min - 1)):
                     print(" " * (V.just + 1), end="")
                     for k, h in enumerate(H.labels):
                         if k > 0:
-                            print(" " * int(H.diffs[k-1] // H.min *2-1), end="")
+                            print(" " * round(H.diffs[k-1] / H.min *2-1), end="")
                         print("┃", end="")
                     print()
             print(str(v).rjust(V.just) + f"{self.pointColor(V, H, V.values[i], H.values[0])}╺{self.NO_COLOR}", end="")
             for j, h in enumerate(H.labels):
                 if j > 0:
-                    print("━" * int(H.diffs[j-1] // H.min *2-1), end="")
+                    print("━" * round(H.diffs[j-1] / H.min *2-1), end="")
                 print(f"{self.pointColor(V, H, V.values[i], H.values[j])}╋{self.NO_COLOR}", end="")
             print(f"{self.pointColor(V, H, V.values[i], H.values[-1])}╸{self.NO_COLOR}" + str(v))
     
@@ -156,7 +156,7 @@ class Grid:
             print(" " * (V.just + 1), end="")
             for j, h in enumerate(H.labels):
                 if j > 0:
-                    print(" " * int(H.diffs[j-1] // H.min *2-1), end="")
+                    print(" " * round(H.diffs[j-1] / H.min *2-1), end="")
                 print(str(h).ljust(H.just)[i], end="")
             print()
 
