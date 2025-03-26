@@ -71,11 +71,28 @@ class Grid:
     """
 
     def axisLegend(self, V: Axis, H: Axis) -> tuple:
+        """Getting axis information for the grid legend
+
+        Args:
+            V (Axis): Vertical axis
+            H (Axis): Horizontal axis
+
+        Returns:
+            tuple: 3 row strings representing selected axis
+        """
         first = (" ", f"{AXIS_COLORS[V.name]}{V.name.upper()}{NO_COLOR}", "     ")
         second = (" ", "┃", "     ")
         third = (f"╺{'━━╋' if H.reverse else '╋━━'}╸", f"{AXIS_COLORS[H.name]}{H.name.upper()}{NO_COLOR}", " ")
         rows = tuple(map(lambda row: "".join(row[::-1 if H.reverse else 1]), (first, second, third)))
         return rows[::1 if V.reverse else -1]
+
+    def vertexLegend(self) -> str:
+        """Getting a legend for vertex colors
+
+        Returns:
+            str: Colors for vertex counts
+        """
+        return " ".join(GRID_COLORS[i] + str(i) for i in range(len(GRID_COLORS))) + "+" + NO_COLOR
     
     def printGridLegend(self, V: Axis, H: Axis) -> None:
         """Printing out grid axis legend
@@ -84,17 +101,10 @@ class Grid:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
-        print(f"╭{'─'*7}╮")
+        print(f"╭{'─'*7}┬{'─'*16}┐")
         for row in self.axisLegend(V, H):
-            print(f"│{row}│")
-        print(f"╰{'─'*7}╯")
-
-    def printColorLegend(self) -> None:
-        """Printing out a legend for grid colors
-        """
-        for i in range(len(GRID_COLORS)):
-            print(f"{' ' if i > 0 else ''}{GRID_COLORS[i]}{str(i)}", end="")
-        print(f"+{NO_COLOR}")
+            print(f"│{row}│ " + self.vertexLegend() + " │")
+        print(f"╰{'─'*7}┴{'─'*16}┘")
     
     def getVertices(self, depth: int = 0) -> set:
         """Getting a set of vertices present in the current hierarchy.
@@ -193,7 +203,6 @@ class Grid:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
-        self.printColorLegend()
         self.printGridLegend(V, H)
         return
         for method in (self.gridHeader, self.gridBody, self.gridFooter):
