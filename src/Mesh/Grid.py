@@ -20,6 +20,8 @@ class Axis:
         """
         ## Axis name
         self.name = name
+        ## Is the axis in reverse?
+        self.reverse = reverse
         ## Axis values
         self.values = sorted(set(getattr(vertex, name) for vertex in vertices))
         ## Differences in axis values
@@ -65,10 +67,32 @@ class Grid:
     ## "Reset" color
     NO_COLOR = "\033[0m"
 
-    def gridLegend(self) -> None:
+    AXIS_COLORS = {"x": "\033[31m", "y": "\033[32m", "z": "\033[37m"}
+
+    def axisLegend(self, V: Axis, H: Axis) -> tuple:
+        first = f" {V.name.upper()}     "[::-1 if H.reverse else 1]
+        second = " ┃     "[::-1 if H.reverse else 1]
+        third = f"╺╋━━╸{H.name.upper()} " if not H.reverse else f" {H.name.upper()}╺━━╋╸"
+        return (first, second, third)[::1 if V.reverse else -1]
+    
+    def printGridLegend(self, V: Axis, H: Axis) -> None:
+        """Printing out grid axis legend
+
+        Args:
+            V (Axis): Vertical axis
+            H (Axis): Horizontal axis
+        """
+        print(f"╭{'─'*7}╮")
+        for row in self.axisLegend(V, H):
+            print(f"│{row}│")
+        print(f"╰{'─'*7}╯")
+
+    def printColorLegend(self) -> None:
         """Printing out a legend for grid colors
         """
-        print(" ".join(self.GRID_COLORS[i] + str(i) for i in range(len(self.GRID_COLORS))), end=f"+{self.NO_COLOR}\n")
+        for i in range(len(self.GRID_COLORS)):
+            print(f"{' ' if i > 0 else ''}{self.GRID_COLORS[i]}{str(i)}", end="")
+        print(f"+{self.NO_COLOR}")
     
     def getVertices(self, depth: int = 0) -> set:
         """Getting a set of vertices present in the current hierarchy.
@@ -167,6 +191,9 @@ class Grid:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
+        self.printColorLegend()
+        self.printGridLegend(V, H)
+        return
         for method in (self.gridHeader, self.gridBody, self.gridFooter):
             method(V, H)
     
@@ -179,7 +206,6 @@ class Grid:
         if not self.faces:
             return
         vertices = self.getVertices(depth)
-        self.gridLegend()
         self.printGrid(Axis(vertices, "x", True), Axis(vertices, "y", True))
         self.printGrid(Axis(vertices, "z", True), Axis(vertices, "y", True))
         self.printGrid(Axis(vertices, "z", True), Axis(vertices, "x"))
