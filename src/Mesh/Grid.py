@@ -10,18 +10,18 @@ class Axis:
     """Class for containing axis information
     """
 
-    def __init__(self, grid: "Grid", name: str, reverse: bool = False) -> None:
+    def __init__(self, vertices: set, name: str, reverse: bool = False) -> None:
         """Initialising an Axis instance
 
         Args:
-            grid (Grid): Grid object
-            name (str): Axis name ("x" / "y"/ "z")
+            vertices (set): Set of vertex positions (relative to parent's origin)
+            name (str): Axis name ("x"/"y"/"z")
             reverse (bool, optional): Should the axis values be reversed? Defaults to False.
         """
         ## Axis name
         self.name = name
         ## Axis values
-        self.values = sorted(set(getattr(vertex, name) for face in grid.faces for vertex in face))
+        self.values = sorted(set(getattr(vertex, name) for vertex in vertices))
         ## Differences in axis values
         self.diffs = [self.values[i] - self.values[i-1] for i in range(1, len(self.values))]
         if reverse:
@@ -69,6 +69,21 @@ class Grid:
         """Printing out a legend for grid colors
         """
         print(" ".join(self.GRID_COLORS[i] + str(i) for i in range(len(self.GRID_COLORS))), end=f"+{self.NO_COLOR}\n")
+    
+    def getVertices(self, depth: int = 0) -> set:
+        """Getting a set of vertices present in the current hierarchy.
+
+        Args:
+            depth (int, optional): Remaining recursion depth. Defaults to 0.
+
+        Returns:
+            list: Set of vertices in the current hierarchy (relative to parent's origin)
+        """
+        vertices = set(vertex for face in self.faces for vertex in face)
+        if depth > 0:
+            for child in self.objects:
+                vertices = vertices.union(child.getVertices(depth - 1))
+        return set(map(lambda v: v + self.bounds.O, vertices))
     
     def pointColor(self, V: Axis, H: Axis, VV: float, HV: float) -> str:
         """Getting a color of a single point
@@ -155,12 +170,16 @@ class Grid:
         for method in (self.gridHeader, self.gridBody, self.gridFooter):
             method(V, H)
     
-    def printGrids(self) -> None:
+    def printGrids(self, depth: int = 0) -> None:
         """Printing out a string representations of an object in a grid view
+
+        Args:
+            depth (int, optional): Remaining recursion depth. Defaults to 0.
         """
         if not self.faces:
             return
+        vertices = self.getVertices(depth)
         self.gridLegend()
-        self.printGrid(Axis(self, "x", True), Axis(self, "y", True))
-        self.printGrid(Axis(self, "z", True), Axis(self, "y", True))
-        self.printGrid(Axis(self, "z", True), Axis(self, "x"))
+        self.printGrid(Axis(vertices, "x", True), Axis(vertices, "y", True))
+        self.printGrid(Axis(vertices, "z", True), Axis(vertices, "y", True))
+        self.printGrid(Axis(vertices, "z", True), Axis(vertices, "x"))
