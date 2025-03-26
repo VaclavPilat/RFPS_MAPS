@@ -53,6 +53,15 @@ class Axis:
         return getattr(vertex, self.name) == value
 
 
+## Grid colors, from coldest to hottest
+GRID_COLORS = ("\033[37m", "\033[34m", "\033[36m", "\033[32m", "\033[33m", "\033[31m", "\033[35m")
+
+## "Reset" color
+NO_COLOR = "\033[0m"
+
+## Colors for axis names
+AXIS_COLORS = {"x": "\033[91m", "y": "\033[92m", "z": "\033[94m"}
+
 
 ## \todo Add functionality for generating grid recursively (the whole hierarchy, not just one object)
 class Grid:
@@ -61,19 +70,12 @@ class Grid:
     Requires a subclass to have a "faces" property (a list of lists of V3 vertices)
     """
 
-    ## Grid colors, from coldest to hottest
-    GRID_COLORS = ("\033[37m", "\033[34m", "\033[36m", "\033[32m", "\033[33m", "\033[31m", "\033[35m")
-
-    ## "Reset" color
-    NO_COLOR = "\033[0m"
-
-    AXIS_COLORS = {"x": "\033[31m", "y": "\033[32m", "z": "\033[37m"}
-
     def axisLegend(self, V: Axis, H: Axis) -> tuple:
-        first = f" {V.name.upper()}     "[::-1 if H.reverse else 1]
-        second = " ┃     "[::-1 if H.reverse else 1]
-        third = f"╺╋━━╸{H.name.upper()} " if not H.reverse else f" {H.name.upper()}╺━━╋╸"
-        return (first, second, third)[::1 if V.reverse else -1]
+        first = (" ", f"{AXIS_COLORS[V.name]}{V.name.upper()}{NO_COLOR}", "     ")
+        second = (" ", "┃", "     ")
+        third = (f"╺{'━━╋' if H.reverse else '╋━━'}╸", f"{AXIS_COLORS[H.name]}{H.name.upper()}{NO_COLOR}", " ")
+        rows = tuple(map(lambda row: "".join(row[::-1 if H.reverse else 1]), (first, second, third)))
+        return rows[::1 if V.reverse else -1]
     
     def printGridLegend(self, V: Axis, H: Axis) -> None:
         """Printing out grid axis legend
@@ -90,9 +92,9 @@ class Grid:
     def printColorLegend(self) -> None:
         """Printing out a legend for grid colors
         """
-        for i in range(len(self.GRID_COLORS)):
-            print(f"{' ' if i > 0 else ''}{self.GRID_COLORS[i]}{str(i)}", end="")
-        print(f"+{self.NO_COLOR}")
+        for i in range(len(GRID_COLORS)):
+            print(f"{' ' if i > 0 else ''}{GRID_COLORS[i]}{str(i)}", end="")
+        print(f"+{NO_COLOR}")
     
     def getVertices(self, depth: int = 0) -> set:
         """Getting a set of vertices present in the current hierarchy.
