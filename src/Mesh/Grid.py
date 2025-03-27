@@ -2,6 +2,7 @@
 # Functionality for rendering Object structure in console
 from Utils.Decorators import makeImmutable
 from Math.Vector import V3
+import math
 
 
 
@@ -61,6 +62,19 @@ NO_COLOR = "\033[0m"
 
 ## Colors for axis names
 AXIS_COLORS = {"x": "\033[91m", "y": "\033[92m", "z": "\033[94m"}
+    
+def lenANSI(string: str) -> int:
+    """Getting the length of a string while ignoring ANSI escape sequences
+
+    Args:
+        string (str): String to get the length of
+
+    Returns:
+        int: Length of the pure string
+    """
+    for color in GRID_COLORS + tuple(AXIS_COLORS.values()) + (NO_COLOR,):
+        string = string.replace(color, "")
+    return len(string)
 
 
 ## \todo Add functionality for generating grid recursively (the whole hierarchy, not just one object)
@@ -101,10 +115,30 @@ class Grid:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
-        print(f"╭{'─'*7}┬{'─'*16}┐")
-        for row in self.axisLegend(V, H):
-            print(f"│{row}│ " + self.vertexLegend() + " │")
-        print(f"╰{'─'*7}┴{'─'*16}┘")
+        axis = self.axisLegend(V, H)
+        info = (self.vertexLegend(), )
+        rows = (len(axis) + 1) // 2
+        cols = math.ceil(len(info) / rows)
+        lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
+        print(f"╭{'─' * lenANSI(axis[0])}", end="")
+        for c in range(cols):
+            print(f"┬{'─' * (lengths[c] + 2)}", end="")
+        print("┐")
+        for r, line in enumerate(axis):
+            print(f"│{line}", end="")
+            if r % 2 == 0:
+                for c in range(cols):
+                    index = c*rows+r//2
+                    print(f"│ {info[index].ljust(lengths[c]) if len(info) > index else ' '*lengths[c]} ", end="")
+                print("│")
+            else:
+                for c in range(cols):
+                    print(f"{'┼' if c else '├'}{'─' * (lengths[c] + 2)}", end="")
+                print("┤" if info else "│")
+        print(f"╰{'─' * lenANSI(axis[0])}", end="")
+        for c in range(cols):
+            print(f"┴{'─' * (lengths[c] + 2)}", end="")
+        print("┘")
     
     def getVertices(self, depth: int = 0) -> set:
         """Getting a set of vertices present in the current hierarchy.
