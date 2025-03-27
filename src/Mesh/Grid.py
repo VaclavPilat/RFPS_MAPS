@@ -78,6 +78,7 @@ def lenANSI(string: str) -> int:
 
 
 ## \todo Add functionality for generating grid recursively (the whole hierarchy, not just one object)
+# \todo Make Grid a standalone class for rendering, not a superclass for Object
 class Grid:
     """Functionality for rendering Object vertices in console from multiple perspectives
 
@@ -108,6 +109,14 @@ class Grid:
         """
         return " ".join(GRID_COLORS[i] + str(i) for i in range(len(GRID_COLORS))) + "+" + NO_COLOR
     
+    def meshLegend(self) -> str:
+        """Getting a mesh legend
+
+        Returns:
+            str: Vertex and face count
+        """
+        return f"{len(self.getVertices())} vertices"
+
     def printGridLegend(self, V: Axis, H: Axis) -> None:
         """Printing out grid axis legend
 
@@ -116,7 +125,7 @@ class Grid:
             H (Axis): Horizontal axis
         """
         axis = self.axisLegend(V, H)
-        info = (self.colorLegend(), )
+        info = (self.colorLegend(), self.meshLegend())
         rows = (len(axis) + 1) // 2
         cols = math.ceil(len(info) / rows)
         lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
