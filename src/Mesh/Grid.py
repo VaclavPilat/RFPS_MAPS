@@ -215,14 +215,14 @@ class Grid:
                     for k, h in enumerate(H.labels):
                         if k > 0:
                             print(" " * round(H.diffs[k-1] / H.min *2-1), end="")
-                        print("┃", end="")
+                        print("│", end="")
                     print()
-            print(str(v).rjust(V.just) + f"{self.pointColor(V, H, V.values[i], H.values[0])}╺{NO_COLOR}", end="")
+            print(str(v).rjust(V.just) + "╶", end="")
             for j, h in enumerate(H.labels):
                 if j > 0:
-                    print("━" * round(H.diffs[j-1] / H.min *2-1), end="")
-                print(f"{self.pointColor(V, H, V.values[i], H.values[j])}╋{NO_COLOR}", end="")
-            print(f"{self.pointColor(V, H, V.values[i], H.values[-1])}╸{NO_COLOR}" + str(v))
+                    print("─" * round(H.diffs[j-1] / H.min *2-1), end="")
+                print(f"{self.pointColor(V, H, V.values[i], H.values[j])}┼{NO_COLOR}", end="")
+            print(f"╴{v}")
     
     def gridFooter(self, V: Axis, H: Axis) -> None:
         """Printing out grid footer
