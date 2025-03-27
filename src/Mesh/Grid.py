@@ -55,13 +55,13 @@ class Axis:
 
 
 ## Grid colors, from coldest to hottest
-GRID_COLORS = ("\033[37m", "\033[34m", "\033[36m", "\033[32m", "\033[33m", "\033[31m", "\033[35m")
+GRID_COLORS = ("\033[97m", "\033[94;1m", "\033[96;1m", "\033[92;1m", "\033[93;1m", "\033[91;1m", "\033[95;1m")
 
 ## "Reset" color
 NO_COLOR = "\033[0m"
 
 ## Colors for axis names
-AXIS_COLORS = {"x": "\033[91m", "y": "\033[92m", "z": "\033[94m"}
+AXIS_COLORS = {"x": "\033[91;1m", "y": "\033[92;1m", "z": "\033[94;1m"}
     
 def lenANSI(string: str) -> int:
     """Getting the length of a string while ignoring ANSI escape sequences
@@ -100,7 +100,7 @@ class Grid:
         rows = tuple(map(lambda row: "".join(row[::-1 if H.reverse else 1]), (first, second, third)))
         return rows[::1 if V.reverse else -1]
 
-    def vertexLegend(self) -> str:
+    def colorLegend(self) -> str:
         """Getting a legend for vertex colors
 
         Returns:
@@ -116,14 +116,14 @@ class Grid:
             H (Axis): Horizontal axis
         """
         axis = self.axisLegend(V, H)
-        info = (self.vertexLegend(), )
+        info = (self.colorLegend(), )
         rows = (len(axis) + 1) // 2
         cols = math.ceil(len(info) / rows)
         lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
         print(f"╭{'─' * lenANSI(axis[0])}", end="")
         for c in range(cols):
             print(f"┬{'─' * (lengths[c] + 2)}", end="")
-        print("┐")
+        print("╮")
         for r, line in enumerate(axis):
             print(f"│{line}", end="")
             if r % 2 == 0:
@@ -138,7 +138,7 @@ class Grid:
         print(f"╰{'─' * lenANSI(axis[0])}", end="")
         for c in range(cols):
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
-        print("┘")
+        print("╯")
     
     def getVertices(self, depth: int = 0) -> set:
         """Getting a set of vertices present in the current hierarchy.
@@ -173,9 +173,9 @@ class Grid:
                 if V.match(vertex, VV) and H.match(vertex, HV):
                     vertices.add(vertex)
         count = len(vertices)
-        if count > len(self.GRID_COLORS):
-            count = len(self.GRID_COLORS) - 1
-        return self.GRID_COLORS[count]
+        if count > len(GRID_COLORS):
+            count = len(GRID_COLORS) - 1
+        return GRID_COLORS[count]
     
     def gridHeader(self, V: Axis, H: Axis) -> None:
         """Printing out grid header
@@ -208,12 +208,12 @@ class Grid:
                             print(" " * round(H.diffs[k-1] / H.min *2-1), end="")
                         print("┃", end="")
                     print()
-            print(str(v).rjust(V.just) + f"{self.pointColor(V, H, V.values[i], H.values[0])}╺{self.NO_COLOR}", end="")
+            print(str(v).rjust(V.just) + f"{self.pointColor(V, H, V.values[i], H.values[0])}╺{NO_COLOR}", end="")
             for j, h in enumerate(H.labels):
                 if j > 0:
                     print("━" * round(H.diffs[j-1] / H.min *2-1), end="")
-                print(f"{self.pointColor(V, H, V.values[i], H.values[j])}╋{self.NO_COLOR}", end="")
-            print(f"{self.pointColor(V, H, V.values[i], H.values[-1])}╸{self.NO_COLOR}" + str(v))
+                print(f"{self.pointColor(V, H, V.values[i], H.values[j])}╋{NO_COLOR}", end="")
+            print(f"{self.pointColor(V, H, V.values[i], H.values[-1])}╸{NO_COLOR}" + str(v))
     
     def gridFooter(self, V: Axis, H: Axis) -> None:
         """Printing out grid footer
@@ -238,7 +238,6 @@ class Grid:
             H (Axis): Horizontal axis
         """
         self.printGridLegend(V, H)
-        return
         for method in (self.gridHeader, self.gridBody, self.gridFooter):
             method(V, H)
     
