@@ -1,6 +1,5 @@
 ## \file
 # Classes for creating objects
-from .Grid import Grid
 from Math.Vector import V3
 from Utils.Decorators import addInitRepr, makeImmutable, defaultKwargsValues
 
@@ -23,7 +22,7 @@ class Repr(type):
 @addInitRepr
 @makeImmutable
 ## \todo Refactor & add docs
-class Object(Grid, metaclass=Repr):
+class Object(metaclass=Repr):
     """Class for containing own mesh and/or other objectes
     """
 

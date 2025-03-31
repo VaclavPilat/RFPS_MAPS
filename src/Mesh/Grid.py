@@ -77,20 +77,30 @@ def lenANSI(string: str) -> int:
     return len(string)
 
 
+@makeImmutable
 ## \todo Add functionality for generating grid recursively (the whole hierarchy, not just one object)
 # \todo Make Grid a standalone class for rendering, not a superclass for Object
 class Grid:
     """Functionality for rendering Object vertices in console from multiple perspectives
-
-    Requires a subclass to have a "faces" property (a list of lists of V3 vertices)
     """
 
-    def axisLegend(self, V: Axis, H: Axis) -> tuple:
-        """Getting axis information for the grid legend
+    def __init__(self, obj: Object, vertical: Axis, horizontal: Axis) -> None:
+        """Initialising a Grid instance
 
         Args:
-            V (Axis): Vertical axis
-            H (Axis): Horizontal axis
+            obj (Object): Object instance to visualise
+            vertical (Axis): Vertical axis
+            horizontal (Axis): Horizontal axis
+        """
+        ## Object to visualise
+        self.obj = obj
+        ## Vertical axis
+        self.vertical = vertical
+        ## Horizontal
+        self.horizontal = horizontal
+
+    def axisInfo(self) -> tuple:
+        """Getting axis information for the grid legend
 
         Returns:
             tuple: 3 row strings representing selected axis
@@ -101,21 +111,22 @@ class Grid:
         rows = tuple(map(lambda row: "".join(row[::-1 if H.reverse else 1]), (first, second, third)))
         return rows[::1 if V.reverse else -1]
 
-    def colorLegend(self) -> str:
+    def colorLegend(self) -> tuple:
         """Getting a legend for vertex colors
 
         Returns:
-            str: Colors for vertex counts
+            tuple: Colors for vertex counts as a string in a tuple
         """
-        return " ".join(GRID_COLORS[i] + str(i) for i in range(len(GRID_COLORS))) + "+" + NO_COLOR
+        return (" ".join(GRID_COLORS[i] + str(i) for i in range(len(GRID_COLORS))) + "+" + NO_COLOR, )
     
-    def meshLegend(self) -> str:
-        """Getting a mesh legend
+    def objectInfo(self) -> tuple:
+        """Getting object information
 
         Returns:
-            str: Vertex and face count
+            tuple: Collection of info strings
         """
-        return f"{len(self.getVertices())} vertices"
+        return (str(self.obj), )
+        #return f"{len(self.getVertices())} vertices"
 
     def printGridLegend(self, V: Axis, H: Axis) -> None:
         """Printing out grid axis legend
@@ -124,15 +135,18 @@ class Grid:
             V (Axis): Vertical axis
             H (Axis): Horizontal axis
         """
-        axis = self.axisLegend(V, H)
-        info = (self.colorLegend(), self.meshLegend())
+        # Variables
+        axis = self.axisInfo(V, H)
+        info = self.colorLegend() + self.objectInfo()
         rows = (len(axis) + 1) // 2
         cols = math.ceil(len(info) / rows)
         lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
+        # Printing out top border
         print(f"╭{'─' * lenANSI(axis[0])}", end="")
         for c in range(cols):
             print(f"┬{'─' * (lengths[c] + 2)}", end="")
         print("╮")
+        # Printing out rows
         for r, line in enumerate(axis):
             print(f"│{line}", end="")
             if r % 2 == 0:
@@ -144,6 +158,7 @@ class Grid:
                 for c in range(cols):
                     print(f"{'┼' if c else '├'}{'─' * (lengths[c] + 2)}", end="")
                 print("┤" if info else "│")
+        # Printing out bottom border
         print(f"╰{'─' * lenANSI(axis[0])}", end="")
         for c in range(cols):
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
@@ -158,7 +173,7 @@ class Grid:
         Returns:
             list: Set of vertices in the current hierarchy (relative to parent's origin)
         """
-        vertices = set(vertex for face in self.faces for vertex in face)
+        vertices = set(vertex for face in self.obj.faces for vertex in face)
         if depth > 0:
             for child in self.objects:
                 vertices = vertices.union(child.getVertices(depth - 1))
