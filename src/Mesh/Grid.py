@@ -1,6 +1,7 @@
 ## \file
 # Functionality for rendering Object structure in console
 from Utils.Decorators import makeImmutable
+from Utils.Colors import NONE, AXIS, TEMPERATURE, lenANSI
 from Math.Vector import V3
 import math
 
@@ -52,29 +53,6 @@ class Axis:
             func: True if the vertex has the value as a component of the current axis
         """
         return getattr(vertex, self.name) == value
-
-
-## Grid colors, from coldest to hottest
-GRID_COLORS = ("\033[97m", "\033[94;1m", "\033[96;1m", "\033[92;1m", "\033[93;1m", "\033[91;1m", "\033[95;1m")
-
-## "Reset" color
-NO_COLOR = "\033[0m"
-
-## Colors for axis names
-AXIS_COLORS = {"x": "\033[91;1m", "y": "\033[92;1m", "z": "\033[94;1m"}
-    
-def lenANSI(string: str) -> int:
-    """Getting the length of a string while ignoring ANSI escape sequences
-
-    Args:
-        string (str): String to get the length of
-
-    Returns:
-        int: Length of the pure string
-    """
-    for color in GRID_COLORS + tuple(AXIS_COLORS.values()) + (NO_COLOR,):
-        string = string.replace(color, "")
-    return len(string)
 
 
 @makeImmutable
