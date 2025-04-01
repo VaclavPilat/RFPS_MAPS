@@ -2,6 +2,8 @@
 # Classes for creating objects
 from Math.Vector import V3
 from Utils.Decorators import addInitRepr, makeImmutable, defaultKwargsValues
+from Utils.Colors import HIERARCHY, NONE
+from .Grid import Grid
 
 
 
@@ -53,9 +55,6 @@ class Object(metaclass=Repr):
         for obj in self.objects:
             yield from obj
     
-    ## Hierarchy colors
-    HIERARCHY_COLORS = ("\033[34m", "\033[35m", "\033[36m", "\033[31m", "\033[32m", "\033[33m")
-    
     def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
         """Printing string representation of object hierarchy
 
@@ -64,13 +63,24 @@ class Object(metaclass=Repr):
             children (str, optional): Line indent for child items. Defaults to "".
             layer (int, optional): Current layer index. Defaults to 0.
         """
-        print(f"{current}\033[0m{repr(self)}")
+        print(f"{current}{NONE}{repr(self)}")
         for index, child in enumerate(self.objects):
-            color = self.HIERARCHY_COLORS[layer % len(self.HIERARCHY_COLORS)]
+            color = HIERARCHY[layer % len(HIERARCHY)]
             last = index < len(self.objects) - 1
             newCurrent = f"{children}{color}{'┣' if last else '┗'}━╸"
             newChildren = f"{children}{color}{'┃' if last else ' '}  "
             child.printHierarchy(newCurrent, newChildren, layer + 1)
+    
+    def printGrids(self, depth: int = 0) -> None:
+        """Printing out grids representing the current object
+
+        Args:
+            depth (int, optional): Maximum recursion depth. Defaults to 0.
+        """
+        grid = Grid(self)
+        grid.print("-x", "-y", depth)
+        grid.print("-z", "-y", depth)
+        grid.print("-z", "x", depth)
 
     def load(self, obj: "Object", *args, **kwargs) -> "Object":
         """Creating a object instance using class type and its constructor arguments

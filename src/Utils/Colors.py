@@ -12,6 +12,9 @@ TEMPERATURE = ("\033[97m", "\033[94;1m", "\033[96;1m", "\033[92;1m", "\033[93;1m
 ## Axis colors
 AXIS = {"x": "\033[91;1m", "y": "\033[92;1m", "z": "\033[94;1m"}
 
+## Hierarchy colors
+HIERARCHY = ("\033[94m", "\033[95m", "\033[96m", "\033[91m", "\033[92m", "\033[93m")
+
 
     
 def lenANSI(string: str) -> int:
