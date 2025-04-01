@@ -167,6 +167,47 @@ class Grid:
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
     
+    def _printVertices(self, vertical: Axis, horizontal: Axis) -> None:
+        """Printing out grid header
+
+        Args:
+            vertical (Axis): Vertical axis
+            horizontal (Axis): Horizontal axis
+        """
+        # Header
+        for i in range(horizontal.just):
+            print(" " * (vertical.just + 1), end="")
+            for j, h in enumerate(horizontal.labels):
+                if j > 0:
+                    print(" " * round(horizontal.diffs[j-1] / horizontal.min *2-1), end="")
+                print(str(h).rjust(horizontal.just)[i], end="")
+            print()
+        # Body
+        for i, v in enumerate(vertical.labels):
+            if i > 0:
+                for j in range(round(vertical.diffs[i-1] / vertical.min - 1)):
+                    print(" " * (vertical.just + 1), end="")
+                    for k, h in enumerate(horizontal.labels):
+                        if k > 0:
+                            print(" " * round(horizontal.diffs[k-1] / horizontal.min *2-1), end="")
+                        print("│", end="")
+                    print()
+            print(str(v).rjust(vertical.just) + "╶", end="")
+            for j, h in enumerate(horizontal.labels):
+                if j > 0:
+                    print("─" * round(horizontal.diffs[j-1] / horizontal.min *2-1), end="")
+                #print(f"{self.pointColor(vertical, horizontal, vertical.values[i], horizontal.values[j])}┼{NONE}", end="")
+                print(f"┼", end="")
+            print(f"╴{v}")
+        # Footer
+        for i in range(horizontal.just):
+            print(" " * (vertical.just + 1), end="")
+            for j, h in enumerate(horizontal.labels):
+                if j > 0:
+                    print(" " * round(horizontal.diffs[j-1] / horizontal.min *2-1), end="")
+                print(str(h).ljust(horizontal.just)[i], end="")
+            print()
+    
     def print(self, vertical: str, horizontal: str, title: str, depth: int = 0) -> None:
         """Printing out a grid
 
@@ -181,3 +222,4 @@ class Grid:
         vertical = Axis(vertical, vertices)
         horizontal = Axis(horizontal, vertices)
         self._printLegend(vertical, horizontal, title, depth)
+        self._printVertices(vertical, horizontal)
