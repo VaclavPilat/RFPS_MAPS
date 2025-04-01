@@ -116,16 +116,17 @@ class Grid:
         """
         return (" ".join(TEMPERATURE[i] + str(i) for i in range(len(TEMPERATURE))) + "+" + NONE, )
     
-    def _printLegend(self, vertical: Axis, horizontal: Axis) -> None:
+    def _printLegend(self, vertical: Axis, horizontal: Axis, title: str) -> None:
         """Printing out grid legend
 
         Args:
             vertical (Axis): Vertical axis
             horizontal (Axis): Horizontal axis
+            title (str): View title
         """
         # Variables
         axis = self._axisInfo(vertical, horizontal)
-        info = self._colorLegend()
+        info = (self.obj.name, title, ) + self._colorLegend()
         rows = (len(axis) + 1) // 2
         cols = math.ceil(len(info) / rows)
         lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
@@ -140,7 +141,10 @@ class Grid:
             if r % 2 == 0:
                 for c in range(cols):
                     index = c*rows+r//2
-                    print(f"│ {info[index].ljust(lengths[c]) if len(info) > index else ' '*lengths[c]} ", end="")
+                    if len(info) > index:
+                        print(f"│ {info[index]+' '*(lengths[c]-lenANSI(info[index]))} ", end="")
+                    else:
+                        print(f"│ {' '*lengths[c]} ", end="")
                 print("│")
             else:
                 for c in range(cols):
@@ -152,16 +156,17 @@ class Grid:
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
     
-    def print(self, vertical: str, horizontal: str, depth: int = 0) -> None:
+    def print(self, vertical: str, horizontal: str, title: str, depth: int = 0) -> None:
         """Printing out a grid
 
         Args:
             vertical (str): Vertical axis name
             horizontal (str): Horizontal axis name
+            title (str): View title
             depth (int, optional): Maximum layer index. Defaults to 0.
         """
         assert depth >= 0, "Max depth cannot be a negative number"
         vertices = set.union(*self.vertices[:depth + 1])
         vertical = Axis(vertical, vertices)
         horizontal = Axis(horizontal, vertices)
-        self._printLegend(vertical, horizontal)
+        self._printLegend(vertical, horizontal, title)

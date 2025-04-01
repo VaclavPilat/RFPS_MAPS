@@ -78,9 +78,9 @@ class Object(metaclass=Repr):
             depth (int, optional): Maximum recursion depth. Defaults to 0.
         """
         grid = Grid(self)
-        grid.print("-x", "-y", depth)
-        grid.print("-z", "-y", depth)
-        grid.print("-z", "x", depth)
+        grid.print("-x", "-y", "TOP VIEW", depth)
+        grid.print("-z", "-y", "SIDE VIEW", depth)
+        grid.print("-z", "x", "FRONT VIEW", depth)
 
     def load(self, obj: "Object", *args, **kwargs) -> "Object":
         """Creating a object instance using class type and its constructor arguments
