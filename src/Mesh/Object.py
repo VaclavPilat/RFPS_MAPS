@@ -71,16 +71,10 @@ class Object(metaclass=Repr):
             newChildren = f"{children}{color}{'┃' if last else ' '}  "
             child.printHierarchy(newCurrent, newChildren, layer + 1)
     
-    def printGrids(self, depth: int = 0) -> None:
+    def printGrids(self, *args, **kwargs) -> None:
         """Printing out grids representing the current object
-
-        Args:
-            depth (int, optional): Maximum recursion depth. Defaults to 0.
         """
-        grid = Grid(self)
-        grid.print("-x", "-y", "TOP VIEW", depth)
-        grid.print("-z", "-y", "SIDE VIEW", depth)
-        grid.print("-z", "x", "FRONT VIEW", depth)
+        Grid(self).print(*args, **kwargs)
 
     def load(self, obj: "Object", *args, **kwargs) -> "Object":
         """Creating a object instance using class type and its constructor arguments

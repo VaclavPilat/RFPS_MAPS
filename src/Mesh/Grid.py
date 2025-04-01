@@ -57,8 +57,134 @@ class Axis:
 
 
 @makeImmutable
+class View:
+    """Class for rendering 3D objects as 2D views in console
+    """
+
+    def __init__(self, obj: "Object", vertices: set, vertical: str, horizontal: str, title: str) -> None:
+        """Initialising a View instance
+
+        Args:
+            obj (Object): Object instance to render in console
+            vertices (set): Subset of the object's vertices
+            vertical (Axis): Vertical axis name
+            horizontal (Axis): Horizontal axis name
+            title (str): View title
+        """
+        ## Object to render
+        self.obj = obj
+        ## Subset of object's vertices to render
+        self.vertices = vertices
+        ## Vertical axis
+        self.vertical = Axis(vertical, vertices)
+        ## Horizontal axis
+        self.horizontal = Axis(horizontal, vertices)
+        ## View title
+        self.title = title
+
+    def _axisInfo(self) -> tuple:
+        """Getting out a diagram of axis orientation
+
+        Returns:
+            tuple: 3 row strings representing selected axis
+        """
+        first = (" ", f"{AXIS[self.vertical.name]}{self.vertical.name.upper()}{NONE}", "     ")
+        second = (" ", "┃", "     ")
+        third = (f"╺{'━━╋'[::(-1,1)[self.horizontal.reverse]]}╸", f"{AXIS[self.horizontal.name]}{self.horizontal.name.upper()}{NONE}", " ")
+        rows = tuple(map(lambda row: "".join(row[::(1,-1)[self.horizontal.reverse]]), (first, second, third)))
+        return rows[::(-1,1)[self.vertical.reverse]]
+
+    def _colorLegend(self) -> tuple:
+        """Getting a legend for vertex colors
+
+        Returns:
+            tuple: Colors for vertex counts as a string in a tuple
+        """
+        return (" ".join(TEMPERATURE[i] + str(i) for i in range(len(TEMPERATURE))) + "+" + NONE, )
+    
+    def _printLegend(self) -> None:
+        """Printing out grid legend
+        """
+        # Variables
+        axis = self._axisInfo()
+        info = (self.obj.name, f"{len(self.vertices)} vertices", self.title, ) + self._colorLegend()
+        rows = (len(axis) + 1) // 2
+        cols = math.ceil(len(info) / rows)
+        lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
+        # Printing out top border
+        print(f"╭{'─' * lenANSI(axis[0])}", end="")
+        for c in range(cols):
+            print(f"┬{'─' * (lengths[c] + 2)}", end="")
+        print("╮")
+        # Printing out rows
+        for r, line in enumerate(axis):
+            print(f"│{line}", end="")
+            if r % 2 == 0:
+                for c in range(cols):
+                    index = c*rows+r//2
+                    if len(info) > index:
+                        print(f"│ {info[index]+' '*(lengths[c]-lenANSI(info[index]))} ", end="")
+                    else:
+                        print(f"│ {' '*lengths[c]} ", end="")
+                print("│")
+            else:
+                for c in range(cols):
+                    print(f"{'┼' if c else '├'}{'─' * (lengths[c] + 2)}", end="")
+                print("┤" if info else "│")
+        # Printing out bottom border
+        print(f"╰{'─' * lenANSI(axis[0])}", end="")
+        for c in range(cols):
+            print(f"┴{'─' * (lengths[c] + 2)}", end="")
+        print("╯")
+    
+    def _printVertices(self) -> None:
+        """Printing out grid header
+        """
+        # Header
+        for i in range(self.horizontal.just):
+            print(" " * (self.vertical.just + 1), end="")
+            for j, h in enumerate(self.horizontal.labels):
+                if j > 0:
+                    print(" " * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
+                print(str(h).rjust(self.horizontal.just)[i], end="")
+            print()
+        # Body
+        for i, v in enumerate(self.vertical.labels):
+            if i > 0:
+                for j in range(round(self.vertical.diffs[i-1] / self.vertical.min - 1)):
+                    print(" " * (self.vertical.just + 1), end="")
+                    for k, h in enumerate(self.horizontal.labels):
+                        if k > 0:
+                            print(" " * round(self.horizontal.diffs[k-1] / self.horizontal.min *2-1), end="")
+                        print("│", end="")
+                    print()
+            print(str(v).rjust(self.vertical.just) + "╶", end="")
+            for j, h in enumerate(self.horizontal.labels):
+                if j > 0:
+                    print("─" * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
+                #print(f"{self.pointColor(vertical, horizontal, vertical.values[i], horizontal.values[j])}┼{NONE}", end="")
+                print(f"┼", end="")
+            print(f"╴{v}")
+        # Footer
+        for i in range(self.horizontal.just):
+            print(" " * (self.vertical.just + 1), end="")
+            for j, h in enumerate(self.horizontal.labels):
+                if j > 0:
+                    print(" " * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
+                print(str(h).ljust(self.horizontal.just)[i], end="")
+            print()
+    
+    def print(self) -> None:
+        """Printing out the grid view
+        """
+        self._printLegend()
+        self._printVertices()
+
+
+
+@makeImmutable
 class Grid:
-    """Class for rendering 3D objects in a 2D grid, with multiple possible perspectives
+    """Class for processing requests for the rendering of 3D objects in console
     """
 
     def __init__(self, obj: "Object") -> None:
@@ -101,125 +227,15 @@ class Grid:
             set: Set of vertices found wihin the specified depth
         """
         return set.union(*self.vertices[:depth + 1])
-
-    def _axisInfo(self, vertical: Axis, horizontal: Axis) -> tuple:
-        """Printing out grid legend
-
-        Args:
-            vertical (Axis): Vertical axis
-            horizontal (Axis): Horizontal axis
-
-        Returns:
-            tuple: 3 row strings representing selected axis
-        """
-        first = (" ", f"{AXIS[vertical.name]}{vertical.name.upper()}{NONE}", "     ")
-        second = (" ", "┃", "     ")
-        third = (f"╺{'━━╋'[::(-1,1)[horizontal.reverse]]}╸", f"{AXIS[horizontal.name]}{horizontal.name.upper()}{NONE}", " ")
-        rows = tuple(map(lambda row: "".join(row[::(1,-1)[horizontal.reverse]]), (first, second, third)))
-        return rows[::(-1,1)[vertical.reverse]]
-
-    def _colorLegend(self) -> tuple:
-        """Getting a legend for vertex colors
-
-        Returns:
-            tuple: Colors for vertex counts as a string in a tuple
-        """
-        return (" ".join(TEMPERATURE[i] + str(i) for i in range(len(TEMPERATURE))) + "+" + NONE, )
     
-    def _printLegend(self, vertical: Axis, horizontal: Axis, title: str, depth: int) -> None:
-        """Printing out grid legend
-
-        Args:
-            vertical (Axis): Vertical axis
-            horizontal (Axis): Horizontal axis
-            title (str): View title
-            depth (int): Maximum layer depth
-        """
-        # Variables
-        axis = self._axisInfo(vertical, horizontal)
-        info = (self.obj.name, f"{len(self._selectVertices(depth))} vertices", title, ) + self._colorLegend()
-        rows = (len(axis) + 1) // 2
-        cols = math.ceil(len(info) / rows)
-        lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
-        # Printing out top border
-        print(f"╭{'─' * lenANSI(axis[0])}", end="")
-        for c in range(cols):
-            print(f"┬{'─' * (lengths[c] + 2)}", end="")
-        print("╮")
-        # Printing out rows
-        for r, line in enumerate(axis):
-            print(f"│{line}", end="")
-            if r % 2 == 0:
-                for c in range(cols):
-                    index = c*rows+r//2
-                    if len(info) > index:
-                        print(f"│ {info[index]+' '*(lengths[c]-lenANSI(info[index]))} ", end="")
-                    else:
-                        print(f"│ {' '*lengths[c]} ", end="")
-                print("│")
-            else:
-                for c in range(cols):
-                    print(f"{'┼' if c else '├'}{'─' * (lengths[c] + 2)}", end="")
-                print("┤" if info else "│")
-        # Printing out bottom border
-        print(f"╰{'─' * lenANSI(axis[0])}", end="")
-        for c in range(cols):
-            print(f"┴{'─' * (lengths[c] + 2)}", end="")
-        print("╯")
-    
-    def _printVertices(self, vertical: Axis, horizontal: Axis) -> None:
-        """Printing out grid header
-
-        Args:
-            vertical (Axis): Vertical axis
-            horizontal (Axis): Horizontal axis
-        """
-        # Header
-        for i in range(horizontal.just):
-            print(" " * (vertical.just + 1), end="")
-            for j, h in enumerate(horizontal.labels):
-                if j > 0:
-                    print(" " * round(horizontal.diffs[j-1] / horizontal.min *2-1), end="")
-                print(str(h).rjust(horizontal.just)[i], end="")
-            print()
-        # Body
-        for i, v in enumerate(vertical.labels):
-            if i > 0:
-                for j in range(round(vertical.diffs[i-1] / vertical.min - 1)):
-                    print(" " * (vertical.just + 1), end="")
-                    for k, h in enumerate(horizontal.labels):
-                        if k > 0:
-                            print(" " * round(horizontal.diffs[k-1] / horizontal.min *2-1), end="")
-                        print("│", end="")
-                    print()
-            print(str(v).rjust(vertical.just) + "╶", end="")
-            for j, h in enumerate(horizontal.labels):
-                if j > 0:
-                    print("─" * round(horizontal.diffs[j-1] / horizontal.min *2-1), end="")
-                #print(f"{self.pointColor(vertical, horizontal, vertical.values[i], horizontal.values[j])}┼{NONE}", end="")
-                print(f"┼", end="")
-            print(f"╴{v}")
-        # Footer
-        for i in range(horizontal.just):
-            print(" " * (vertical.just + 1), end="")
-            for j, h in enumerate(horizontal.labels):
-                if j > 0:
-                    print(" " * round(horizontal.diffs[j-1] / horizontal.min *2-1), end="")
-                print(str(h).ljust(horizontal.just)[i], end="")
-            print()
-    
-    def print(self, vertical: str, horizontal: str, title: str, depth: int = 0) -> None:
+    def print(self, depth: int = 0) -> None:
         """Printing out a grid
 
         Args:
-            vertical (str): Vertical axis name
-            horizontal (str): Horizontal axis name
-            title (str): View title
             depth (int, optional): Maximum layer index. Defaults to 0.
         """
         assert depth >= 0, "Max depth cannot be a negative number"
-        vertices = self._selectVertices(depth)
-        vertical = Axis(vertical, vertices)
-        horizontal = Axis(horizontal, vertices)
-        self._printLegend(vertical, horizontal, title, depth)
-        self._printVertices(vertical, horizontal)
+        selected = self._selectVertices(depth)
+        View(self.obj, selected, "-x", "-y", "TOP VIEW").print()
+        View(self.obj, selected, "-z", "-y", "SIDE VIEW").print()
+        View(self.obj, selected, "-z", "x", "FRONT VIEW").print()
