@@ -54,27 +54,6 @@ class Object(metaclass=Repr):
         yield self
         for obj in self.objects:
             yield from obj
-    
-    def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
-        """Printing string representation of object hierarchy
-
-        Args:
-            current (str, optional): Current line indent. Defaults to "".
-            children (str, optional): Line indent for child items. Defaults to "".
-            layer (int, optional): Current layer index. Defaults to 0.
-        """
-        print(f"{current}{NONE}{repr(self)}")
-        for index, child in enumerate(self.objects):
-            color = HIERARCHY[layer % len(HIERARCHY)]
-            last = index < len(self.objects) - 1
-            newCurrent = f"{children}{color}{'┣' if last else '┗'}━╸"
-            newChildren = f"{children}{color}{'┃' if last else ' '}  "
-            child.printHierarchy(newCurrent, newChildren, layer + 1)
-    
-    def printGrids(self, *args, **kwargs) -> None:
-        """Printing out grids representing the current object
-        """
-        Grid(self).print(*args, **kwargs)
 
     def load(self, obj: "Object", *args, **kwargs) -> "Object":
         """Creating a object instance using class type and its constructor arguments
@@ -104,6 +83,27 @@ class Object(metaclass=Repr):
             inverted (bool, optional): Should the face be inverted? Defaults to False.
         """
         self.faces.append(vertices if not inverted else vertices[::-1])
+    
+    def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
+        """Printing string representation of object hierarchy
+
+        Args:
+            current (str, optional): Current line indent. Defaults to "".
+            children (str, optional): Line indent for child items. Defaults to "".
+            layer (int, optional): Current layer index. Defaults to 0.
+        """
+        print(f"{current}{NONE}{repr(self)}")
+        for index, child in enumerate(self.objects):
+            color = HIERARCHY[layer % len(HIERARCHY)]
+            last = index < len(self.objects) - 1
+            newCurrent = f"{children}{color}{'┣' if last else '┗'}━╸"
+            newChildren = f"{children}{color}{'┃' if last else ' '}  "
+            child.printHierarchy(newCurrent, newChildren, layer + 1)
+    
+    def printGrids(self, *args, **kwargs) -> None:
+        """Printing out grids representing the current object
+        """
+        Grid(self).print(*args, **kwargs)
 
 
 

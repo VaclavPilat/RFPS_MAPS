@@ -146,7 +146,7 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs, G=METRO.USTG, H=METRO.USTH, L=METRO.USTL).printGrids(10)
+    self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs, G=METRO.USTG, H=METRO.USTH, L=METRO.USTL).printGrids()
     self.load(UnderpassEntrance, "Underpass slope entrance", Box(V3.BACKWARD * 3, METRO.USLL, METRO.UEWD), C=Slopes, S=METRO.USLC, R=METRO.USLR)
 
 

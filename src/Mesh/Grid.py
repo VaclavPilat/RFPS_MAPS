@@ -100,7 +100,7 @@ class View:
         Returns:
             tuple: Colors for vertex counts as a string in a tuple
         """
-        return (" ".join(TEMPERATURE[i] + str(i) for i in range(len(TEMPERATURE))) + "+" + NONE, )
+        return (" ".join(TEMPERATURE[i] + str(i+1) for i in range(len(TEMPERATURE))) + "+" + NONE, )
     
     def _printLegend(self) -> None:
         """Printing out grid legend
@@ -137,6 +137,22 @@ class View:
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
     
+    def _pointColor(self, vertical: float, horizontal: float) -> str:
+        """Colorising a single point based on the number of vertices behind it
+
+        Args:
+            vertical (float): Vertical axis value
+            horizontal (float): Horizontal axis value
+
+        Returns:
+            str: ANSI colored box character representing the point
+        """
+        selected = tuple(filter(lambda v: self.vertical.match(v, vertical) and self.horizontal.match(v, horizontal), self.vertices))
+        if selected:
+            count = len(selected)
+            return f"{TEMPERATURE[min(count-1, len(TEMPERATURE)-1)]}╋{NONE}"
+        return "┼"
+    
     def _printVertices(self) -> None:
         """Printing out grid header
         """
@@ -162,8 +178,7 @@ class View:
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
                     print("─" * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
-                #print(f"{self.pointColor(vertical, horizontal, vertical.values[i], horizontal.values[j])}┼{NONE}", end="")
-                print(f"┼", end="")
+                print(self._pointColor(self.vertical.values[i], self.horizontal.values[j]), end="")
             print(f"╴{v}")
         # Footer
         for i in range(self.horizontal.just):
