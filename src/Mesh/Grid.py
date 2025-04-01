@@ -89,8 +89,18 @@ class Grid:
                     vertices[layer].add(vertex)
             for child in obj.objects:
                 queue.append((child, layer + 1))
-            return tuple(vertices)
         return tuple(vertices)
+    
+    def _selectVertices(self, depth: int) -> set:
+        """Selecting vertices up to a certain layer depth
+
+        Args:
+            depth (int): Maximum layer depth
+
+        Returns:
+            set: Set of vertices found wihin the specified depth
+        """
+        return set.union(*self.vertices[:depth + 1])
 
     def _axisInfo(self, vertical: Axis, horizontal: Axis) -> tuple:
         """Printing out grid legend
@@ -104,9 +114,9 @@ class Grid:
         """
         first = (" ", f"{AXIS[vertical.name]}{vertical.name.upper()}{NONE}", "     ")
         second = (" ", "┃", "     ")
-        third = (f"╺{'━━╋' if horizontal.reverse else '╋━━'}╸", f"{AXIS[horizontal.name]}{horizontal.name.upper()}{NONE}", " ")
-        rows = tuple(map(lambda row: "".join(row[::-1 if horizontal.reverse else 1]), (first, second, third)))
-        return rows[::1 if vertical.reverse else -1]
+        third = (f"╺{'━━╋'[::(-1,1)[horizontal.reverse]]}╸", f"{AXIS[horizontal.name]}{horizontal.name.upper()}{NONE}", " ")
+        rows = tuple(map(lambda row: "".join(row[::(1,-1)[horizontal.reverse]]), (first, second, third)))
+        return rows[::(-1,1)[vertical.reverse]]
 
     def _colorLegend(self) -> tuple:
         """Getting a legend for vertex colors
@@ -116,17 +126,18 @@ class Grid:
         """
         return (" ".join(TEMPERATURE[i] + str(i) for i in range(len(TEMPERATURE))) + "+" + NONE, )
     
-    def _printLegend(self, vertical: Axis, horizontal: Axis, title: str) -> None:
+    def _printLegend(self, vertical: Axis, horizontal: Axis, title: str, depth: int) -> None:
         """Printing out grid legend
 
         Args:
             vertical (Axis): Vertical axis
             horizontal (Axis): Horizontal axis
             title (str): View title
+            depth (int): Maximum layer depth
         """
         # Variables
         axis = self._axisInfo(vertical, horizontal)
-        info = (self.obj.name, title, ) + self._colorLegend()
+        info = (self.obj.name, f"{len(self._selectVertices(depth))} vertices", title, ) + self._colorLegend()
         rows = (len(axis) + 1) // 2
         cols = math.ceil(len(info) / rows)
         lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
@@ -166,7 +177,7 @@ class Grid:
             depth (int, optional): Maximum layer index. Defaults to 0.
         """
         assert depth >= 0, "Max depth cannot be a negative number"
-        vertices = set.union(*self.vertices[:depth + 1])
+        vertices = self._selectVertices(depth)
         vertical = Axis(vertical, vertices)
         horizontal = Axis(horizontal, vertices)
-        self._printLegend(vertical, horizontal, title)
+        self._printLegend(vertical, horizontal, title, depth)
