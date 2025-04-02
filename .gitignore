@@ -5,3 +5,4 @@ _*
 *.png
 *.jpg
 !docs/Icon.png
+.idea
