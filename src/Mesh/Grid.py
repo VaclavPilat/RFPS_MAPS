@@ -172,12 +172,12 @@ class View:
                     for k, h in enumerate(self.horizontal.labels):
                         if k > 0:
                             print(" " * round(self.horizontal.diffs[k-1] / self.horizontal.min *2-1), end="")
-                        print("│", end="")
+                        print("┆", end="")
                     print()
             print(str(v).rjust(self.vertical.just) + "╶", end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print("─" * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
+                    print("╌" * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
                 print(self._pointColor(self.vertical.values[i], self.horizontal.values[j]), end="")
             print(f"╴{v}")
         # Footer
