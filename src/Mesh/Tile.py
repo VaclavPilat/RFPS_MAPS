@@ -66,12 +66,23 @@ class Bounds:
         """Rotating a vertex point around tile pivot
 
         Args:
-            point (V3): Point to rotate
+            point (V3): Vertex position to rotate (relative to origin)
 
         Returns:
-            V3: Rotated vertex position
+            V3: Rotated vertex position (relative to origin)
         """
-        return self.O + ((point - self.O) >> self.R)
+        return point >> self.R
+    
+    def transform(self, point: V3) -> V3:
+        """Getting the position of a point relative to parent
+
+        Args:
+            point (V3): Vertex position (relative to origin)
+
+        Returns:
+            V3: Vertex position (relative to parent's origin)
+        """
+        return point + self.O
 
 
 

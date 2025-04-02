@@ -210,27 +210,18 @@ class Grid:
         """
         ## Object to visualise
         self.obj = obj
-        ## All vertex positions found within the object (including children)
-        self.vertices = self._getVertices()
     
-    def _getVertices(self) -> tuple:
-        """Getting a layer-indexed tuple of sets of vertices
+    def _getVertices(self, obj: "Object", depth: int) -> set:
+        """Getting vertex positions (relative to the parent's origin) up to a certain depth
 
         Returns:
-            tuple: Tuple of sets of vertices (one for each depth layer)
+            tuple: Remaining depth to go down to
         """
-        vertices = []
-        queue = [(self.obj, 0)]
-        while queue:
-            obj, layer = queue.pop(0)
-            if layer == len(vertices):
-                vertices.append(set())
-            for face in obj.faces:
-                for vertex in face:
-                    vertices[layer].add(vertex)
+        vertices = set(vertex for face in obj.faces for vertex in face)
+        if depth > 0:
             for child in obj.objects:
-                queue.append((child, layer + 1))
-        return tuple(vertices)
+                vertices = vertices.union(self._getVertices(child, depth - 1))
+        return set(map(obj.bounds.transform, vertices))
     
     def _selectVertices(self, depth: int) -> set:
         """Selecting vertices up to a certain layer depth
@@ -241,7 +232,7 @@ class Grid:
         Returns:
             set: Set of vertices found wihin the specified depth
         """
-        return set.union(*self.vertices[:depth + 1])
+        return self._getVertices(self.obj, depth)
     
     def print(self, depth: int = 0) -> None:
         """Printing out a grid
@@ -250,7 +241,7 @@ class Grid:
             depth (int, optional): Maximum layer index. Defaults to 0.
         """
         assert depth >= 0, "Max depth cannot be a negative number"
-        selected = self._selectVertices(depth)
-        View(self.obj, selected, "-x", "-y", "TOP VIEW").print()
-        View(self.obj, selected, "-z", "-y", "SIDE VIEW").print()
-        View(self.obj, selected, "-z", "x", "FRONT VIEW").print()
+        vertices = self._selectVertices(depth)
+        View(self.obj, vertices, "-x", "-y", "TOP VIEW").print()
+        View(self.obj, vertices, "-z", "-y", "SIDE VIEW").print()
+        View(self.obj, vertices, "-z", "x", "FRONT VIEW").print()
