@@ -54,6 +54,17 @@ class Object(metaclass=Repr):
         yield self
         for obj in self.objects:
             yield from obj
+    
+    def transform(self, point: V3) -> V3:
+        """Getting the position of a point relative to parent
+
+        Args:
+            point (V3): Vertex position (relative to object position)
+
+        Returns:
+            V3: Vertex position (relative to parent's object position)
+        """
+        return point + self.position
 
     def load(self, obj: "Object", *args, **kwargs) -> "Object":
         """Creating a object instance using class type and its constructor arguments

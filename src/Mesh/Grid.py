@@ -225,7 +225,7 @@ class Grid:
         if depth > 0:
             for child in obj.objects:
                 vertices = vertices.union(self._getVertices(child, depth - 1))
-        return set(map(obj.bounds.transform, vertices))
+        return set(map(obj.transform, vertices))
     
     def _selectVertices(self, depth: int) -> set:
         """Selecting vertices up to a certain layer depth
