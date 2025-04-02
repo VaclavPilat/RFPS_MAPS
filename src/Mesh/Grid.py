@@ -1,7 +1,7 @@
 ## \file
 # Functionality for rendering Object structure in console
 from Utils.Decorators import makeImmutable
-from Utils.Colors import NONE, AXIS, TEMPERATURE, lenANSI
+from Utils.Colors import NONE, AXIS, TEMPERATURE, lenANSI, BOLD
 from Math.Vector import V3
 import math, re
 
@@ -107,7 +107,11 @@ class View:
         """
         # Variables
         axis = self._axisInfo()
-        info = (self.obj.name, f"{len(self.vertices)} vertices", self.title, ) + self._colorLegend()
+        info = (
+            f"{BOLD}{self.obj.name}{NONE}",
+            f"{BOLD}{len(self.vertices)}{NONE} vertices",
+            self.title
+        ) + self._colorLegend()
         rows = (len(axis) + 1) // 2
         cols = math.ceil(len(info) / rows)
         lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]

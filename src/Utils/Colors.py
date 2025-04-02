@@ -13,11 +13,14 @@ if sys.stdout.isatty():
     AXIS = {"x": "\033[91;1m", "y": "\033[92;1m", "z": "\033[94;1m"}
     ## Hierarchy colors
     HIERARCHY = ("\033[94m", "\033[95m", "\033[96m", "\033[91m", "\033[92m", "\033[93m")
+    ## Bold color
+    BOLD = "\033[1m"
 else:
     NONE = ""
     TEMPERATURE = ("", )
     AXIS = {"x": "", "y": "", "z": ""}
     HIERARCHY = ("", )
+    BOLD = ""
 
 
     
@@ -30,6 +33,6 @@ def lenANSI(string: str) -> int:
     Returns:
         int: Length of the pure string
     """
-    for color in TEMPERATURE + tuple(AXIS.values()) + (NONE, ):
+    for color in TEMPERATURE + tuple(AXIS.values()) + (NONE, BOLD):
         string = string.replace(color, "")
     return len(string)
