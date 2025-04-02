@@ -25,7 +25,7 @@ class Repr(type):
 @makeImmutable
 ## \todo Refactor & add docs
 class Object(metaclass=Repr):
-    """Class for containing own mesh and/or other objectes
+    """Class for containing own mesh and/or other objects
     """
 
     def __init__(self, name: str = "New object", position: V3 = V3.ZERO, *args, **kwargs) -> None:
@@ -46,7 +46,7 @@ class Object(metaclass=Repr):
         self.generate(*args, **kwargs)
     
     def __iter__(self):
-        """Iterating over objectes
+        """Iterating over objects
 
         Returns:
             Iterator representing object objects
@@ -67,7 +67,7 @@ class Object(metaclass=Repr):
         return point + self.position
 
     def load(self, obj: "Object", *args, **kwargs) -> "Object":
-        """Creating a object instance using class type and its constructor arguments
+        """Creating an object instance using class type and its constructor arguments
 
         Args:
             obj (Object): Object type to create
@@ -83,9 +83,9 @@ class Object(metaclass=Repr):
         """Generating the object
 
         Raises:
-            NotImplementedError: Thrown when not overriden
+            NotImplementedError: Thrown when not overridden
         """
-        raise NotImplementedError("Object generation method was not overriden")
+        raise NotImplementedError("Object generation method was not overridden")
 
     def face(self, *vertices, inverted: bool = False) -> None:
         """Creating a new face

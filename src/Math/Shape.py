@@ -1,5 +1,5 @@
 ## \file
-# Implementations of shapes and and their vertex generation
+# Implementations of shapes and their vertex generation
 from Math.Vector import V3
 from Math.Interval import I360
 from Math.Functions import isPow2
@@ -19,7 +19,7 @@ class Circle:
     """
 
     def __init__(self, radius: int|float = 1, pivot: V3 = V3.ZERO, bounds: I360 = I360(openEnd=True)) -> None:
-        """Initializing an Circle instance
+        """Initializing a Circle instance
 
         Args:
             radius (int | float, optional): Circle radius, in meters. Defaults to 1.

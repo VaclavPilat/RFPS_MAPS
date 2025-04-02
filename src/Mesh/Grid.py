@@ -143,7 +143,7 @@ class View:
         print("╯")
     
     def _pointColor(self, vertical: float, horizontal: float) -> str:
-        """Colorising a single point based on the number of vertices behind it
+        """Colorizing a single point based on the number of vertices behind it
 
         Args:
             vertical (float): Vertical axis value
@@ -235,7 +235,7 @@ class Grid:
             depth (int): Maximum layer depth
 
         Returns:
-            set: Set of vertices found wihin the specified depth
+            set: Set of vertices found within the specified depth
         """
         return self._getVertices(self.obj, depth)
     

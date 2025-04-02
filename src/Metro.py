@@ -135,7 +135,7 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     self.face(BLI1, BRI1, BRI, BLI)
     self.face(BRI1, TRI1, TRI, BRI)
     self.face(TRI1, TLI1, TLI, TRI)
-    # Generating descenting mesh
+    # Generating descending mesh
     if C is not None:
         self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=METRO.UHDP+METRO.UHHG, **kwargs)
 
