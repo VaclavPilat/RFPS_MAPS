@@ -36,7 +36,8 @@ class Axis:
         ## Minimum axis value difference
         if self.diffs:
             self.min = min(self.diffs)
-            assert self.min > 0, "Minimal difference has to be positive"
+            ## \bug Floats can cause errors. Fix by using decimals everywhere
+            assert self.min > 0.001, "Map contains floating point errors"
         else:
             self.min = 0
         ## Most amount of space a single axis value can take up

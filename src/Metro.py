@@ -146,7 +146,7 @@ def Metro(self) -> None:
     """Generating the Metro station
     """
     self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs, G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
-    self.load(UnderpassEntrance, "Underpass slope entrance", Box(V3.BACKWARD * 3, METRO.USLL, METRO.UEWD), C=Slopes, S=METRO.USLC, R=METRO.USLR)
+    self.load(UnderpassEntrance, "Underpass slope entrance", Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD, R=2), C=Slopes, S=METRO.USLC, R=METRO.USLR)
 
 
 

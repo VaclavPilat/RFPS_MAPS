@@ -25,6 +25,7 @@ Object.create = create
 
 
 
+## \todo Add object rotations
 def build(self) -> "bpy object":
     """Building a blender object from an Object instance
 
