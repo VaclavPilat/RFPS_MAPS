@@ -1,8 +1,8 @@
 ## \file
 # Classes for creating objects
-from Math.Vector import V3
-from Utils.Decorators import addInitRepr, makeImmutable, defaultKwargsValues
-from Utils.Colors import HIERARCHY, NONE
+from .Vector import V3
+from .Decorators import addInitRepr, makeImmutable, defaultKwargsValues
+from .Colors import HIERARCHY, NONE
 from .Grid import Grid
 
 

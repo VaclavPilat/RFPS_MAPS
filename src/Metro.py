@@ -8,12 +8,12 @@ if __name__ == "__main__":
         if not directory in sys.path:
             sys.path.append(directory)
         ## \todo Find a better way to make this work
-        import Blender.Object
+        import Utils.Blender
     except ImportError:
         BLENDER = False
-from Math.Vector import V3
-from Mesh.Object import Object, createObjectSubclass
-from Mesh.Tile import Tile, Bounds, Box, Anchor
+from Utils.Vector import V3
+from Utils.Object import Object, createObjectSubclass
+from Utils.Tile import Tile, Bounds, Box, Anchor
 from Utils.Decorators import makeImmutable
 
 

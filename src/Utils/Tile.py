@@ -1,8 +1,8 @@
 ## \file
 # Implementation of a Tile mesh object
 from .Object import Object
-from Math.Vector import V3
-from Utils.Decorators import defaultKwargsValues, makeImmutable, addInitRepr
+from .Vector import V3
+from .Decorators import defaultKwargsValues, makeImmutable, addInitRepr
 from enum import Enum
 
 

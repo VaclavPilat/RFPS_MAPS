@@ -1,6 +1,6 @@
 ## \file
 # Implementations of vector classes
-from Utils.Decorators import addInitRepr, makeImmutable, addCopyCall
+from .Decorators import addInitRepr, makeImmutable, addCopyCall
 import math
 
 

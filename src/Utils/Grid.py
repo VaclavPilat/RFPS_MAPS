@@ -1,8 +1,8 @@
 ## \file
 # Functionality for rendering Object structure in console
-from Utils.Decorators import makeImmutable
-from Utils.Colors import NONE, AXIS, TEMPERATURE, lenANSI, BOLD
-from Math.Vector import V3
+from .Decorators import makeImmutable
+from .Colors import NONE, AXIS, TEMPERATURE, lenANSI, BOLD
+from .Vector import V3
 import math, re
 
 
