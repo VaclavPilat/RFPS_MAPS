@@ -1,6 +1,6 @@
 ## \file
 # Testing implementation of a defaultKwargsValues decorator
-from Utils.Decorators import defaultKwargsValues
+from src.Utils.Decorators import defaultKwargsValues
 import unittest
 
 

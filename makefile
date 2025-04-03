@@ -5,15 +5,13 @@ FILE = *.py
 all: test doc
 
 test:
-	@cd src; \
-	$(PYTHON) -m unittest discover -s Tests -p "*Test.py"; \
-	cd ..
+	$(PYTHON) -m unittest discover -s tests -p *.py
 
 doc:
 	@doxygen Doxyfile
 
 cloc:
-	@cloc src/ --include-lang=Python --exclude-dir=Tests --by-file
+	@cloc src/ --include-lang=Python --by-file
 
 clean:
 	@rm -rf docs/html/

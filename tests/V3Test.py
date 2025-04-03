@@ -1,6 +1,6 @@
 ## \file
 # Testing V3 implementation
-from Utils.Vector import V3
+from src.Utils.Vector import V3
 import unittest, math
 
 

@@ -1,6 +1,6 @@
 ## \file
 # Testing the logic of the addCopyCall decorator
-from Utils.Decorators import addCopyCall
+from src.Utils.Decorators import addCopyCall
 import unittest
 
 

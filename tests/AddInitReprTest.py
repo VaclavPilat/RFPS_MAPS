@@ -1,6 +1,6 @@
 ## \file
 # Testing addInitRepr functionality
-from Utils.Decorators import addInitRepr
+from src.Utils.Decorators import addInitRepr
 import unittest
 
 

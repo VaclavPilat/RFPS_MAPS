@@ -1,6 +1,6 @@
 ## \file
 # Testing makeImmutable decorator functionality
-from Utils.Decorators import makeImmutable
+from src.Utils.Decorators import makeImmutable
 import unittest
 
 
