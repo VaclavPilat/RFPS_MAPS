@@ -6,7 +6,6 @@ from .Decorators import makeImmutable, addInitRepr
 from enum import Enum
 
 
-
 class Pivot(Enum):
     """Enum for containing all pivot types of a Tile.
 
@@ -25,7 +24,6 @@ class Pivot(Enum):
 
     ## Bottom right corner
     BR = 3
-
 
 
 # noinspection PyCallingNonCallable
@@ -75,7 +73,6 @@ class Bounds:
         return point >> self.R
 
 
-
 @addInitRepr
 class Box(Bounds):
     """Class for representing a bounding box of a Tile
@@ -100,7 +97,6 @@ class Box(Bounds):
         super().__init__(O, TL, BR, R)
 
 
-
 @addInitRepr
 class Anchor(Bounds):
     """Class for representing anchor bounds of a Tile
@@ -123,7 +119,6 @@ class Anchor(Bounds):
         super().__init__(O, TL, BR, R)
 
 
-
 @addInitRepr
 class Tile(Object):
     """Base class for all Metro Objects
@@ -140,7 +135,7 @@ class Tile(Object):
         self.bounds = bounds
         # noinspection PyTypeChecker
         super().__init__(name, self.bounds.O, *args, **kwargs)
-    
+
     def face(self, *points, **kwargs) -> None:
         """Rotating face around tile pivot
         """

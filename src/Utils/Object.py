@@ -6,7 +6,6 @@ from .Colors import HIERARCHY, NONE
 from .Grid import Grid
 
 
-
 class Repr(type):
     """Custom type for having a __repr__ method that returns type name
     """
@@ -18,7 +17,6 @@ class Repr(type):
             str: Name of the current type
         """
         return cls.__name__
-
 
 
 @addInitRepr
@@ -45,7 +43,7 @@ class Object(metaclass=Repr):
         self.faces = []
         # noinspection PyArgumentList
         self.generate(*args, **kwargs)
-    
+
     def __iter__(self):
         """Iterating over objects
 
@@ -55,7 +53,7 @@ class Object(metaclass=Repr):
         yield self
         for obj in self.objects:
             yield from obj
-    
+
     def transform(self, point: V3) -> V3:
         """Getting the position of a point relative to parent
 
@@ -79,7 +77,7 @@ class Object(metaclass=Repr):
         instance = obj(*args, **kwargs)
         self.objects.append(instance)
         return instance
-    
+
     def generate(self) -> None:
         """Generating the object
 
@@ -95,7 +93,7 @@ class Object(metaclass=Repr):
             inverted (bool, optional): Should the face be inverted? Defaults to False.
         """
         self.faces.append(vertices if not inverted else vertices[::-1])
-    
+
     def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
         """Printing string representation of object hierarchy
 
@@ -111,12 +109,11 @@ class Object(metaclass=Repr):
             newCurrent = f"{children}{color}{'┣' if last else '┗'}━╸"
             newChildren = f"{children}{color}{'┃' if last else ' '}  "
             child.printHierarchy(newCurrent, newChildren, layer + 1)
-    
+
     def printGrids(self, *args, **kwargs) -> None:
         """Printing out grids representing the current object
         """
         Grid(self).print(*args, **kwargs)
-
 
 
 def createObjectSubclass(cls: type = Object) -> "func":

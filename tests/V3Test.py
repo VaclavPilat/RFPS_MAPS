@@ -4,7 +4,6 @@ from src.Utils.Vector import V3
 import unittest, math
 
 
-
 # noinspection PyCallingNonCallable
 class V3Test(unittest.TestCase):
     """Class for testing V3 implementation
@@ -17,33 +16,33 @@ class V3Test(unittest.TestCase):
         self.assertEqual(V3(1, 2, 3).x, 1)
         self.assertEqual(V3(1, 2, 3).y, 2)
         self.assertEqual(V3(1, 2, 3).z, 3)
-    
+
     def test_tostring(self) -> None:
         """Testing __str__ implementation
         """
         self.assertEqual(str(V3(1, 2, 3)), "(1, 2, 3)")
-    
+
     def test_addition(self) -> None:
         """Testing __add__ implementation
         """
         self.assertEqual(V3(1, 2, 3) + V3(4, 5, 6), V3(5, 7, 9))
-    
+
     def test_subtraction(self) -> None:
         """Testing __sub__ implementation
         """
         self.assertEqual(V3(1, 2, 3) - V3(4, 5, 6), V3(-3, -3, -3))
-    
+
     def test_multiplication(self) -> None:
         """Testing __mul__ and __rmul__ implementation
         """
         self.assertEqual(V3(1, 2, 3) * 3, V3(3, 6, 9))
         self.assertEqual(3 * V3(1, 2, 3), V3(3, 6, 9))
-    
+
     def test_division(self) -> None:
         """Testing __truediv__ implementation
         """
         self.assertEqual(V3(1, 2, 3) / 2, V3(0.5, 1, 1.5))
-    
+
     def test_rotation(self) -> None:
         """Testing __rshift__ and __lshift__ implementation
         """
@@ -54,13 +53,13 @@ class V3Test(unittest.TestCase):
         self.assertEqual(V3(1, -2, 3) >> 1, V3(-2, -1, 3))
         self.assertEqual(V3(-2, -1, 3) >> 1, V3(-1, 2, 3))
         self.assertEqual(V3(-1, 2, 3) >> 1, V3(2, 1, 3))
-    
+
     def test_equality(self) -> None:
         """Testing __eq__ implementation
         """
         self.assertEqual(V3(1, 2, 3), V3(1, 2, 3))
         self.assertNotEqual(V3(1, 2, 3), V3(1, 2, 4))
-    
+
     def test_copy(self) -> None:
         """Testing __call__ operator for making vector copies
         """
@@ -69,7 +68,7 @@ class V3Test(unittest.TestCase):
         a = V3(1, 2, 3)
         b = a()
         self.assertEqual(a, b)
-    
+
     def test_magnitude(self) -> None:
         """Testing __abs__ implementation
         """
@@ -78,7 +77,7 @@ class V3Test(unittest.TestCase):
         self.assertAlmostEqual(abs(V3.ONE), math.sqrt(3))
         self.assertAlmostEqual(abs(V3(z=4, y=3)), 5)
         self.assertAlmostEqual(abs(V3(6, 8)), 10)
-    
+
     def test_direction(self) -> None:
         """Testing __contains__ implementation
         """

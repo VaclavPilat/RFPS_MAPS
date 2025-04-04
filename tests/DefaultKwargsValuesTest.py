@@ -4,7 +4,6 @@ from src.Utils.Decorators import defaultKwargsValues
 import unittest
 
 
-
 class Single:
     """Example class with wrapped single argument methods
     """
@@ -16,7 +15,7 @@ class Single:
             value (int, optional): Example value. Defaults to 0.
         """
         self.value = value
-    
+
     @defaultKwargsValues("value")
     def arg(self, value: int) -> int:
         """Using a default value for an arg
@@ -28,7 +27,7 @@ class Single:
             int: Arg value or its default value
         """
         return value
-    
+
     @defaultKwargsValues("value")
     def kwarg(self, value: int = None) -> int:
         """Using a default value for a kwarg
@@ -40,7 +39,7 @@ class Single:
             int: Kwarg value or its default value
         """
         return value
-    
+
     @defaultKwargsValues("value")
     def kwargdict(self, **kwargs) -> int:
         """Using a default value in a kwarg dict
@@ -49,7 +48,6 @@ class Single:
             int: Kwarg value or its default value
         """
         return kwargs["value"]
-
 
 
 class Multiple:
@@ -67,13 +65,12 @@ class Multiple:
         self.a = a
         self.b = b
         self.c = c
-    
+
     @defaultKwargsValues("a", "b", "c")
     def sum(self, a: int, b: int, c: int) -> int:
         """Getting the sum of all three values
         """
         return a + b + c
-
 
 
 class DefaultKwargsValuesTest(unittest.TestCase):

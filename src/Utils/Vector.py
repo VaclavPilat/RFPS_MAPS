@@ -4,24 +4,22 @@ from .Decorators import addInitRepr, makeImmutable, addCopyCall
 import math
 
 
-
 @addInitRepr
 @makeImmutable
 @addCopyCall("x", "y", "z")
-## \todo Named direction changes leads to chaos, make an operator for checking if a vector is in the same "direction" and another one
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
 
     This class is made to be immutable and have an automatic __repr__() implementation using decorators.
     """
 
-    def __init__(self, x: int|float = 0, y: int|float = 0, z: int|float = 0) -> None:
+    def __init__(self, x: float = 0, y: float = 0, z: float = 0) -> None:
         """Initializing a 3D vector
 
         Args:
-            x (int | float, optional): X value. Defaults to 0.
-            y (int | float, optional): Y value. Defaults to 0.
-            z (int | float, optional): Z value. Defaults to 0.
+            x (float, optional): X value. Defaults to 0.
+            y (float, optional): Y value. Defaults to 0.
+            z (float, optional): Z value. Defaults to 0.
         
         Examples:
             >>> V3(1, 2, 3)
@@ -59,7 +57,7 @@ class V3:
             '(1, 2, 3)'
         """
         return "(" + ", ".join([str(a) for a in list(self)]) + ")"
-    
+
     def __hash__(self) -> int:
         """Getting the hash of this vector
 
@@ -93,7 +91,7 @@ class V3:
             if a != b:
                 return False
         return True
-    
+
     def __add__(self, other: "V3") -> "V3":
         """Adding two vectors together
 
@@ -110,7 +108,7 @@ class V3:
         if not isinstance(other, self.__class__):
             raise ValueError("Other value is not a vector")
         return V3(*(a + b for a, b in zip(self, other)))
-    
+
     def __sub__(self, other: "V3") -> "V3":
         """Subtracting one vector from another
 
@@ -127,12 +125,12 @@ class V3:
         if not isinstance(other, self.__class__):
             raise ValueError("Other value is not a vector")
         return V3(*(a - b for a, b in zip(self, other)))
-    
-    def __mul__(self, other: int|float) -> "V3":
+
+    def __mul__(self, other: float) -> "V3":
         """Multiplication of a vector by a number
 
         Args:
-            other (int | float): Number to multiply by
+            other (float): Number to multiply by
 
         Returns:
             V3: Product of this vector and the number
@@ -148,12 +146,12 @@ class V3:
         if type(other) in (int, float):
             return V3(*([other * a for a in self]))
         raise ValueError("Other value is not a vector or a number")
-    
-    def __rmul__(self, other: int|float) -> "V3":
+
+    def __rmul__(self, other: float) -> "V3":
         """Multiplication of a vector by a number
 
         Args:
-            other (int | float): Number to multiply by
+            other (float): Number to multiply by
 
         Returns:
             V3: Product of this vector and the number
@@ -167,12 +165,12 @@ class V3:
             V3(2, 4, 6)
         """
         return self.__mul__(other)
-    
-    def __truediv__(self, other: int|float) -> "V3":
+
+    def __truediv__(self, other: float) -> "V3":
         """Division of a vector by a number
 
         Args:
-            other (int | float): Number to divide by
+            other (float): Number to divide by
 
         Returns:
             V3: Quotient of this vector and the number
@@ -186,7 +184,7 @@ class V3:
         if type(other) in (int, float):
             return V3(*([a / other for a in self]))
         raise ValueError("Other value is not a number")
-    
+
     def __rshift__(self, index: int) -> "V3":
         """Rotating the vector on Z axis by multiples of 90 degrees, clockwise
 
@@ -214,7 +212,7 @@ class V3:
         if index == 3:
             return V3(-self.y, self.x, self.z)
         return self
-    
+
     def __lshift__(self, index: int) -> "V3":
         """Rotating the vector on Z axis by multiples of 90 degrees, counter-clockwise
 
@@ -235,7 +233,7 @@ class V3:
             V3(2, -1, 3)
         """
         return self.__rshift__(-index)
-    
+
     def __abs__(self) -> float:
         """Calculating the magnitude of the vector
 
@@ -252,8 +250,8 @@ class V3:
             >>> abs(V3(10, 10, 10))
             17.320508075688775
         """
-        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
-    
+        return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+
     def __contains__(self, other: "V3") -> bool:
         """Checking whether a vector "is somewhat heading the same way" as the other one
 
@@ -283,7 +281,6 @@ class V3:
                 else:
                     return False
         return True
-
 
 
 ## Zero-filled vector, equals to V3(0, 0, 0)

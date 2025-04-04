@@ -4,7 +4,6 @@ from src.Utils.Decorators import makeImmutable
 import unittest
 
 
-
 @makeImmutable
 class Wrapped:
     """Example class being wrapped
@@ -19,12 +18,10 @@ class Wrapped:
         self.value = value
 
 
-
 class WrappedSubclass(Wrapped):
     """Subclass of the example wrapped class
     """
     pass
-
 
 
 class MakeImmutableTest(unittest.TestCase):

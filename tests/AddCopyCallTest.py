@@ -4,7 +4,6 @@ from src.Utils.Decorators import addCopyCall
 import unittest
 
 
-
 @addCopyCall("number", "string", "boolean")
 class Wrapped:
     """Example class being wrapped
@@ -23,7 +22,6 @@ class Wrapped:
         self.boolean = boolean
 
 
-
 # noinspection PyCallingNonCallable
 class AddCopyCallTest(unittest.TestCase):
     """Class for testing autoCall behaviour
@@ -36,7 +34,7 @@ class AddCopyCallTest(unittest.TestCase):
         self.assertEqual(x.number, 10)
         self.assertEqual(x.string, "foo")
         self.assertEqual(x.boolean, True)
-    
+
     def test_empty(self) -> None:
         """Testing __call__ with an empty constructor
         """
@@ -44,7 +42,7 @@ class AddCopyCallTest(unittest.TestCase):
         self.assertEqual(x.number, 10)
         self.assertEqual(x.string, "foo")
         self.assertEqual(x.boolean, True)
-    
+
     def test_args(self) -> None:
         """Testing __call__ with args only
         """
@@ -52,7 +50,7 @@ class AddCopyCallTest(unittest.TestCase):
         self.assertEqual(x.number, 20)
         self.assertEqual(x.string, "bar")
         self.assertEqual(x.boolean, True)
-    
+
     def test_kwargs(self) -> None:
         """Testing __call__ with kwargs only
         """
@@ -60,7 +58,7 @@ class AddCopyCallTest(unittest.TestCase):
         self.assertEqual(x.number, 40)
         self.assertEqual(x.string, "bar")
         self.assertEqual(x.boolean, True)
-    
+
     def test_both(self) -> None:
         """Testing __call__ with both args and kwargs at the same time
         """

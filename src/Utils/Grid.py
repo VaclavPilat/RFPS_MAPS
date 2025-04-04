@@ -6,7 +6,6 @@ from .Vector import V3
 import math, re
 
 
-
 @makeImmutable
 class Axis:
     """Class for containing axis information
@@ -27,7 +26,7 @@ class Axis:
         ## Axis values
         self.values = sorted(set(getattr(vertex, self.name) for vertex in vertices))
         ## Differences in axis values
-        self.diffs = [self.values[i] - self.values[i-1] for i in range(1, len(self.values))]
+        self.diffs = [self.values[i] - self.values[i - 1] for i in range(1, len(self.values))]
         if self.reverse:
             self.values.reverse()
             self.diffs.reverse()
@@ -42,7 +41,7 @@ class Axis:
             self.min = 0
         ## Most amount of space a single axis value can take up
         self.just = max(map(lambda value: len(str(value)), self.labels))
-    
+
     def match(self, vertex: V3, value: float) -> bool:
         """Checking whether an axis value "matches" a vertex point
 
@@ -56,7 +55,7 @@ class Axis:
         return getattr(vertex, self.name) == value
 
 
-
+# noinspection PyUnresolvedReferences
 @makeImmutable
 class View:
     """Class for rendering 3D objects as 2D views in console
@@ -91,9 +90,10 @@ class View:
         """
         first = (" ", f"{AXIS[self.vertical.name]}{self.vertical.name.upper()}{NONE}", "     ")
         second = (" ", "┃", "     ")
-        third = (f"╺{'━━╋'[::(-1,1)[self.horizontal.reverse]]}╸", f"{AXIS[self.horizontal.name]}{self.horizontal.name.upper()}{NONE}", " ")
-        rows = tuple(map(lambda row: "".join(row[::(1,-1)[self.horizontal.reverse]]), (first, second, third)))
-        return rows[::(-1,1)[self.vertical.reverse]]
+        third = (f"╺{'━━╋'[::(-1, 1)[self.horizontal.reverse]]}╸",
+                 f"{AXIS[self.horizontal.name]}{self.horizontal.name.upper()}{NONE}", " ")
+        rows = tuple(map(lambda row: "".join(row[::(1, -1)[self.horizontal.reverse]]), (first, second, third)))
+        return rows[::(-1, 1)[self.vertical.reverse]]
 
     @staticmethod
     def _colorLegend() -> tuple:
@@ -102,21 +102,21 @@ class View:
         Returns:
             tuple: Colors for vertex counts as a string in a tuple
         """
-        return (" ".join(TEMPERATURE[i] + str(i+1) for i in range(len(TEMPERATURE))) + "+" + NONE, )
-    
+        return (" ".join(TEMPERATURE[i] + str(i + 1) for i in range(len(TEMPERATURE))) + "+" + NONE,)
+
     def _printLegend(self) -> None:
         """Printing out grid legend
         """
         # Variables
         axis = self._axisInfo()
         info = (
-            f"{BOLD}{self.obj.name}{NONE}",
-            f"{BOLD}{len(self.vertices)}{NONE} vertices",
-            self.title
-        ) + self._colorLegend()
+                   f"{BOLD}{self.obj.name}{NONE}",
+                   f"{BOLD}{len(self.vertices)}{NONE} vertices",
+                   self.title
+               ) + self._colorLegend()
         rows = (len(axis) + 1) // 2
         cols = math.ceil(len(info) / rows)
-        lengths = [max(map(lenANSI, info[i * rows:(i+1) * rows])) for i in range(cols)]
+        lengths = [max(map(lenANSI, info[i * rows:(i + 1) * rows])) for i in range(cols)]
         # Printing out top border
         print(f"╭{'─' * lenANSI(axis[0])}", end="")
         for c in range(cols):
@@ -127,11 +127,11 @@ class View:
             print(f"│{line}", end="")
             if r % 2 == 0:
                 for c in range(cols):
-                    index = c*rows+r//2
+                    index = c * rows + r // 2
                     if len(info) > index:
-                        print(f"│ {info[index]+' '*(lengths[c]-lenANSI(info[index]))} ", end="")
+                        print(f"│ {info[index] + ' ' * (lengths[c] - lenANSI(info[index]))} ", end="")
                     else:
-                        print(f"│ {' '*lengths[c]} ", end="")
+                        print(f"│ {' ' * lengths[c]} ", end="")
                 print("│")
             else:
                 for c in range(cols):
@@ -142,7 +142,7 @@ class View:
         for c in range(cols):
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
-    
+
     def _pointColor(self, vertical: float, horizontal: float) -> str:
         """Colorizing a single point based on the number of vertices behind it
 
@@ -153,12 +153,13 @@ class View:
         Returns:
             str: ANSI colored box character representing the point
         """
-        selected = tuple(filter(lambda v: self.vertical.match(v, vertical) and self.horizontal.match(v, horizontal), self.vertices))
+        selected = tuple(
+            filter(lambda v: self.vertical.match(v, vertical) and self.horizontal.match(v, horizontal), self.vertices))
         if selected:
             count = len(selected)
-            return f"{TEMPERATURE[min(count-1, len(TEMPERATURE)-1)]}╋{NONE}"
+            return f"{TEMPERATURE[min(count - 1, len(TEMPERATURE) - 1)]}╋{NONE}"
         return "┼"
-    
+
     def _printVertices(self) -> None:
         """Printing out grid header
         """
@@ -167,23 +168,23 @@ class View:
             print(" " * (self.vertical.just + 1), end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print(" " * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
+                    print(" " * round(self.horizontal.diffs[j - 1] / self.horizontal.min * 2 - 1), end="")
                 print(str(h).rjust(self.horizontal.just)[i], end="")
             print()
         # Body
         for i, v in enumerate(self.vertical.labels):
             if i > 0:
-                for j in range(round(self.vertical.diffs[i-1] / self.vertical.min - 1)):
+                for j in range(round(self.vertical.diffs[i - 1] / self.vertical.min - 1)):
                     print(" " * (self.vertical.just + 1), end="")
                     for k, h in enumerate(self.horizontal.labels):
                         if k > 0:
-                            print(" " * round(self.horizontal.diffs[k-1] / self.horizontal.min *2-1), end="")
+                            print(" " * round(self.horizontal.diffs[k - 1] / self.horizontal.min * 2 - 1), end="")
                         print("┆", end="")
                     print()
             print(str(v).rjust(self.vertical.just) + "╶", end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print("╌" * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
+                    print("╌" * round(self.horizontal.diffs[j - 1] / self.horizontal.min * 2 - 1), end="")
                 print(self._pointColor(self.vertical.values[i], self.horizontal.values[j]), end="")
             print(f"╴{v}")
         # Footer
@@ -191,10 +192,10 @@ class View:
             print(" " * (self.vertical.just + 1), end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print(" " * round(self.horizontal.diffs[j-1] / self.horizontal.min *2-1), end="")
+                    print(" " * round(self.horizontal.diffs[j - 1] / self.horizontal.min * 2 - 1), end="")
                 print(str(h).ljust(self.horizontal.just)[i], end="")
             print()
-    
+
     def print(self) -> None:
         """Printing out the grid view
         """
@@ -202,7 +203,7 @@ class View:
         self._printVertices()
 
 
-
+# noinspection PyUnresolvedReferences
 @makeImmutable
 class Grid:
     """Class for processing requests for the rendering of 3D objects in console
@@ -216,7 +217,7 @@ class Grid:
         """
         ## Object to visualise
         self.obj = obj
-    
+
     def _getVertices(self, obj: "Object", depth: int) -> set:
         """Getting vertex positions (relative to the parent's origin) up to a certain depth
 
@@ -228,7 +229,7 @@ class Grid:
             for child in obj.objects:
                 vertices = vertices.union(self._getVertices(child, depth - 1))
         return set(map(obj.transform, vertices))
-    
+
     def _selectVertices(self, depth: int) -> set:
         """Selecting vertices up to a certain layer depth
 
@@ -239,7 +240,7 @@ class Grid:
             set: Set of vertices found within the specified depth
         """
         return self._getVertices(self.obj, depth)
-    
+
     def print(self, depth: int = 0) -> None:
         """Printing out a grid
 

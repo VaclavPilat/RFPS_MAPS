@@ -4,7 +4,6 @@ from src.Utils.Decorators import addInitRepr
 import unittest
 
 
-
 @addInitRepr
 class Wrapped:
     """Example class being wrapped
@@ -21,12 +20,10 @@ class Wrapped:
         self.string = string
 
 
-
 class WrappedSubclass(Wrapped):
     """Subclass of the example wrapped class
     """
     pass
-
 
 
 # noinspection PyArgumentList
@@ -43,7 +40,7 @@ class AddInitReprTest(unittest.TestCase):
         self.assertEqual(repr(Wrapped(number=10)), "Wrapped(number=10)")
         self.assertEqual(repr(Wrapped(20, string="baz")), "Wrapped(20, string='baz')")
         self.assertEqual(repr(Wrapped(string="foo", number=0)), "Wrapped(string='foo', number=0)")
-    
+
     def test_subclass(self) -> None:
         """Testing that the decorator still works on a subclass
         """

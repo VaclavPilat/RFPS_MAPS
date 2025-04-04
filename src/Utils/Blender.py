@@ -5,7 +5,6 @@ from .Object import Object
 import bpy, bmesh
 
 
-
 def create(self) -> "bpy mesh":
     """Creating a blender mesh from face vertices
 
@@ -22,8 +21,6 @@ def create(self) -> "bpy mesh":
         bm.faces.new([vertices[vert] for vert in face])
     bm.to_mesh(mesh)
     return mesh
-Object.create = create
-
 
 
 ## \todo Add object rotations
@@ -39,8 +36,10 @@ def build(self) -> "bpy object":
     for child in self.objects:
         child.build().parent = obj
     return obj
-Object.build = build
 
+
+Object.create = create
+Object.build = build
 
 
 class Setup:
@@ -64,7 +63,7 @@ class Setup:
                         # Showing textures
                         space.shading.type = "MATERIAL"
                         return
-    
+
     @staticmethod
     def purgeExistingObjects() -> None:
         """Clearing all objects and collections in scene

@@ -16,7 +16,6 @@ from Utils.Tile import Tile, Box, Anchor
 from Utils.Decorators import makeImmutable
 
 
-
 @makeImmutable
 class Settings:
     """Class for containing readonly object settings
@@ -29,24 +28,22 @@ class Settings:
             setattr(self, key, value)
 
 
-
 ## Setting constants used in the Metro map
 METRO = Settings(
-    UECH = 0.1, # Underpass entrance curb height (in meters)
-    UECW = 0.3, # Underpass entrance curb width (in meters)
-    UEWD = 3, # Underpass entrance width (in meters)
-    UHDP = 1, # Underpass hallway depth (in meters)
-    UHHG = 3, # Underpass hallway height (in meters)
-    UHWD = 4, # Underpass hallway width (in meters)
-    USCL = 10, # Underpass staircase length (in meters)
-    USLC = 3, # Underpass slope count
-    USLL = 40, # Underpass slope length (in meters)
-    USLR = 8, # Underpass slope ratio
-    USTG = 3, # Underpass step group count
-    USTH = 0.2, # Underpass step height (in meters)
-    USTL = 0.3, # Underpass step length (in meters)
+    UECH=0.1,  # Underpass entrance curb height (in meters)
+    UECW=0.3,  # Underpass entrance curb width (in meters)
+    UEWD=3,  # Underpass entrance width (in meters)
+    UHDP=1,  # Underpass hallway depth (in meters)
+    UHHG=3,  # Underpass hallway height (in meters)
+    UHWD=4,  # Underpass hallway width (in meters)
+    USCL=10,  # Underpass staircase length (in meters)
+    USLC=3,  # Underpass slope count
+    USLL=40,  # Underpass slope length (in meters)
+    USLR=8,  # Underpass slope ratio
+    USTG=3,  # Underpass step group count
+    USTH=0.2,  # Underpass step height (in meters)
+    USTL=0.3,  # Underpass step length (in meters)
 )
-
 
 
 # noinspection PyIncorrectDocstring
@@ -82,7 +79,6 @@ def Stairs(self, D: float, G: int, H: float, L: float) -> None:
         TL, BL = (TL2, BL2)
 
 
-
 # noinspection PyIncorrectDocstring
 @createObjectSubclass(Tile)
 def Slopes(self, D: float, S: int, R: float) -> None:
@@ -110,7 +106,6 @@ def Slopes(self, D: float, S: int, R: float) -> None:
             TL1, BL1 = map(lambda v: v + V3.RIGHT * G, (TL, BL))
         self.face(TL1, TL, BL, BL1)
         TL, BL = (TL1, BL1)
-
 
 
 # noinspection PyIncorrectDocstring
@@ -142,14 +137,12 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
         self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=METRO.UHDP+METRO.UHHG, **kwargs)
 
 
-
 @createObjectSubclass()
 def Metro(self) -> None:
     """Generating the Metro station
     """
     self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs, G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
     self.load(UnderpassEntrance, "Underpass slope entrance", Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD, R=2), C=Slopes, S=METRO.USLC, R=METRO.USLR)
-
 
 
 if __name__ == "__main__":

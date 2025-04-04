@@ -3,7 +3,6 @@
 # Method injection is preferred over subclassing
 
 
-
 def addInitRepr(cls: type) -> type:
     """Class decorator that adds __repr__ method.
     repr(obj) should return a string representation of the constructor call.
@@ -37,7 +36,6 @@ def addInitRepr(cls: type) -> type:
     cls.__init__ = new_init
     cls.__repr__ = new_repr
     return cls
-
 
 
 def makeImmutable(cls: type) -> type:
@@ -76,7 +74,6 @@ def makeImmutable(cls: type) -> type:
     return cls
 
 
-
 def addCopyCall(*fields) -> "func":
     """Creating a decorator the adds an automatic __call__ implementation.
     This function takes field names in the same order as constructor arguments.
@@ -108,7 +105,6 @@ def addCopyCall(*fields) -> "func":
         cls.__call__ = new_call
         return cls
     return decorator
-
 
 
 def defaultKwargsValues(*fields) -> "func":
