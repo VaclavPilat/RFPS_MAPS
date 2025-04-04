@@ -8,6 +8,7 @@ import math
 
 
 
+# noinspection PyCallingNonCallable
 @makeImmutable
 @addInitRepr
 @addCopyCall("radius", "pivot", "bounds")
@@ -65,7 +66,7 @@ class Circle:
         lower = tuple(self)
         upper = tuple(self(pivot=self.pivot + V3.UP * height))
         for i, j in [(a-1, a) for a in range(not closed, len(lower))]:
-            yield (upper[j], upper[i], lower[i], lower[j])
+            yield upper[j], upper[i], lower[i], lower[j]
     
     def face(self, cutout: "Circle" = None) -> tuple:
         """Generating circle face

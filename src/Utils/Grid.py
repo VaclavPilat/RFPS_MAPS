@@ -95,7 +95,8 @@ class View:
         rows = tuple(map(lambda row: "".join(row[::(1,-1)[self.horizontal.reverse]]), (first, second, third)))
         return rows[::(-1,1)[self.vertical.reverse]]
 
-    def _colorLegend(self) -> tuple:
+    @staticmethod
+    def _colorLegend() -> tuple:
         """Getting a legend for vertex colors
 
         Returns:

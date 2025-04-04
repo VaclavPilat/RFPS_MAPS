@@ -42,7 +42,7 @@ class I360Test(unittest.TestCase):
         self.assertEqual(list(x(points=2)), [180])
         self.assertEqual(list(x(points=3)), [120, 240])
     
-    def assertIntervalEqual(self, first: IOperand, second: IOperand, count: int = 30) -> None:
+    def assertIntervalEqual(self, first: IOperand, second: IOperand) -> None:
         """Asserting that both intervals generate the same points
 
         Args:

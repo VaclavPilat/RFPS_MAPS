@@ -5,6 +5,7 @@ import unittest, math
 
 
 
+# noinspection PyCallingNonCallable
 class V3Test(unittest.TestCase):
     """Class for testing V3 implementation
     """

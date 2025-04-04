@@ -24,6 +24,7 @@ class Wrapped:
 
 
 
+# noinspection PyCallingNonCallable
 class AddCopyCallTest(unittest.TestCase):
     """Class for testing autoCall behaviour
     """

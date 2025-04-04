@@ -7,13 +7,12 @@ if __name__ == "__main__":
         directory = os.path.dirname(bpy.data.filepath)
         if not directory in sys.path:
             sys.path.append(directory)
-        ## \todo Find a better way to make this work
-        import Utils.Blender
+        from Utils.Blender import Setup
     except ImportError:
         BLENDER = False
 from Utils.Vector import V3
 from Utils.Object import Object, createObjectSubclass
-from Utils.Tile import Tile, Bounds, Box, Anchor
+from Utils.Tile import Tile, Box, Anchor
 from Utils.Decorators import makeImmutable
 
 
@@ -152,11 +151,10 @@ def Metro(self) -> None:
 
 if __name__ == "__main__":
     if BLENDER:
-        from Blender.Functions import setupForDevelopment, purgeExistingObjects
-        setupForDevelopment()
-        purgeExistingObjects()
+        Setup.setupForDevelopment()
+        Setup.purgeExistingObjects()
     metro = Metro("Metro station")
     metro.printHierarchy()
-    metro.printGrids(1)
+    #metro.printGrids(1)
     if BLENDER:
         metro.build()

@@ -28,6 +28,7 @@ class Pivot(Enum):
 
 
 
+# noinspection PyCallingNonCallable
 @makeImmutable
 class Bounds:
     """Class for representing Tile bounds

@@ -43,6 +43,7 @@ class Object(metaclass=Repr):
         self.objects = []
         ## List of mesh faces
         self.faces = []
+        # noinspection PyArgumentList
         self.generate(*args, **kwargs)
     
     def __iter__(self):
@@ -66,11 +67,11 @@ class Object(metaclass=Repr):
         """
         return point + self.position
 
-    def load(self, obj: "Object", *args, **kwargs) -> "Object":
-        """Creating an object instance using class type and its constructor arguments
+    def load(self, obj: type, *args, **kwargs) -> "Object":
+        """Creating an object instance using Object type and its constructor arguments
 
         Args:
-            obj (Object): Object type to create
+            obj (type): Object type to create
 
         Returns:
             Object: Created object instance
