@@ -2,16 +2,16 @@
 # Implementation of the Metro station map
 if __name__ == "__main__":
     try:
+        # noinspection PyUnresolvedReferences
         import os, sys, bpy
         BLENDER = True
         directory = os.path.dirname(bpy.data.filepath)
         if not directory in sys.path:
             sys.path.append(directory)
-        from Utils.Blender import Setup
     except ImportError:
         BLENDER = False
 from Utils.Vector import V3
-from Utils.Object import Object, createObjectSubclass
+from Utils.Object import createObjectSubclass
 from Utils.Tile import Tile, Box, Anchor
 from Utils.Decorators import makeImmutable
 
@@ -49,6 +49,7 @@ METRO = Settings(
 
 
 
+# noinspection PyIncorrectDocstring
 @createObjectSubclass(Tile)
 def Stairs(self, D: float, G: int, H: float, L: float) -> None:
     """Generating multiple flights of stairs with resting places in between
@@ -82,6 +83,7 @@ def Stairs(self, D: float, G: int, H: float, L: float) -> None:
 
 
 
+# noinspection PyIncorrectDocstring
 @createObjectSubclass(Tile)
 def Slopes(self, D: float, S: int, R: float) -> None:
     """Generating multiple (wheelchair accessible) slopes with resting places in between
@@ -111,6 +113,7 @@ def Slopes(self, D: float, S: int, R: float) -> None:
 
 
 
+# noinspection PyIncorrectDocstring
 @createObjectSubclass(Tile)
 def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     """Generating an underpass entrance
@@ -140,7 +143,7 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
 
 
 
-@createObjectSubclass(Object)
+@createObjectSubclass()
 def Metro(self) -> None:
     """Generating the Metro station
     """
@@ -150,11 +153,16 @@ def Metro(self) -> None:
 
 
 if __name__ == "__main__":
+    # noinspection PyUnboundLocalVariable
     if BLENDER:
+        from Utils.Blender import Setup
         Setup.setupForDevelopment()
         Setup.purgeExistingObjects()
+    # noinspection PyTypeChecker
     metro = Metro("Metro station")
+    # noinspection PyUnresolvedReferences
     metro.printHierarchy()
     #metro.printGrids(1)
     if BLENDER:
+        # noinspection PyUnresolvedReferences
         metro.build()

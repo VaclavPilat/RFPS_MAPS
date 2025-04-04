@@ -4,15 +4,15 @@
 
 
 
-def addInitRepr(cls: "cls") -> "cls":
+def addInitRepr(cls: type) -> type:
     """Class decorator that adds __repr__ method.
     repr(obj) should return a string representation of the constructor call.
 
     Args:
-        cls (cls): Class type to wrap
+        cls (type): Class type to wrap
 
     Returns:
-        cls: The same class type with updated members
+        type: The same class type with updated members
     
     Examples:
         >>> @addInitRepr
@@ -40,14 +40,14 @@ def addInitRepr(cls: "cls") -> "cls":
 
 
 
-def makeImmutable(cls: "cls") -> "cls":
+def makeImmutable(cls: type) -> type:
     """Class decorator that turns the class into an immutable one
 
     Args:
-        cls (cls): Data class type to wrap
+        cls (type): Data class type to wrap
 
     Returns:
-        cls: The same class type with updated members
+        type: The same class type with updated members
     
     Examples:
         >>> @makeImmutable
@@ -69,6 +69,7 @@ def makeImmutable(cls: "cls") -> "cls":
     def new_setattr(self, name, value) -> None:
         if getattr(self, "_initialised", False):
             raise AttributeError(f"Attempting to modify {self.__class__.__name__}.{name}")
+        # noinspection PyArgumentList
         old_setattr(self, name, value)
     cls.__init__ = new_init
     cls.__setattr__ = new_setattr
@@ -97,8 +98,8 @@ def addCopyCall(*fields) -> "func":
         >>> Wrapped(30)(value=-5).value
         -5
     """
-    def decorator(cls: "cls") -> "cls":
-        def new_call(self, *args, **kwargs) -> "obj":
+    def decorator(cls: type) -> type:
+        def new_call(self, *args, **kwargs) -> object:
             data = {field: getattr(self, field) for field in fields}
             for i in range(len(args)):
                 data[fields[i]] = args[i]

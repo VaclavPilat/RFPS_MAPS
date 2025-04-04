@@ -2,7 +2,7 @@
 # Implementation of a Tile mesh object
 from .Object import Object
 from .Vector import V3
-from .Decorators import defaultKwargsValues, makeImmutable, addInitRepr
+from .Decorators import makeImmutable, addInitRepr
 from enum import Enum
 
 
@@ -96,6 +96,7 @@ class Box(Bounds):
             BR = TL + V3.RIGHT * W + V3.BACKWARD * H
         else:
             raise ValueError("Unexpected Pivot value")
+        # noinspection PyArgumentList
         super().__init__(O, TL, BR, R)
 
 
@@ -118,6 +119,7 @@ class Anchor(Bounds):
             O = TL
         else:
             raise ValueError("Unexpected Pivot value")
+        # noinspection PyArgumentList
         super().__init__(O, TL, BR, R)
 
 
@@ -136,6 +138,7 @@ class Tile(Object):
         """
         ## Tile boundaries
         self.bounds = bounds
+        # noinspection PyTypeChecker
         super().__init__(name, self.bounds.O, *args, **kwargs)
     
     def face(self, *points, **kwargs) -> None:

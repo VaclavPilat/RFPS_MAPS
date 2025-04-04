@@ -45,10 +45,11 @@ class MakeImmutableTest(unittest.TestCase):
             x.value = 15
         with self.assertRaises(AttributeError):
             x.foo = "bar"
-    
+
     def test_subclass(self) -> None:
         """Testing that the decorator still works even when subclassing
         """
+        # noinspection PyUnresolvedReferences,PyArgumentList
         self.assertEqual(WrappedSubclass(value=20).value, 20)
         with self.assertRaises(AttributeError):
             WrappedSubclass().value = 10

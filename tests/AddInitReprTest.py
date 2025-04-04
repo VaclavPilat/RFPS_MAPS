@@ -29,6 +29,7 @@ class WrappedSubclass(Wrapped):
 
 
 
+# noinspection PyArgumentList
 class AddInitReprTest(unittest.TestCase):
     """Class for testing autoRepr implementation
     """

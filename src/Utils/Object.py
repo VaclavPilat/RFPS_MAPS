@@ -1,7 +1,7 @@
 ## \file
 # Classes for creating objects
 from .Vector import V3
-from .Decorators import addInitRepr, makeImmutable, defaultKwargsValues
+from .Decorators import addInitRepr, makeImmutable
 from .Colors import HIERARCHY, NONE
 from .Grid import Grid
 

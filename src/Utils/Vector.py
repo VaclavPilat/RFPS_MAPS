@@ -206,7 +206,7 @@ class V3:
             >>> V3(1, 2, 3) >> 3
             V3(-2, 1, 3)
         """
-        index = index % 4
+        index %= 4
         if index == 1:
             return V3(self.y, -self.x, self.z)
         if index == 2:

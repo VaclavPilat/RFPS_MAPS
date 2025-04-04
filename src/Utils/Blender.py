@@ -1,6 +1,7 @@
 ## \file
 # Functionality for bridging Blender usage with the rest of code
 from .Object import Object
+# noinspection PyUnresolvedReferences
 import bpy, bmesh
 
 
