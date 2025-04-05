@@ -4,6 +4,7 @@ if __name__ == "__main__":
     try:
         # noinspection PyUnresolvedReferences
         import os, sys, bpy
+
         BLENDER = True
         directory = os.path.dirname(bpy.data.filepath)
         if not directory in sys.path:
@@ -58,15 +59,15 @@ def Stairs(self, D: float, G: int, H: float, L: float) -> None:
         L (float): Step length (in meters)
     """
     assert G >= 1, "At least 1 step group required"
-    VF = round(D / H) # Vertical face count
-    HF = VF + 1 # Horizontal face count
+    VF = round(D / H)  # Vertical face count
+    HF = VF + 1  # Horizontal face count
     assert HF * L < self.bounds.W, "Steps will not fit horizontally"
     TL, BL = (self.bounds.TL, self.bounds.BL)
     if G >= 2:
-        R = (self.bounds.W - (HF - G + 1) * L) / (G - 1) # Resting place length
-    I = set(int(i / G * HF) for i in range(1, G)) # Resting place indices
+        R = (self.bounds.W - (HF - G + 1) * L) / (G - 1)  # Resting place length
+    I = set(int(i / G * HF) for i in range(1, G))  # Resting place indices
     for i in range(HF):
-        if i == HF - 1: # Final horizontal face
+        if i == HF - 1:  # Final horizontal face
             self.face(self.bounds.TR(z=TL.z), TL, BL, self.bounds.BR(z=BL.z))
             break
         # Making a horizontal face
@@ -92,17 +93,17 @@ def Slopes(self, D: float, S: int, R: float) -> None:
     assert S >= 1, "At least 1 slope is required"
     assert D * R < self.bounds.W, "Slopes would not fit horizontally"
     if S > 1:
-        G = (self.bounds.W - D * R) / (S - 1) # Resting place (gap) length
+        G = (self.bounds.W - D * R) / (S - 1)  # Resting place (gap) length
     TL, BL = (self.bounds.TL, self.bounds.BL)
-    C = 1 if S == 1 else S - 1 # Resting place count
+    C = 1 if S == 1 else S - 1  # Resting place count
     for i in range(S + C):
-        if i > 0 and i == S + C - 1: # Final face, whatever it might be
+        if i > 0 and i == S + C - 1:  # Final face, whatever it might be
             self.face(TL, BL, *map(lambda v: v + V3.DOWN * D, (self.bounds.BR, self.bounds.TR)))
             break
-        if i % 2 == 0: # Making a slope face
+        if i % 2 == 0:  # Making a slope face
             z = (self.bounds.TL + V3.DOWN * D * (i // 2 + 1) / S).z
             TL1, BL1 = map(lambda v: (v + V3.RIGHT * (TL.z - z) * R)(z=z), (TL, BL))
-        else: # Making a horizontal face
+        else:  # Making a horizontal face
             TL1, BL1 = map(lambda v: v + V3.RIGHT * G, (TL, BL))
         self.face(TL1, TL, BL, BL1)
         TL, BL = (TL1, BL1)
@@ -119,9 +120,10 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     TLI, TRI = map(lambda v: v + V3.BACKWARD * METRO.UECW, (self.bounds.TL, self.bounds.TR))
     BLI, BRI = map(lambda v: v + V3.FORWARD * METRO.UECW, (self.bounds.BL, self.bounds.BR))
     TRI, BRI = map(lambda v: v + V3.LEFT * METRO.UECW, (TRI, BRI))
-    TL1, TR1, BL1, BR1 = map(lambda v: v + V3.UP * METRO.UECH, (self.bounds.TL, self.bounds.TR, self.bounds.BL, self.bounds.BR))
+    TL1, TR1, BL1, BR1 = map(lambda v: v + V3.UP * METRO.UECH,
+                             (self.bounds.TL, self.bounds.TR, self.bounds.BL, self.bounds.BR))
     TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + V3.UP * METRO.UECH, (TLI, TRI, BLI, BRI))
-    self.face(TR1, TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1) # Top face
+    self.face(TR1, TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1)  # Top face
     # Outer faces
     self.face(TR1, BR1, self.bounds.BR, self.bounds.TR)
     self.face(TL1, TR1, self.bounds.TR, self.bounds.TL)
@@ -134,28 +136,29 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     self.face(TRI1, TLI1, TLI, TRI)
     # Generating descending mesh
     if C is not None:
-        self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=METRO.UHDP+METRO.UHHG, **kwargs)
+        self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=METRO.UHDP + METRO.UHHG, **kwargs)
 
 
 @createObjectSubclass()
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs, G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
-    self.load(UnderpassEntrance, "Underpass slope entrance", Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD, R=2), C=Slopes, S=METRO.USLC, R=METRO.USLR)
+    self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs,
+              G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
+    self.load(UnderpassEntrance, "Underpass slope entrance",
+              Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD,
+                  R=2), C=Slopes, S=METRO.USLC, R=METRO.USLR)
 
 
 if __name__ == "__main__":
     # noinspection PyUnboundLocalVariable
     if BLENDER:
         from Utils.Blender import Setup
+
         Setup.setupForDevelopment()
         Setup.purgeExistingObjects()
-    # noinspection PyTypeChecker
     metro = Metro("Metro station")
-    # noinspection PyUnresolvedReferences
     metro.printHierarchy()
     #metro.printGrids(1)
     if BLENDER:
-        # noinspection PyUnresolvedReferences
         metro.build()

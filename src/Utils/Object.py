@@ -4,6 +4,8 @@ from .Vector import V3
 from .Decorators import addInitRepr, makeImmutable
 from .Colors import HIERARCHY, NONE
 from .Grid import Grid
+from types import FunctionType
+from typing import Callable
 
 
 class Repr(type):
@@ -116,19 +118,22 @@ class Object(metaclass=Repr):
         Grid(self).print(*args, **kwargs)
 
 
-def createObjectSubclass(cls: type = Object) -> "func":
+def createObjectSubclass(cls: type = Object) -> Callable[[FunctionType], type]:
     """Decorator for creating an Object subclass from a generator function
 
     Args:
         cls (type, optional): Object or its subclass type. Defaults to Object.
 
     Returns:
-        cls: Decorator for making a subclass of the provided class type
+        type: Decorator for making a subclass of the provided class type
     """
-    def decorator(func: "func") -> type:
+
+    def decorator(func: FunctionType) -> type:
         class Wrapped(cls):
             pass
+
         Wrapped.generate = func
         Wrapped.__name__ = func.__name__
         return Wrapped
+
     return decorator

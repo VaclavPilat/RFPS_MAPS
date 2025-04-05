@@ -1,6 +1,8 @@
 ## \file
 # Custom decorator functions for data classes.
 # Method injection is preferred over subclassing
+from types import FunctionType
+from typing import Callable
 
 
 def addInitRepr(cls: type) -> type:
@@ -27,12 +29,16 @@ def addInitRepr(cls: type) -> type:
         'Wrapped(value=10)' 
     """
     old_init = cls.__init__
+
     def new_init(self, *args, **kwargs) -> None:
         if getattr(self, "_argstring", None) is None:
-            self._argstring = ", ".join([repr(a) for a in args] + [f"{key}={repr(value)}" for (key, value) in kwargs.items()])
+            self._argstring = ", ".join(
+                [repr(a) for a in args] + [f"{key}={repr(value)}" for (key, value) in kwargs.items()])
         old_init(self, *args, **kwargs)
+
     def new_repr(self) -> str:
         return f"{self.__class__.__name__}({self._argstring})"
+
     cls.__init__ = new_init
     cls.__repr__ = new_repr
     return cls
@@ -61,20 +67,24 @@ def makeImmutable(cls: type) -> type:
     """
     old_init = cls.__init__
     old_setattr = cls.__setattr__
+
     def new_init(self, *args, **kwargs) -> None:
         old_init(self, *args, **kwargs)
         self._initialised = True
+
     def new_setattr(self, name, value) -> None:
         if getattr(self, "_initialised", False):
             raise AttributeError(f"Attempting to modify {self.__class__.__name__}.{name}")
         # noinspection PyArgumentList
         old_setattr(self, name, value)
+
     cls.__init__ = new_init
     cls.__setattr__ = new_setattr
     return cls
 
 
-def addCopyCall(*fields) -> "func":
+# noinspection PyCallingNonCallable
+def addCopyCall(*fields) -> Callable[[type], type]:
     """Creating a decorator the adds an automatic __call__ implementation.
     This function takes field names in the same order as constructor arguments.
     The new __call__ implementation creates a new instance from updated field values.
@@ -95,6 +105,7 @@ def addCopyCall(*fields) -> "func":
         >>> Wrapped(30)(value=-5).value
         -5
     """
+
     def decorator(cls: type) -> type:
         def new_call(self, *args, **kwargs) -> object:
             data = {field: getattr(self, field) for field in fields}
@@ -102,12 +113,15 @@ def addCopyCall(*fields) -> "func":
                 data[fields[i]] = args[i]
             data.update(**kwargs)
             return cls(**data)
+
         cls.__call__ = new_call
         return cls
+
     return decorator
 
 
-def defaultKwargsValues(*fields) -> "func":
+# noinspection PyTypeChecker
+def defaultKwargsValues(*fields) -> Callable[[FunctionType], FunctionType]:
     """Creating a decorator that adds default values for kwargs from self fields.
     Providing new values in meant to be done only using kwargs.
 
@@ -127,10 +141,13 @@ def defaultKwargsValues(*fields) -> "func":
         >>> Test(10).stringify(value=20)
         '20'
     """
-    def decorator(method: "func"):
+
+    def decorator(method: FunctionType):
         def wrapper(self, *args, **kwargs):
             data = {field: getattr(self, field) for field in fields}
             data.update(**kwargs)
             return method(self, *args, **data)
+
         return wrapper
+
     return decorator
