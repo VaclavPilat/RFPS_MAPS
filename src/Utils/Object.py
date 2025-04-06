@@ -28,7 +28,8 @@ class Object(metaclass=Repr):
     """Class for containing own mesh and/or other objects
     """
 
-    def __init__(self, name: str = "New object", position: V3 = V3.ZERO, *args, **kwargs) -> None:
+    def __init__(self, name: str = "New object", position: V3 = V3.ZERO, rotation: V3 = V3.ZERO, *args,
+                 **kwargs) -> None:
         """Creating a new object
 
         Args:
@@ -39,6 +40,8 @@ class Object(metaclass=Repr):
         self.name = name
         ## Object location
         self.position = position
+        ## Object rotation (in degrees)
+        self.rotation = rotation
         ## List of child objects
         self.objects = []
         ## List of mesh faces

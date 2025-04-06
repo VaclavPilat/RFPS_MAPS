@@ -2,7 +2,7 @@
 # Functionality for bridging Blender usage with the rest of code
 from .Object import Object
 # noinspection PyUnresolvedReferences
-import bpy, bmesh
+import bpy, bmesh, math
 
 
 def create(self) -> "bpy mesh":
@@ -32,6 +32,7 @@ def build(self) -> "bpy object":
     """
     obj = bpy.data.objects.new(self.name, self.create() if len(self.faces) else None)
     obj.location = list(self.position)
+    obj.rotation_euler = [math.radians(value) for value in self.rotation]
     bpy.context.scene.collection.objects.link(obj)
     for child in self.objects:
         child.build().parent = obj

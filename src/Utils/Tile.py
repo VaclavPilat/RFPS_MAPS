@@ -12,16 +12,12 @@ class Pivot(Enum):
     Pivot is the origin point of a Tile instance.
     Tile is built and rotated around a pivot.
     """
-
     ## Top left corner
     TL = 0
-
     ## Top right corner
     TR = 1
-
     ## Bottom left corner
     BL = 2
-
     ## Bottom right corner
     BR = 3
 
@@ -134,10 +130,10 @@ class Tile(Object):
         ## Tile boundaries
         self.bounds = bounds
         # noinspection PyTypeChecker
-        super().__init__(name, self.bounds.O, *args, **kwargs)
+        super().__init__(name, position=self.bounds.O, rotation=V3.UP * bounds.R * 90, *args, **kwargs)
 
-    def face(self, *points, **kwargs) -> None:
-        """Rotating face around tile pivot
-        """
-        points = list(map(self.bounds.rotate, points))
-        super().face(*points, **kwargs)
+    #def face(self, *points, **kwargs) -> None:
+    #    """Rotating face around tile pivot
+    #    """
+    #    points = list(map(self.bounds.rotate, points))
+    #    super().face(*points, **kwargs)
