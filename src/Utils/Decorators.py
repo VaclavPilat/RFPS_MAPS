@@ -28,19 +28,19 @@ def addInitRepr(cls: type) -> type:
         >>> repr(Wrapped(value=10))
         'Wrapped(value=10)' 
     """
-    old_init = cls.__init__
+    oldInit = cls.__init__
 
-    def new_init(self, *args, **kwargs) -> None:
+    def newInit(self, *args, **kwargs) -> None:
         if getattr(self, "_argstring", None) is None:
             self._argstring = ", ".join(
                 [repr(a) for a in args] + [f"{key}={repr(value)}" for (key, value) in kwargs.items()])
-        old_init(self, *args, **kwargs)
+        oldInit(self, *args, **kwargs)
 
-    def new_repr(self) -> str:
+    def newRepr(self) -> str:
         return f"{self.__class__.__name__}({self._argstring})"
 
-    cls.__init__ = new_init
-    cls.__repr__ = new_repr
+    cls.__init__ = newInit
+    cls.__repr__ = newRepr
     return cls
 
 
@@ -65,21 +65,21 @@ def makeImmutable(cls: type) -> type:
             ...
         AttributeError: Attempting to modify Wrapped.value 
     """
-    old_init = cls.__init__
-    old_setattr = cls.__setattr__
+    oldInit = cls.__init__
+    oldSetattr = cls.__setattr__
 
-    def new_init(self, *args, **kwargs) -> None:
-        old_init(self, *args, **kwargs)
+    def newInit(self, *args, **kwargs) -> None:
+        oldInit(self, *args, **kwargs)
         self._initialised = True
 
-    def new_setattr(self, name, value) -> None:
+    def newSetattr(self, name, value) -> None:
         if getattr(self, "_initialised", False):
             raise AttributeError(f"Attempting to modify {self.__class__.__name__}.{name}")
         # noinspection PyArgumentList
-        old_setattr(self, name, value)
+        oldSetattr(self, name, value)
 
-    cls.__init__ = new_init
-    cls.__setattr__ = new_setattr
+    cls.__init__ = newInit
+    cls.__setattr__ = newSetattr
     return cls
 
 
@@ -107,14 +107,14 @@ def addCopyCall(*fields) -> Callable[[type], type]:
     """
 
     def decorator(cls: type) -> type:
-        def new_call(self, *args, **kwargs) -> object:
+        def newCall(self, *args, **kwargs) -> object:
             data = {field: getattr(self, field) for field in fields}
             for i in range(len(args)):
                 data[fields[i]] = args[i]
             data.update(**kwargs)
             return cls(**data)
 
-        cls.__call__ = new_call
+        cls.__call__ = newCall
         return cls
 
     return decorator
