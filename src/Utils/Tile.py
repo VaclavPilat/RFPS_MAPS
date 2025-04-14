@@ -28,34 +28,34 @@ class Bounds:
     """Class for representing Tile bounds
     """
 
-    def __init__(self, O: V3, TL: V3, BR: V3, R: int = 0) -> None:
+    def __init__(self, origin: V3, TL: V3, BR: V3, rotation: int = 0) -> None:
         """Initialising Tile boundaries
 
         Args:
-            O (V3): Tile origin (pivot) point (relative to parent's origin)
+            origin (V3): Tile origin (pivot) point (relative to parent's origin)
             TL (V3): Top left tile corner (relative to parent's origin)
             BR (V3): Bottom right tile corner (relative to parent's origin)
-            R (int, optional): Rotation index. Defaults to 0.
+            rotation (int, optional): Rotation index. Defaults to 0.
         """
         ## Tile origin (pivot) point (relative to parent's origin)
-        self.O = O
+        self.origin = origin
         ## Top left tile corner position (relative to origin)
         assert TL.z == BR.z, "All bounds have to have the same z-value"
-        self.TL = TL - O
+        self.TL = TL - origin
         ## Bottom right tile corner position (relative to origin)
-        self.BR = BR - O
+        self.BR = BR - origin
         ## Top right tile corner position (relative to origin)
         self.TR = self.TL(y=self.BR.y)
         ## Bottom left tile corner position (relative to origin)
         self.BL = self.TL(x=self.BR.x)
         ## Tile rotation index as a value from 0 to 3
-        self.R = R
+        self.rotation = rotation
         ## Tile width (in meters)
-        self.W = abs(self.TL - self.TR)
-        assert self.W > 0, "Tile width has to be positive"
+        self.width = abs(self.TL - self.TR)
+        assert self.width > 0, "Tile width has to be positive"
         ## Tile height (in meters)
-        self.H = abs(self.TL - self.BL)
-        assert self.H > 0, "Tile height has to be positive"
+        self.height = abs(self.TL - self.BL)
+        assert self.height > 0, "Tile height has to be positive"
 
     def rotate(self, point: V3) -> V3:
         """Rotating a vertex point around tile pivot
@@ -66,7 +66,7 @@ class Bounds:
         Returns:
             V3: Rotated vertex position (relative to origin)
         """
-        return point >> self.R
+        return point >> self.rotation
 
 
 @addInitRepr
@@ -74,23 +74,23 @@ class Box(Bounds):
     """Class for representing a bounding box of a Tile
     """
 
-    def __init__(self, O: V3, W: float, H: float, P: Pivot = Pivot.TL, R: int = 0) -> None:
+    def __init__(self, origin: V3, width: float, height: float, rotation: int = 0, pivot: Pivot = Pivot.TL) -> None:
         """Initialising a bounding box
 
         Args:
-            O (V3): Tile origin (pivot) point (relative to parent's origin)
-            W (float): Tile width (in meters)
-            H (float): Tile height (in meters)
-            P (Pivot, optional): Pivot location. Defaults to Pivot.TL.
-            R (int, optional): Rotation index. Defaults to 0.
+            origin (V3): Tile origin (pivot) point (relative to parent's origin)
+            width (float): Tile width (in meters)
+            height (float): Tile height (in meters)
+            rotation (int, optional): Rotation index. Defaults to 0.
+            pivot (Pivot, optional): Pivot location. Defaults to Pivot.TL.
         """
-        if P == Pivot.TL:
-            TL = O
-            BR = TL + V3.RIGHT * W + V3.BACKWARD * H
+        if pivot == Pivot.TL:
+            TL = origin
+            BR = TL + V3.RIGHT * width + V3.BACKWARD * height
         else:
             raise ValueError("Unexpected Pivot value")
         # noinspection PyArgumentList
-        super().__init__(O, TL, BR, R)
+        super().__init__(origin, TL, BR, rotation)
 
 
 @addInitRepr
@@ -98,21 +98,21 @@ class Anchor(Bounds):
     """Class for representing anchor bounds of a Tile
     """
 
-    def __init__(self, TL: V3, BR: V3, P: Pivot = Pivot.TL, R: int = 0) -> None:
+    def __init__(self, TL: V3, BR: V3, pivot: Pivot = Pivot.TL, rotation: int = 0) -> None:
         """Initialising anchor bounds
 
         Args:
             TL (V3): Top left tile corner (relative to parent's origin)
             BR (V3): Bottom right tile corner (relative to parent's origin)
-            P (Pivot, optional): Pivot location. Defaults to Pivot.TL.
-            R (int, optional): Rotation index. Defaults to 0.
+            pivot (Pivot, optional): Pivot location. Defaults to Pivot.TL.
+            rotation (int, optional): Rotation index. Defaults to 0.
         """
-        if P == Pivot.TL:
-            O = TL
+        if pivot == Pivot.TL:
+            origin = TL
         else:
             raise ValueError("Unexpected Pivot value")
         # noinspection PyArgumentList
-        super().__init__(O, TL, BR, R)
+        super().__init__(origin, TL, BR, rotation)
 
 
 @addInitRepr
@@ -130,7 +130,7 @@ class Tile(Object):
         ## Tile boundaries
         self.bounds = bounds
         # noinspection PyTypeChecker
-        super().__init__(name, position=self.bounds.O, rotation=V3.UP * bounds.R * 90, *args, **kwargs)
+        super().__init__(name, position=bounds.origin, rotation=V3.UP * bounds.rotation * 90, *args, **kwargs)
 
     #def face(self, *points, **kwargs) -> None:
     #    """Rotating face around tile pivot

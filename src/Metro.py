@@ -36,10 +36,10 @@ METRO = Settings(
     UEWD=3,  # Underpass entrance width (in meters)
     UHDP=1,  # Underpass hallway depth (in meters)
     UHHG=3,  # Underpass hallway height (in meters)
-    UHWD=4,  # Underpass hallway width (in meters)
+    UHWD=5,  # Underpass hallway width (in meters)
     USCL=10,  # Underpass staircase length (in meters)
     USLC=3,  # Underpass slope count
-    USLL=40,  # Underpass slope length (in meters)
+    USLL=37,  # Underpass slope length (in meters)
     USLR=8,  # Underpass slope ratio
     USTG=3,  # Underpass step group count
     USTH=0.2,  # Underpass step height (in meters)
@@ -61,10 +61,10 @@ def Stairs(self, D: float, G: int, H: float, L: float) -> None:
     assert G >= 1, "At least 1 step group required"
     VF = round(D / H)  # Vertical face count
     HF = VF + 1  # Horizontal face count
-    assert HF * L < self.bounds.W, "Steps will not fit horizontally"
+    assert HF * L < self.bounds.width, "Steps will not fit horizontally"
     TL, BL = (self.bounds.TL, self.bounds.BL)
     if G >= 2:
-        R = (self.bounds.W - (HF - G + 1) * L) / (G - 1)  # Resting place length
+        R = (self.bounds.width - (HF - G + 1) * L) / (G - 1)  # Resting place length
     I = set(int(i / G * HF) for i in range(1, G))  # Resting place indices
     for i in range(HF):
         if i == HF - 1:  # Final horizontal face
@@ -91,9 +91,9 @@ def Slopes(self, D: float, S: int, R: float) -> None:
         R (float): Slope ratio (slope length per meter of descent)
     """
     assert S >= 1, "At least 1 slope is required"
-    assert D * R < self.bounds.W, "Slopes would not fit horizontally"
+    assert D * R < self.bounds.width, "Slopes would not fit horizontally"
     if S > 1:
-        G = (self.bounds.W - D * R) / (S - 1)  # Resting place (gap) length
+        G = (self.bounds.width - D * R) / (S - 1)  # Resting place (gap) length
     TL, BL = (self.bounds.TL, self.bounds.BL)
     C = 1 if S == 1 else S - 1  # Resting place count
     for i in range(S + C):
@@ -147,7 +147,7 @@ def Metro(self) -> None:
               G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
     self.load(UnderpassEntrance, "Underpass slope entrance",
               Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD,
-                  R=2), C=Slopes, S=METRO.USLC, R=METRO.USLR)
+                  rotation=2), C=Slopes, S=METRO.USLC, R=METRO.USLR)
 
 
 if __name__ == "__main__":
