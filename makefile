@@ -19,7 +19,7 @@ clean:
 run:
 	@cd src; \
 	for file in $(FILE); do \
-		$(PYTHON) $(FILE); \
+		$(PYTHON) $(FILE) | less -FRS -# 4; \
 	done; \
 	cd ..
 
