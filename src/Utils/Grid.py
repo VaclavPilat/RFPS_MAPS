@@ -25,6 +25,7 @@ class Axis:
         self.reverse = name.startswith("-")
         ## Axis values
         self.values = sorted(set(getattr(vertex, self.name) for vertex in vertices))
+        assert len(self.values), "Axis has to contain at least one vertex value"
         ## Differences in axis values
         self.diffs = [self.values[i] - self.values[i - 1] for i in range(1, len(self.values))]
         if self.reverse:

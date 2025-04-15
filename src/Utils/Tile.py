@@ -12,14 +12,16 @@ class Pivot(Enum):
     Pivot is the origin point of a Tile instance.
     Tile is built and rotated around a pivot.
     """
-    ## Top left corner
-    TL = 0
-    ## Top right corner
-    TR = 1
-    ## Bottom left corner
-    BL = 2
-    ## Bottom right corner
-    BR = 3
+    ## Center of the tile
+    CENTER = 0
+    ## Top left tile corner
+    TOP_LEFT = 1
+    ## Top right tile corner
+    TOP_RIGHT = 2
+    ## Bottom left tile corner
+    BOTTOM_LEFT = 3
+    ## Bottom right tile corner
+    BOTTOM_RIGHT = 4
 
 
 # noinspection PyCallingNonCallable
@@ -71,10 +73,10 @@ class Bounds:
 
 @addInitRepr
 class Box(Bounds):
-    """Class for representing a bounding box of a Tile
+    """Class for representing a bounding box of a Tile by its size
     """
 
-    def __init__(self, origin: V3, width: float, height: float, rotation: int = 0, pivot: Pivot = Pivot.TL) -> None:
+    def __init__(self, origin: V3, width: float, height: float, rotation: int = 0, pivot: Pivot = Pivot.TOP_LEFT) -> None:
         """Initialising a bounding box
 
         Args:
@@ -82,9 +84,9 @@ class Box(Bounds):
             width (float): Tile width (in meters)
             height (float): Tile height (in meters)
             rotation (int, optional): Rotation index. Defaults to 0.
-            pivot (Pivot, optional): Pivot location. Defaults to Pivot.TL.
+            pivot (Pivot, optional): Pivot location. Defaults to Pivot.TOP_LEFT.
         """
-        if pivot == Pivot.TL:
+        if pivot == Pivot.TOP_LEFT:
             TL = origin
             BR = TL + V3.RIGHT * width + V3.BACKWARD * height
         else:
@@ -95,19 +97,19 @@ class Box(Bounds):
 
 @addInitRepr
 class Anchor(Bounds):
-    """Class for representing anchor bounds of a Tile
+    """Class for representing anchor bounds of a Tile by its corner positions
     """
 
-    def __init__(self, TL: V3, BR: V3, pivot: Pivot = Pivot.TL, rotation: int = 0) -> None:
+    def __init__(self, TL: V3, BR: V3, rotation: int = 0, pivot: Pivot = Pivot.TOP_LEFT) -> None:
         """Initialising anchor bounds
 
         Args:
             TL (V3): Top left tile corner (relative to parent's origin)
             BR (V3): Bottom right tile corner (relative to parent's origin)
-            pivot (Pivot, optional): Pivot location. Defaults to Pivot.TL.
             rotation (int, optional): Rotation index. Defaults to 0.
+            pivot (Pivot, optional): Pivot location. Defaults to Pivot.TOP_LEFT.
         """
-        if pivot == Pivot.TL:
+        if pivot == Pivot.TOP_LEFT:
             origin = TL
         else:
             raise ValueError("Unexpected Pivot value")
@@ -131,9 +133,3 @@ class Tile(Object):
         self.bounds = bounds
         # noinspection PyTypeChecker
         super().__init__(name, position=bounds.origin, rotation=V3.UP * bounds.rotation * 90, *args, **kwargs)
-
-    #def face(self, *points, **kwargs) -> None:
-    #    """Rotating face around tile pivot
-    #    """
-    #    points = list(map(self.bounds.rotate, points))
-    #    super().face(*points, **kwargs)

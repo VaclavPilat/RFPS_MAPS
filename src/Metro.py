@@ -159,6 +159,6 @@ if __name__ == "__main__":
         Setup.purgeExistingObjects()
     metro = Metro("Metro station")
     metro.printHierarchy()
-    #metro.printGrids(1)
+    metro.printGrids(1)
     if BLENDER:
         metro.build()

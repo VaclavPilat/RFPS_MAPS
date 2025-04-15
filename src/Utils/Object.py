@@ -111,8 +111,8 @@ class Object(metaclass=Repr):
         for index, child in enumerate(self.objects):
             color = HIERARCHY[layer % len(HIERARCHY)]
             last = index < len(self.objects) - 1
-            newCurrent = f"{children}{color}{'┣' if last else '┗'}━╸"
-            newChildren = f"{children}{color}{'┃' if last else ' '}  "
+            newCurrent = f"{children}{color}{'┣' if last else '┗'}━━ "
+            newChildren = f"{children}{color}{'┃' if last else ' '}   "
             child.printHierarchy(newCurrent, newChildren, layer + 1)
 
     def printGrids(self, *args, **kwargs) -> None:
