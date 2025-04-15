@@ -7,6 +7,9 @@ import math
 @addInitRepr
 @makeImmutable
 @addCopyCall("x", "y", "z")
+## \todo Add multiple axis rotation: >>> V3() >> V3()
+# \todo Implement rotations for ANY degree values
+# \todo Use Decimal everywhere with float trap set to True
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
 
@@ -185,11 +188,11 @@ class V3:
             return V3(*([a / other for a in self]))
         raise ValueError("Other value is not a number")
 
-    def __rshift__(self, angle: int) -> "V3":
+    def __rshift__(self, angle: float) -> "V3":
         """Rotating the vector on Z axis, clockwise
 
         Args:
-            angle (int): Rotation angle in degrees
+            angle (float): Rotation angle in degrees
 
         Returns:
             V3: Rotated vector
@@ -214,11 +217,11 @@ class V3:
             return V3(-self.y, self.x, self.z)
         return self
 
-    def __lshift__(self, angle: int) -> "V3":
+    def __lshift__(self, angle: float) -> "V3":
         """Rotating the vector on Z axis, counter-clockwise
 
         Args:
-            angle (int): Rotation angle in degreees
+            angle (float): Rotation angle in degreees
 
         Returns:
             V3: Rotated vector

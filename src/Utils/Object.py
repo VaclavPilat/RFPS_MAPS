@@ -28,13 +28,13 @@ class Object(metaclass=Repr):
     """Class for containing own mesh and/or other objects
     """
 
-    def __init__(self, name: str = "New object", position: V3 = V3.ZERO, rotation: V3 = V3.ZERO, *args,
-                 **kwargs) -> None:
+    def __init__(self, name: str = "New object", position: V3 = V3.ZERO, rotation: float = 0, *args, **kwargs) -> None:
         """Creating a new object
 
         Args:
             name (str, optional): Object name. Defaults to "New object".
             position (V3, optional): Object location. Defaults to V3.ZERO.
+            rotation (float, optional): Object rotation in degrees (Z-value only). Defaults to 0.
         """
         ## Object name
         self.name = name
@@ -68,7 +68,7 @@ class Object(metaclass=Repr):
         Returns:
             V3: Vertex position (relative to parent's object position)
         """
-        return point + self.position
+        return (point >> self.rotation) + self.position
 
     def load(self, obj: type, *args, **kwargs) -> "Object":
         """Creating an object instance using Object type and its constructor arguments

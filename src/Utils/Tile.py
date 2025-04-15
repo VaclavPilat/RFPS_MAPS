@@ -132,4 +132,4 @@ class Tile(Object):
         ## Tile boundaries
         self.bounds = bounds
         # noinspection PyTypeChecker
-        super().__init__(name, position=bounds.origin, rotation=V3.UP * bounds.rotation * 90, *args, **kwargs)
+        super().__init__(name, position=bounds.origin, rotation=bounds.rotation, *args, **kwargs)

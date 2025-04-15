@@ -1,6 +1,7 @@
 ## \file
 # Functionality for bridging Blender usage with the rest of code
 from .Object import Object
+from .Vector import V3
 # noinspection PyUnresolvedReferences
 import bpy, bmesh, math
 
@@ -23,7 +24,7 @@ def create(self) -> "bpy mesh":
     return mesh
 
 
-## \todo Add object rotations
+## \todo Update rotation code once V3 supports all-axis rotations
 def build(self) -> "bpy object":
     """Building a blender object from an Object instance
 
@@ -32,7 +33,7 @@ def build(self) -> "bpy object":
     """
     obj = bpy.data.objects.new(self.name, self.create() if len(self.faces) else None)
     obj.location = list(self.position)
-    obj.rotation_euler = [math.radians(value) for value in self.rotation]
+    obj.rotation_euler = [math.radians(value) for value in V3.UP * self.rotation]
     bpy.context.scene.collection.objects.link(obj)
     for child in self.objects:
         child.build().parent = obj

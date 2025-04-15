@@ -147,7 +147,7 @@ def Metro(self) -> None:
               G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
     self.load(UnderpassEntrance, "Underpass slope entrance",
               Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD,
-                  rotation=2), C=Slopes, S=METRO.USLC, R=METRO.USLR)
+                  rotation=180), C=Slopes, S=METRO.USLC, R=METRO.USLR).printGrids()
 
 
 if __name__ == "__main__":
@@ -159,6 +159,6 @@ if __name__ == "__main__":
         Setup.purgeExistingObjects()
     metro = Metro("Metro station")
     metro.printHierarchy()
-    metro.printGrids(1)
+    #metro.printGrids(1)
     if BLENDER:
         metro.build()
