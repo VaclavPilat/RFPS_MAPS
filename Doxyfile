@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "RFPS MAPS"
-PROJECT_NUMBER         = 0.0
+PROJECT_NUMBER         = 0.1
 PROJECT_BRIEF          = "Python scripts for creating map models in Blender for the RFPS project"
 PROJECT_LOGO           = docs/Icon.png
 OUTPUT_DIRECTORY       = docs
