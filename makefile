@@ -26,6 +26,6 @@ run:
 show:
 	@cd src; \
 	for file in $(FILE); do \
-		$(BLENDER) --python-exit-code 2 --disable-abort-handler --python $(FILE); \
+		$(BLENDER) --python-exit-code 2 --disable-abort-handler -P $(FILE) >/dev/null; \
 	done; \
 	cd ..
