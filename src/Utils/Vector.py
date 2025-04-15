@@ -185,11 +185,11 @@ class V3:
             return V3(*([a / other for a in self]))
         raise ValueError("Other value is not a number")
 
-    def __rshift__(self, index: int) -> "V3":
-        """Rotating the vector on Z axis by multiples of 90 degrees, clockwise
+    def __rshift__(self, angle: int) -> "V3":
+        """Rotating the vector on Z axis, clockwise
 
         Args:
-            index (int): Rotation index
+            angle (int): Rotation angle in degrees
 
         Returns:
             V3: Rotated vector
@@ -197,27 +197,28 @@ class V3:
         Examples:
             >>> V3(1, 2, 3) >> 0
             V3(1, 2, 3)
-            >>> V3(1, 2, 3) >> 1
+            >>> V3(1, 2, 3) >> 90
             V3(2, -1, 3)
-            >>> V3(1, 2, 3) >> 2
+            >>> V3(1, 2, 3) >> 180
             V3(-1, -2, 3)
-            >>> V3(1, 2, 3) >> 3
+            >>> V3(1, 2, 3) >> 270
             V3(-2, 1, 3)
         """
-        index %= 4
-        if index == 1:
+        assert angle % 90 == 0, "Vector only supports rotations by multiples of 90 degrees"
+        angle %= 360
+        if angle == 90:
             return V3(self.y, -self.x, self.z)
-        if index == 2:
+        if angle == 180:
             return V3(-self.x, -self.y, self.z)
-        if index == 3:
+        if angle == 270:
             return V3(-self.y, self.x, self.z)
         return self
 
-    def __lshift__(self, index: int) -> "V3":
-        """Rotating the vector on Z axis by multiples of 90 degrees, counter-clockwise
+    def __lshift__(self, angle: int) -> "V3":
+        """Rotating the vector on Z axis, counter-clockwise
 
         Args:
-            index (int): Rotation index
+            angle (int): Rotation angle in degreees
 
         Returns:
             V3: Rotated vector
@@ -225,14 +226,14 @@ class V3:
         Examples:
             >>> V3(1, 2, 3) << 0
             V3(1, 2, 3)
-            >>> V3(1, 2, 3) << 1
+            >>> V3(1, 2, 3) << 90
             V3(-2, 1, 3)
-            >>> V3(1, 2, 3) << 2
+            >>> V3(1, 2, 3) << 180
             V3(-1, -2, 3)
-            >>> V3(1, 2, 3) << 3
+            >>> V3(1, 2, 3) << 270
             V3(2, -1, 3)
         """
-        return self.__rshift__(-index)
+        return self.__rshift__(-angle)
 
     def __abs__(self) -> float:
         """Calculating the magnitude of the vector

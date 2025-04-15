@@ -46,13 +46,13 @@ class V3Test(unittest.TestCase):
     def test_rotation(self) -> None:
         """Testing __rshift__ and __lshift__ implementation
         """
-        self.assertEqual(V3.FORWARD >> 1, V3.RIGHT)
-        self.assertEqual(V3.RIGHT << 2, V3.LEFT)
-        self.assertEqual(V3.LEFT >> 7, V3.BACKWARD)
-        self.assertEqual(V3(2, 1, 3) >> 1, V3(1, -2, 3))
-        self.assertEqual(V3(1, -2, 3) >> 1, V3(-2, -1, 3))
-        self.assertEqual(V3(-2, -1, 3) >> 1, V3(-1, 2, 3))
-        self.assertEqual(V3(-1, 2, 3) >> 1, V3(2, 1, 3))
+        self.assertEqual(V3.FORWARD >> 90, V3.RIGHT)
+        self.assertEqual(V3.RIGHT << 180, V3.LEFT)
+        self.assertEqual(V3.LEFT >> 270, V3.BACKWARD)
+        self.assertEqual(V3(2, 1, 3) >> 90, V3(1, -2, 3))
+        self.assertEqual(V3(1, -2, 3) >> 90, V3(-2, -1, 3))
+        self.assertEqual(V3(-2, -1, 3) >> 90, V3(-1, 2, 3))
+        self.assertEqual(V3(-1, 2, 3) >> 90, V3(2, 1, 3))
 
     def test_equality(self) -> None:
         """Testing __eq__ implementation
