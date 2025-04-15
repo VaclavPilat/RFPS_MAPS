@@ -19,13 +19,13 @@ clean:
 run:
 	@cd src; \
 	for file in $(FILE); do \
-		$(PYTHON) $(FILE) | less -FRS -# 4; \
+		$(PYTHON) "$$file" | less -FRS -# 4; \
 	done; \
 	cd ..
 
 show:
 	@cd src; \
 	for file in $(FILE); do \
-		$(BLENDER) --python-exit-code 2 --disable-abort-handler -P $(FILE) >/dev/null; \
+		$(BLENDER) --python-exit-code 2 --disable-abort-handler -P "$$file" >/dev/null; \
 	done; \
 	cd ..
