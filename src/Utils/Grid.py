@@ -22,24 +22,24 @@ class Axis:
         assert re.fullmatch("-?[xyz]", name), "Invalid axis name"
         self.name = name[-1]
         ## Is the axis in reverse?
-        self.reverse = name.startswith("-")
+        self.reversed = name.startswith("-")
         ## Axis values
         self.values = sorted(set(getattr(vertex, self.name) for vertex in vertices))
         assert len(self.values), "Axis has to contain at least one vertex value"
         ## Differences in axis values
-        self.diffs = [self.values[i] - self.values[i - 1] for i in range(1, len(self.values))]
-        if self.reverse:
+        differences = [self.values[i] - self.values[i - 1] for i in range(1, len(self.values))]
+        if self.reversed:
             self.values.reverse()
-            self.diffs.reverse()
+            differences.reverse()
+        if differences:
+            minimum = min(differences)
+            assert minimum > 0.001, "Map contains floating point errors"
+            ## Axis value distances
+            self.distances = tuple(map(lambda d: round(d / minimum), differences))
+        else:
+            self.distances = tuple()
         ## Axis value labels
         self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
-        ## Minimum axis value difference
-        if self.diffs:
-            self.min = min(self.diffs)
-            ## \bug Floats can cause errors. Fix by using decimals everywhere
-            assert self.min > 0.001, "Map contains floating point errors"
-        else:
-            self.min = 0
         ## Most amount of space a single axis value can take up
         self.just = max(map(lambda value: len(str(value)), self.labels))
 
@@ -57,6 +57,7 @@ class Axis:
 
 
 # noinspection PyUnresolvedReferences
+## \todo Highlight lines between vertices (horizontal & vertical)
 @makeImmutable
 class View:
     """Class for rendering 3D objects as 2D views in console
@@ -91,10 +92,10 @@ class View:
         """
         first = (" ", f"{AXIS[self.vertical.name]}{self.vertical.name.upper()}{NONE}", "     ")
         second = (" ", "┃", "     ")
-        third = (f"╺{'━━╋'[::(-1, 1)[self.horizontal.reverse]]}╸",
+        third = (f"╺{'━━╋'[::(-1, 1)[self.horizontal.reversed]]}╸",
                  f"{AXIS[self.horizontal.name]}{self.horizontal.name.upper()}{NONE}", " ")
-        rows = tuple(map(lambda row: "".join(row[::(1, -1)[self.horizontal.reverse]]), (first, second, third)))
-        return rows[::(-1, 1)[self.vertical.reverse]]
+        rows = tuple(map(lambda row: "".join(row[::(1, -1)[self.horizontal.reversed]]), (first, second, third)))
+        return rows[::(-1, 1)[self.vertical.reversed]]
 
     @staticmethod
     def _colorLegend() -> tuple:
@@ -169,23 +170,23 @@ class View:
             print(" " * (self.vertical.just + 1), end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print(" " * round(self.horizontal.diffs[j - 1] / self.horizontal.min * 2 - 1), end="")
+                    print(" " * (self.horizontal.distances[j - 1] * 2 - 1), end="")
                 print(str(h).rjust(self.horizontal.just)[i], end="")
             print()
         # Body
         for i, v in enumerate(self.vertical.labels):
             if i > 0:
-                for j in range(round(self.vertical.diffs[i - 1] / self.vertical.min - 1)):
+                for j in range(self.vertical.distances[i - 1] - 1):
                     print(" " * (self.vertical.just + 1), end="")
                     for k, h in enumerate(self.horizontal.labels):
                         if k > 0:
-                            print(" " * round(self.horizontal.diffs[k - 1] / self.horizontal.min * 2 - 1), end="")
+                            print(" " * (self.horizontal.distances[k - 1] * 2 - 1), end="")
                         print("┆", end="")
                     print()
             print(str(v).rjust(self.vertical.just) + "╶", end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print("╌" * round(self.horizontal.diffs[j - 1] / self.horizontal.min * 2 - 1), end="")
+                    print("╌" * (self.horizontal.distances[j - 1] * 2 - 1), end="")
                 print(self._pointColor(self.vertical.values[i], self.horizontal.values[j]), end="")
             print(f"╴{v}")
         # Footer
@@ -193,7 +194,7 @@ class View:
             print(" " * (self.vertical.just + 1), end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print(" " * round(self.horizontal.diffs[j - 1] / self.horizontal.min * 2 - 1), end="")
+                    print(" " * (self.horizontal.distances[j - 1] * 2 - 1), end="")
                 print(str(h).ljust(self.horizontal.just)[i], end="")
             print()
 
