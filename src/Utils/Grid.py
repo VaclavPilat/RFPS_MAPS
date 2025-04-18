@@ -93,14 +93,11 @@ class View:
         Returns:
             tuple: 2D tuple of vertex counts
         """
-        return tuple(
-            tuple(
-                len(list(filter(
-                    lambda vertex: self.vertical.match(vertex, v) and self.horizontal.match(vertex, h),
-                    vertices
-                )))
-                for h in self.horizontal.values)
-            for v in self.vertical.values)
+        return tuple(tuple(
+            len(list(filter(
+                lambda vertex: self.vertical.match(vertex, v) and self.horizontal.match(vertex, h),
+                vertices
+            ))) for h in self.horizontal.values) for v in self.vertical.values)
 
     def _axisInfo(self) -> tuple:
         """Getting out a diagram of axis orientation
@@ -239,6 +236,9 @@ class Grid:
     def _getVertices(self, obj: "Object", depth: int) -> set:
         """Getting vertex positions (relative to the parent's origin) up to a certain depth
 
+        Args:
+            depth (int): Maximum layer depth
+
         Returns:
             tuple: Remaining depth to go down to
         """
@@ -248,17 +248,6 @@ class Grid:
                 vertices = vertices.union(self._getVertices(child, depth - 1))
         return set(map(obj.transform, vertices))
 
-    def _selectVertices(self, depth: int) -> set:
-        """Selecting vertices up to a certain layer depth
-
-        Args:
-            depth (int): Maximum layer depth
-
-        Returns:
-            set: Set of vertices found within the specified depth
-        """
-        return self._getVertices(self.obj, depth)
-
     def print(self, depth: int = 0) -> None:
         """Printing out a grid
 
@@ -266,7 +255,7 @@ class Grid:
             depth (int, optional): Maximum layer index. Defaults to 0.
         """
         assert depth >= 0, "Max depth cannot be a negative number"
-        vertices = self._selectVertices(depth)
+        vertices = self._getVertices(self.obj, depth)
         View(self.obj, vertices, "-x", "-y", "TOP VIEW").print()
         View(self.obj, vertices, "-z", "-y", "SIDE VIEW").print()
         View(self.obj, vertices, "-z", "x", "FRONT VIEW").print()
