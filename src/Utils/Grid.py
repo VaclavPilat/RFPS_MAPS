@@ -75,14 +75,32 @@ class View:
         """
         ## Object to render
         self.obj = obj
-        ## Subset of object's vertices to render
-        self.vertices = vertices
         ## Vertical axis
         self.vertical = Axis(vertical, vertices)
         ## Horizontal axis
         self.horizontal = Axis(horizontal, vertices)
         ## View title
         self.title = title
+        ## Matrix of vertex counts for all axis value intersections
+        self.vertexCounts = self._countVertices(vertices)
+
+    def _countVertices(self, vertices: set) -> tuple:
+        """Counting then number of vertices for each axis value intersection
+
+        Args:
+            vertices (set): Subset of the object's vertices
+
+        Returns:
+            tuple: 2D tuple of vertex counts
+        """
+        return tuple(
+            tuple(
+                len(list(filter(
+                    lambda vertex: self.vertical.match(vertex, v) and self.horizontal.match(vertex, h),
+                    vertices
+                )))
+                for h in self.horizontal.values)
+            for v in self.vertical.values)
 
     def _axisInfo(self) -> tuple:
         """Getting out a diagram of axis orientation
@@ -113,7 +131,7 @@ class View:
         axis = self._axisInfo()
         info = (
                    f"{BOLD}{self.obj.name}{NONE}",
-                   f"{BOLD}{len(self.vertices)}{NONE} vertices",
+                   f"{BOLD}{sum(sum(row) for row in self.vertexCounts)}{NONE} vertices",
                    self.title
                ) + self._colorLegend()
         rows = (len(axis) + 1) // 2
@@ -145,20 +163,18 @@ class View:
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
 
-    def _pointColor(self, vertical: float, horizontal: float) -> str:
+    def _pointColor(self, vertical: int, horizontal: int) -> str:
         """Colorizing a single point based on the number of vertices behind it
 
         Args:
-            vertical (float): Vertical axis value
-            horizontal (float): Horizontal axis value
+            vertical (int): Vertical axis value index
+            horizontal (int): Horizontal axis value index
 
         Returns:
             str: ANSI colored box character representing the point
         """
-        selected = tuple(
-            filter(lambda v: self.vertical.match(v, vertical) and self.horizontal.match(v, horizontal), self.vertices))
-        if selected:
-            count = len(selected)
+        count = self.vertexCounts[vertical][horizontal]
+        if count:
             return f"{TEMPERATURE[min(count - 1, len(TEMPERATURE) - 1)]}╋{NONE}"
         return "┼"
 
@@ -187,7 +203,7 @@ class View:
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
                     print("╌" * (self.horizontal.distances[j - 1] * 2 - 1), end="")
-                print(self._pointColor(self.vertical.values[i], self.horizontal.values[j]), end="")
+                print(self._pointColor(i, j), end="")
             print(f"╴{v}")
         # Footer
         for i in range(self.horizontal.just):
