@@ -63,18 +63,16 @@ class View:
     """Class for rendering 3D objects as 2D views in console
     """
 
-    def __init__(self, obj: "Object", vertices: set, vertical: str, horizontal: str, title: str) -> None:
+    def __init__(self, faces: set, vertical: str, horizontal: str, title: str) -> None:
         """Initialising a View instance
 
         Args:
-            obj (Object): Object instance to render in console
-            vertices (set): Subset of the object's vertices
+            faces (tuple): Object faces to render
             vertical (Axis): Vertical axis name
             horizontal (Axis): Horizontal axis name
             title (str): View title
         """
-        ## Object to render
-        self.obj = obj
+        vertices = set(vertex for face in faces for vertex in face)
         ## Vertical axis
         self.vertical = Axis(vertical, vertices)
         ## Horizontal axis
@@ -127,7 +125,7 @@ class View:
         # Variables
         axis = self._axisInfo()
         info = (
-                   f"{BOLD}{self.obj.name}{NONE}",
+                   #f"{BOLD}{self.obj.name}{NONE}",
                    f"{BOLD}{sum(sum(row) for row in self.vertexCounts)}{NONE} vertices",
                    self.title
                ) + self._colorLegend()
@@ -233,20 +231,21 @@ class Grid:
         ## Object to visualise
         self.obj = obj
 
-    def _getVertices(self, obj: "Object", depth: int) -> set:
-        """Getting vertex positions (relative to the parent's origin) up to a certain depth
+    def _transformedFaces(self, obj: "Object", depth: int) -> tuple:
+        """Getting all faces found up to the specified depth, transformed
 
         Args:
-            depth (int): Maximum layer depth
+            obj (Object): Object whose faces are being gathered
+            depth (int): Remaining layer depth to go down to
 
         Returns:
-            tuple: Remaining depth to go down to
+            tuple: Object faces with transformed vertex positions
         """
-        vertices = set(vertex for face in obj.faces for vertex in face)
+        faces = obj.faces
         if depth > 0:
             for child in obj.objects:
-                vertices = vertices.union(self._getVertices(child, depth - 1))
-        return set(map(obj.transform, vertices))
+                faces += self._transformedFaces(child, depth - 1)
+        return tuple(tuple(map(obj.transform, face)) for face in faces)
 
     def print(self, depth: int = 0) -> None:
         """Printing out a grid
@@ -255,7 +254,7 @@ class Grid:
             depth (int, optional): Maximum layer index. Defaults to 0.
         """
         assert depth >= 0, "Max depth cannot be a negative number"
-        vertices = self._getVertices(self.obj, depth)
-        View(self.obj, vertices, "-x", "-y", "TOP VIEW").print()
-        View(self.obj, vertices, "-z", "-y", "SIDE VIEW").print()
-        View(self.obj, vertices, "-z", "x", "FRONT VIEW").print()
+        faces = self._transformedFaces(self.obj, depth)
+        View(faces, "-x", "-y", "TOP VIEW").print()
+        View(faces, "-z", "-y", "FRONT VIEW").print()
+        View(faces, "-z", "x", "SIDE VIEW").print()
