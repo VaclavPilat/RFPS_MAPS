@@ -2,6 +2,7 @@
 # Class for representing a line between two points
 from .Decorators import makeImmutable, addInitRepr
 from .Vector import V3
+from typing import Iterator
 
 
 @makeImmutable
@@ -19,7 +20,9 @@ class Line:
         """
         if a == b:
             raise ValueError("Points must be different")
+        ## First point
         self.a = a
+        ## Second point
         self.b = b
 
     def __eq__(self, other: "Line") -> bool:
@@ -48,3 +51,9 @@ class Line:
         """
         # noinspection PyCallingNonCallable
         return Line(self.a(*args, **kwargs), self.b(*args, **kwargs))
+
+    def __iter__(self) -> Iterator[V3]:
+        """Iterating over line points
+        """
+        yield self.a
+        yield self.b
