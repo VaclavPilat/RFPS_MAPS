@@ -72,7 +72,8 @@ class View:
             horizontal (Axis): Horizontal axis name
             title (str): View title
         """
-        vertices = set(vertex for face in faces for vertex in face)
+        lines = set(line for face in faces for line in face)
+        vertices = set(line.a for line in lines)
         ## Vertical axis
         self.vertical = Axis(vertical, vertices)
         ## Horizontal axis
