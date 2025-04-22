@@ -1,9 +1,11 @@
 ## \file
 # Classes for creating objects
+from .Line import Line
 from .Vector import V3
 from .Decorators import addInitRepr, makeImmutable
 from .Colors import HIERARCHY, NONE
 from .Grid import Grid
+from .Face import Face
 from types import FunctionType
 from typing import Callable
 
@@ -45,7 +47,7 @@ class Object(metaclass=Repr):
         ## List of child objects
         self.objects = []
         ## List of mesh faces
-        self.faces = []
+        self.faces = set()
         # noinspection PyArgumentList
         self.generate(*args, **kwargs)
 
@@ -59,16 +61,16 @@ class Object(metaclass=Repr):
         for obj in self.objects:
             yield from obj
 
-    def transform(self, point: V3) -> V3:
+    def transform(self, structure: V3 | Line | Face) -> V3:
         """Getting the position of a point relative to parent
 
         Args:
-            point (V3): Vertex position (relative to object position)
+            structure (V3 | Line | Face): 3D structure (relative to object position)
 
         Returns:
-            V3: Vertex position (relative to parent's object position)
+            V3 | Line | Face: Vertex position (relative to parent's object position)
         """
-        return (point >> self.rotation) + self.position
+        return (structure >> self.rotation) + self.position
 
     def load(self, obj: type, *args, **kwargs) -> "Object":
         """Creating an object instance using Object type and its constructor arguments
@@ -91,13 +93,10 @@ class Object(metaclass=Repr):
         """
         raise NotImplementedError("Object generation method was not overridden")
 
-    def face(self, *vertices, inverted: bool = False) -> None:
+    def face(self, *points, **kwargs) -> None:
         """Creating a new face
-
-        Args:
-            inverted (bool, optional): Should the face be inverted? Defaults to False.
         """
-        self.faces.append(vertices if not inverted else vertices[::-1])
+        self.faces.add(Face(points, **kwargs))
 
     def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
         """Printing string representation of object hierarchy

@@ -1,12 +1,13 @@
 ## \file
 # Class for representing a line between two points
-from .Decorators import makeImmutable, addInitRepr
+from .Decorators import makeImmutable, addInitRepr, addCopyCall
 from .Vector import V3
 from typing import Iterator
 
 
 @makeImmutable
 @addInitRepr
+@addCopyCall("a", "b")
 class Line:
     """A line connecting two points.
     """
@@ -31,7 +32,7 @@ class Line:
         Returns:
             bool: True if the line is equal to the other line.
         """
-        if not isinstance(other, Line):
+        if not isinstance(other, self.__class__):
             return False
         return (self.a == other.a and self.b == other.b) or (self.a == other.b and self.b == other.a)
 
@@ -57,3 +58,25 @@ class Line:
         """
         yield self.a
         yield self.b
+
+    def __add__(self, other: V3) -> "Line":
+        """Adding a vector to the line
+
+        Args:
+            other (V3): Vector to add
+
+        Returns:
+            Line: A copy of the line with offset line bounds.
+        """
+        return self(*(point + other for point in self))
+
+    def __rshift__(self, other: float) -> "Line":
+        """Rotating a line by a vector
+
+        Args:
+            other (float): Angle to rotate by
+
+        Returns:
+            Line: A copy of the line with rotated line bounds.
+        """
+        return self(*(point >> other for point in self))

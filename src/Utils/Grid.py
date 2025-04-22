@@ -231,7 +231,7 @@ class Grid:
         ## Object to visualise
         self.obj = obj
 
-    def _transformedFaces(self, obj: "Object", depth: int) -> tuple:
+    def _transformedFaces(self, obj: "Object", depth: int) -> set:
         """Getting all faces found up to the specified depth, transformed
 
         Args:
@@ -239,13 +239,13 @@ class Grid:
             depth (int): Remaining layer depth to go down to
 
         Returns:
-            tuple: Object faces with transformed vertex positions
+            set: Object faces with transformed vertex positions
         """
-        faces = obj.faces
+        faces = set(obj.faces)
         if depth > 0:
             for child in obj.objects:
-                faces += self._transformedFaces(child, depth - 1)
-        return tuple(tuple(map(obj.transform, face)) for face in faces)
+                faces = faces.union(self._transformedFaces(child, depth - 1))
+        return set(map(obj.transform, faces))
 
     def print(self, depth: int = 0) -> None:
         """Printing out a grid
