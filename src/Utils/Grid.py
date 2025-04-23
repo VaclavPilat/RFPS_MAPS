@@ -3,6 +3,8 @@
 from .Decorators import makeImmutable
 from .Colors import NONE, AXIS, TEMPERATURE, lenANSI, BOLD
 from .Vector import V3
+from .Line import Line
+from typing import Iterator
 import math, re
 
 
@@ -82,6 +84,8 @@ class View:
         self.title = title
         ## Matrix of vertex counts for all axis value intersections
         self.vertexCounts = self._countVertices(vertices)
+        ## Matrix of horizontal line counts for all axis value pairs
+        self.lineCounts = self._countLines(lines)
 
     def _countVertices(self, vertices: set) -> tuple:
         """Counting then number of vertices for each axis value intersection
@@ -97,6 +101,37 @@ class View:
                 lambda vertex: self.vertical.match(vertex, v) and self.horizontal.match(vertex, h),
                 vertices
             ))) for h in self.horizontal.values) for v in self.vertical.values)
+
+    def _countLines(self, lines: set) -> tuple:
+        """Counting then number of lines for each axis value pair
+
+        Args:
+            lines (set): Subset of the object's lines
+
+        Returns:
+            tuple: 2D tuple of line counts
+        """
+        lines = set(self._flattenLines(lines))
+        return tuple(tuple(
+            len(list(filter(
+                lambda line: Line(
+                    V3(**{self.horizontal.name: h1, self.vertical.name: v}),
+                    V3(**{self.horizontal.name: h2, self.vertical.name: v})
+                ) in line,
+                lines
+            ))) for h1, h2 in zip(self.horizontal.values, self.horizontal.values[1:])) for v in self.vertical.values)
+
+    def _flattenLines(self, lines: set) -> Iterator[Line]:
+        """Flattening lines (removing their third dimension)
+
+        Args:
+            lines (set): Subset of the object's lines
+        """
+        for line in lines:
+            try:
+                yield line(**{({"x", "y", "z"} - {self.horizontal.name, self.vertical.name}).pop(): 0})
+            except ValueError:
+                pass
 
     def _axisInfo(self) -> tuple:
         """Getting out a diagram of axis orientation

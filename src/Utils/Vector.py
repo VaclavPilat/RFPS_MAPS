@@ -7,7 +7,6 @@ import math
 @addInitRepr
 @makeImmutable
 @addCopyCall("x", "y", "z")
-## \todo Add multiple axis rotation: >>> V3() >> V3()
 # \todo Implement rotations for ANY degree values
 # \todo Use Decimal everywhere with float trap set to True
 class V3:
@@ -42,7 +41,7 @@ class V3:
 
         Returns:
             Iterator representing vector values
-        
+
         Examples:
             >>> list(V3(1, 2, 3))
             [1, 2, 3]
@@ -188,6 +187,8 @@ class V3:
             return V3(*([a / other for a in self]))
         raise ValueError("Other value is not a number")
 
+    ## \note Currently only supports float as an argument
+    # \todo Add multiple axis rotation: >>> V3() >> V3()
     def __rshift__(self, angle: float) -> "V3":
         """Rotating the vector on Z axis, clockwise
 
@@ -217,6 +218,7 @@ class V3:
             return V3(-self.y, self.x, self.z)
         return self
 
+    ## \note Same behaviour as __rshift__
     def __lshift__(self, angle: float) -> "V3":
         """Rotating the vector on Z axis, counter-clockwise
 
@@ -256,6 +258,7 @@ class V3:
         """
         return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
+    ## \todo Either change behaviour or remove
     def __contains__(self, other: "V3") -> bool:
         """Checking whether a vector "is somewhat heading the same way" as the other one
 

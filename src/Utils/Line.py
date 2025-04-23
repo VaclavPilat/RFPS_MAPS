@@ -7,7 +7,6 @@ from typing import Iterator
 
 @makeImmutable
 @addInitRepr
-@addCopyCall("a", "b")
 class Line:
     """A line connecting two points.
     """
@@ -80,3 +79,14 @@ class Line:
             Line: A copy of the line with rotated line bounds.
         """
         return self(*(point >> other for point in self))
+
+    ## \note This method only supports comparisons between lines that are parallel to axis.
+    def __contains__(self, item: "Line") -> bool:
+        """Checking whether a line is contained by this one.
+
+        Args:
+            item (Line): Line to check
+
+        Returns:
+            bool: True if the line is contained by this one.
+        """
