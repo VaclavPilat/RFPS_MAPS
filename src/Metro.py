@@ -14,19 +14,8 @@ if __name__ == "__main__":
 from Utils.Vector import V3
 from Utils.Object import createObjectSubclass
 from Utils.Tile import Tile, Box, Anchor
-from Utils.Decorators import makeImmutable
-
-
-@makeImmutable
-class Settings:
-    """Class for containing readonly object settings
-    """
-
-    def __init__(self, **kwargs) -> None:
-        """Initialising a Settings instance with kwarg values
-        """
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+from Utils.Helpers import Settings
+from Utils.Grid import Grid
 
 
 ## Setting constants used in the Metro map
@@ -145,9 +134,9 @@ def Metro(self) -> None:
     """
     self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs,
               G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
-    self.load(UnderpassEntrance, "Underpass slope entrance",
+    Grid(self.load(UnderpassEntrance, "Underpass slope entrance",
               Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD,
-                  rotation=180), C=Slopes, S=METRO.USLC, R=METRO.USLR).printGrids()
+                  rotation=180), C=Slopes, S=METRO.USLC, R=METRO.USLR)).print()
 
 
 if __name__ == "__main__":
@@ -159,6 +148,5 @@ if __name__ == "__main__":
         Setup.purgeExistingObjects()
     metro = Metro("Metro station")
     metro.printHierarchy()
-    #metro.printGrids(1)
     if BLENDER:
         metro.build()

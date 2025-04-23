@@ -1,6 +1,6 @@
 ## \file
 # Line implementation tests
-from src.Utils.Line import Line
+from src.Utils.Object import Line
 from src.Utils.Vector import V3
 import unittest
 

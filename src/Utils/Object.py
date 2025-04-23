@@ -1,26 +1,174 @@
 ## \file
-# Classes for creating objects
-from .Line import Line
-from .Vector import V3
-from .Decorators import addInitRepr, makeImmutable
+# Classes for representing mesh data
 from .Colors import HIERARCHY, NONE
-from .Grid import Grid
-from .Face import Face
+from .Helpers import Repr
+from .Vector import V3
+from .Decorators import makeImmutable, addInitRepr, addCopyCall
+
+from typing import Iterator, Callable
 from types import FunctionType
-from typing import Callable
 
 
-class Repr(type):
-    """Custom type for having a __repr__ method that returns type name
+@makeImmutable
+@addInitRepr
+class Line:
+    """A line connecting two points.
     """
 
-    def __repr__(cls) -> str:
-        """Returns name of current type
+    def __init__(self, a: V3, b: V3) -> None:
+        """Initialize a line.
+
+        Args:
+            a (V3): First point of the line.
+            b (V3): Second point of the line.
+        """
+        if a == b:
+            raise ValueError("Points must be different")
+        ## First point
+        self.a = a
+        ## Second point
+        self.b = b
+
+    def __eq__(self, other: "Line") -> bool:
+        """Checking line equality
 
         Returns:
-            str: Name of the current type
+            bool: True if the line is equal to the other line.
         """
-        return cls.__name__
+        if not isinstance(other, self.__class__):
+            return False
+        return (self.a == other.a and self.b == other.b) or (self.a == other.b and self.b == other.a)
+
+    def __hash__(self) -> int:
+        """Hashing a line instance.
+
+        Returns:
+            int: The hash value of the instance.
+        """
+        return hash(frozenset((self.a, self.b)))
+
+    def __call__(self, *args, **kwargs) -> "Line":
+        """Making a copy of a line.
+
+        Returns:
+            Line: A copy of the line with altered params.
+        """
+        # noinspection PyCallingNonCallable
+        return Line(self.a(*args, **kwargs), self.b(*args, **kwargs))
+
+    def __iter__(self) -> Iterator[V3]:
+        """Iterating over line points
+        """
+        yield self.a
+        yield self.b
+
+    def __add__(self, other: V3) -> "Line":
+        """Adding a vector to the line
+
+        Args:
+            other (V3): Vector to add
+
+        Returns:
+            Line: A copy of the line with offset line bounds.
+        """
+        return self(*(point + other for point in self))
+
+    def __rshift__(self, other: float) -> "Line":
+        """Rotating a line by a vector
+
+        Args:
+            other (float): Angle to rotate by
+
+        Returns:
+            Line: A copy of the line with rotated line bounds.
+        """
+        return self(*(point >> other for point in self))
+
+    ## \note This method only supports comparisons between lines that are parallel to axis.
+    def __contains__(self, line: "Line") -> bool:
+        """Checking whether a line is contained by this one.
+
+        Args:
+            line (Line): Line to check
+
+        Returns:
+            bool: True if the line is contained by this one.
+        """
+        # Quick comparison in case both lines are equal
+        if self == line:
+            return True
+        # Checking if lines are parallel to axis
+        if len(set(self.a) & set(self.b) & set(line.a) & set(line.b)) != 2:
+            return False
+        return False
+
+
+# noinspection PyCallingNonCallable
+@makeImmutable
+@addInitRepr
+@addCopyCall("points")
+class Face:
+    """Class for representing a face
+    """
+
+    def __init__(self, points: tuple) -> None:
+        """Initializing a Face instance
+        """
+        ## Vertices making up the face
+        if len(points) < 3:
+            raise ValueError("Face must have at least 3 vertices")
+        if len(points) != len(set(points)):
+            raise ValueError("Face cannot have duplicate vertices")
+        self.points = points
+
+    def __iter__(self) -> Iterator[Line]:
+        """Iterating over face edges
+        """
+        for i in range(len(self.points)):
+            yield Line(self.points[i - 1], self.points[i])
+
+    def __eq__(self, other: "Face") -> bool:
+        """Comparing two faces
+
+        Args:
+            other (Face): The other face
+
+        Returns:
+            bool: True if the two faces are equal
+        """
+        if not isinstance(other, self.__class__):
+            return False
+        return set(self) == set(other)
+
+    def __hash__(self) -> int:
+        """Hashing lines making up the face
+
+        Returns:
+            int: Hash code
+        """
+        return hash(frozenset(self))
+
+    def __add__(self, other: V3) -> "Face":
+        """Incrementing face bounds by a vector
+
+        Args:
+            other (V3): Vector to increment face bounds by
+
+        Returns:
+            Face: Incremented face
+        """
+        return self(tuple(point + other for point in self.points))
+
+    def __rshift__(self, other: float) -> "Face":
+        """Rotating a face by an amount of degrees
+
+        Args:
+            other (float): Angle to rotate face by
+
+        Returns:
+            Face: Rotated face
+        """
+        return self(tuple(point >> other for point in self.points))
 
 
 @addInitRepr
@@ -113,11 +261,6 @@ class Object(metaclass=Repr):
             newCurrent = f"{children}{color}{'┣' if last else '┗'}━━ "
             newChildren = f"{children}{color}{'┃' if last else ' '}   "
             child.printHierarchy(newCurrent, newChildren, layer + 1)
-
-    def printGrids(self, *args, **kwargs) -> None:
-        """Printing out grids representing the current object
-        """
-        Grid(self).print(*args, **kwargs)
 
 
 def createObjectSubclass(cls: type = Object) -> Callable[[FunctionType], type]:
