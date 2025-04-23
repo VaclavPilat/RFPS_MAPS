@@ -16,10 +16,10 @@ def create(self) -> "bpy mesh":
     bm = bmesh.new()
     vertices = {}
     for face in self.faces:
-        for vert in face:
+        for vert in face.points:
             if vert not in vertices:
                 vertices[vert] = bm.verts.new(tuple(vert))
-        bm.faces.new([vertices[vert] for vert in face])
+        bm.faces.new([vertices[vert] for vert in face.points])
     bm.to_mesh(mesh)
     return mesh
 

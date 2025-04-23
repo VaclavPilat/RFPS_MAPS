@@ -81,12 +81,19 @@ class Line:
         return self(*(point >> other for point in self))
 
     ## \note This method only supports comparisons between lines that are parallel to axis.
-    def __contains__(self, item: "Line") -> bool:
+    def __contains__(self, line: "Line") -> bool:
         """Checking whether a line is contained by this one.
 
         Args:
-            item (Line): Line to check
+            line (Line): Line to check
 
         Returns:
             bool: True if the line is contained by this one.
         """
+        # Quick comparison in case both lines are equal
+        if self == line:
+            return True
+        # Checking if lines are parallel to axis
+        if len(set(self.a) & set(self.b) & set(line.a) & set(line.b)) != 2:
+            return False
+        return False
