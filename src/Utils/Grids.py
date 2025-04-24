@@ -82,6 +82,7 @@ class View:
         self.vertexCounts = self._countVertices(vertices)
         ## Matrix of horizontal line counts for all axis value pairs
         self.lineCounts = self._countLines(lines)
+        print(self.lineCounts)
 
     def _countVertices(self, vertices: set) -> tuple:
         """Counting then number of vertices for each axis value intersection
@@ -107,7 +108,7 @@ class View:
         Returns:
             tuple: 2D tuple of line counts
         """
-        lines = set(self._flattenLines(lines))
+        lines = tuple(self._flattenLines(lines))
         return tuple(tuple(
             len(list(filter(
                 lambda line: Mesh.Line(

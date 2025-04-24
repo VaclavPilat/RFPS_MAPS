@@ -135,7 +135,7 @@ def Metro(self) -> None:
               G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
     Grids.Grid(self.load(UnderpassEntrance, "Underpass slope entrance",
               Tiles.Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD,
-                  rotation=180), C=Slopes, S=METRO.USLC, R=METRO.USLR)).print()
+                  rotation=180), C=Slopes, S=METRO.USLC, R=METRO.USLR)).print(1)
 
 
 if __name__ == "__main__":
