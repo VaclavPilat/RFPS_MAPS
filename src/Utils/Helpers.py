@@ -1,6 +1,6 @@
 ## \file
 # Classes and various other small helpful constructs
-from .Decorators import makeImmutable
+from . import Decorators
 
 
 class Repr(type):
@@ -16,7 +16,7 @@ class Repr(type):
         return cls.__name__
 
 
-@makeImmutable
+@Decorators.makeImmutable
 class Settings:
     """Class for containing readonly object settings
     """

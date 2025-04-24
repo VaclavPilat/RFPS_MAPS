@@ -1,8 +1,6 @@
 ## \file
 # Custom decorator functions for data classes.
 # Method injection is preferred over subclassing
-from types import FunctionType
-from typing import Callable
 
 
 def addInitRepr(cls: type) -> type:
@@ -84,13 +82,13 @@ def makeImmutable(cls: type) -> type:
 
 
 # noinspection PyCallingNonCallable
-def addCopyCall(*fields) -> Callable[[type], type]:
+def addCopyCall(*fields):
     """Creating a decorator the adds an automatic __call__ implementation.
     This function takes field names in the same order as constructor arguments.
     The new __call__ implementation creates a new instance from updated field values.
 
     Returns:
-        func: Created class decorator function
+        Class decorator
     
     Examples:
         >>> @addCopyCall("value")
@@ -121,12 +119,12 @@ def addCopyCall(*fields) -> Callable[[type], type]:
 
 
 # noinspection PyTypeChecker
-def defaultKwargsValues(*fields) -> Callable[[FunctionType], FunctionType]:
+def defaultKwargsValues(*fields):
     """Creating a decorator that adds default values for kwargs from self fields.
     Providing new values in meant to be done only using kwargs.
 
     Returns:
-        func: Decorator that adds default values to kwargs
+        Decorator that adds default values to kwargs
     
     Examples:
         >>> class Test:
@@ -142,7 +140,7 @@ def defaultKwargsValues(*fields) -> Callable[[FunctionType], FunctionType]:
         '20'
     """
 
-    def decorator(method: FunctionType):
+    def decorator(method):
         def wrapper(self, *args, **kwargs):
             data = {field: getattr(self, field) for field in fields}
             data.update(**kwargs)

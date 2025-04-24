@@ -1,15 +1,10 @@
 ## \file
 # Functionality for rendering Object structure in console
-from .Decorators import makeImmutable
-from .Colors import NONE, AXIS, TEMPERATURE, lenANSI, BOLD
-from .Vector import V3
-from .Mesh import Object, Face, Line
-
-from typing import Iterator
+from . import Decorators, Colors, Mesh, Vector
 import math, re
 
 
-@makeImmutable
+@Decorators.makeImmutable
 class Axis:
     """Class for containing axis information
     """
@@ -46,11 +41,11 @@ class Axis:
         ## Most amount of space a single axis value can take up
         self.just = max(map(lambda value: len(str(value)), self.labels))
 
-    def match(self, vertex: V3, value: float) -> bool:
+    def match(self, vertex: Vector.V3, value: float) -> bool:
         """Checking whether an axis value "matches" a vertex point
 
         Args:
-            vertex (V3): Vertex to check
+            vertex (Vector.V3): Vertex to check
             value (float): Value on the current axis
 
         Returns:
@@ -61,7 +56,7 @@ class Axis:
 
 # noinspection PyUnresolvedReferences
 ## \todo Highlight lines between vertices (horizontal & vertical)
-@makeImmutable
+@Decorators.makeImmutable
 class View:
     """Class for rendering 3D objects as 2D views in console
     """
@@ -115,14 +110,14 @@ class View:
         lines = set(self._flattenLines(lines))
         return tuple(tuple(
             len(list(filter(
-                lambda line: Line(
-                    V3(**{self.horizontal.name: h1, self.vertical.name: v}),
-                    V3(**{self.horizontal.name: h2, self.vertical.name: v})
+                lambda line: Mesh.Line(
+                    Vector.V3(**{self.horizontal.name: h1, self.vertical.name: v}),
+                    Vector.V3(**{self.horizontal.name: h2, self.vertical.name: v})
                 ) in line,
                 lines
             ))) for h1, h2 in zip(self.horizontal.values, self.horizontal.values[1:])) for v in self.vertical.values)
 
-    def _flattenLines(self, lines: set) -> Iterator[Line]:
+    def _flattenLines(self, lines: set):
         """Flattening lines (removing their third dimension)
 
         Args:
@@ -140,10 +135,10 @@ class View:
         Returns:
             tuple: 3 row strings representing selected axis
         """
-        first = (" ", f"{AXIS[self.vertical.name]}{self.vertical.name.upper()}{NONE}", "     ")
+        first = (" ", f"{Colors.AXIS[self.vertical.name]}{self.vertical.name.upper()}{Colors.NONE}", "     ")
         second = (" ", "┃", "     ")
         third = (f"╺{'━━╋'[::(-1, 1)[self.horizontal.reversed]]}╸",
-                 f"{AXIS[self.horizontal.name]}{self.horizontal.name.upper()}{NONE}", " ")
+                 f"{Colors.AXIS[self.horizontal.name]}{self.horizontal.name.upper()}{Colors.NONE}", " ")
         rows = tuple(map(lambda row: "".join(row[::(1, -1)[self.horizontal.reversed]]), (first, second, third)))
         return rows[::(-1, 1)[self.vertical.reversed]]
 
@@ -154,7 +149,7 @@ class View:
         Returns:
             tuple: Colors for vertex counts as a string in a tuple
         """
-        return (" ".join(TEMPERATURE[i] + str(i + 1) for i in range(len(TEMPERATURE))) + "+" + NONE,)
+        return (" ".join(Colors.TEMPERATURE[i] + str(i + 1) for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,)
 
     def _printLegend(self) -> None:
         """Printing out grid legend
@@ -162,15 +157,14 @@ class View:
         # Variables
         axis = self._axisInfo()
         info = (
-                   #f"{BOLD}{self.obj.name}{NONE}",
-                   f"{BOLD}{sum(sum(row) for row in self.vertexCounts)}{NONE} vertices",
+                   f"{Colors.BOLD}{sum(sum(row) for row in self.vertexCounts)}{Colors.NONE} vertices",
                    self.title
                ) + self._colorLegend()
         rows = (len(axis) + 1) // 2
         cols = math.ceil(len(info) / rows)
-        lengths = [max(map(lenANSI, info[i * rows:(i + 1) * rows])) for i in range(cols)]
+        lengths = [max(map(Colors.lenANSI, info[i * rows:(i + 1) * rows])) for i in range(cols)]
         # Printing out top border
-        print(f"╭{'─' * lenANSI(axis[0])}", end="")
+        print(f"╭{'─' * Colors.lenANSI(axis[0])}", end="")
         for c in range(cols):
             print(f"┬{'─' * (lengths[c] + 2)}", end="")
         print("╮")
@@ -181,7 +175,7 @@ class View:
                 for c in range(cols):
                     index = c * rows + r // 2
                     if len(info) > index:
-                        print(f"│ {info[index] + ' ' * (lengths[c] - lenANSI(info[index]))} ", end="")
+                        print(f"│ {info[index] + ' ' * (lengths[c] - Colors.lenANSI(info[index]))} ", end="")
                     else:
                         print(f"│ {' ' * lengths[c]} ", end="")
                 print("│")
@@ -190,7 +184,7 @@ class View:
                     print(f"{'┼' if c else '├'}{'─' * (lengths[c] + 2)}", end="")
                 print("┤" if info else "│")
         # Printing out bottom border
-        print(f"╰{'─' * lenANSI(axis[0])}", end="")
+        print(f"╰{'─' * Colors.lenANSI(axis[0])}", end="")
         for c in range(cols):
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
@@ -207,7 +201,7 @@ class View:
         """
         count = self.vertexCounts[vertical][horizontal]
         if count:
-            return f"{TEMPERATURE[min(count - 1, len(TEMPERATURE) - 1)]}╋{NONE}"
+            return f"{Colors.TEMPERATURE[min(count - 1, len(Colors.TEMPERATURE) - 1)]}╋{Colors.NONE}"
         return "┼"
 
     def _printVertices(self) -> None:
@@ -254,7 +248,7 @@ class View:
 
 
 # noinspection PyUnresolvedReferences
-@makeImmutable
+@Decorators.makeImmutable
 class Grid:
     """Class for processing requests for the rendering of 3D objects in console
     """

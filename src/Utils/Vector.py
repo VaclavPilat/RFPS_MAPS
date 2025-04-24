@@ -1,13 +1,12 @@
 ## \file
 # Implementations of vector classes
-from .Decorators import addInitRepr, makeImmutable, addCopyCall
-
+from . import Decorators
 import math
 
 
-@addInitRepr
-@makeImmutable
-@addCopyCall("x", "y", "z")
+@Decorators.addInitRepr
+@Decorators.makeImmutable
+@Decorators.addCopyCall("x", "y", "z")
 ## \todo Implement rotations for ANY degree values
 # \todo Use Decimal everywhere with float trap set to True
 class V3:

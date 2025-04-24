@@ -1,21 +1,15 @@
 ## \file
 # Classes for representing mesh data
-from .Colors import HIERARCHY, NONE
-from .Helpers import Repr
-from .Vector import V3
-from .Decorators import makeImmutable, addInitRepr, addCopyCall
-
-from typing import Iterator, Callable
-from types import FunctionType
+from . import Decorators, Helpers, Colors, Vector
 
 
-@makeImmutable
-@addInitRepr
+@Decorators.makeImmutable
+@Decorators.addInitRepr
 class Line:
     """A line connecting two points.
     """
 
-    def __init__(self, a: V3, b: V3) -> None:
+    def __init__(self, a: Vector.V3, b: Vector.V3) -> None:
         """Initialize a line.
 
         Args:
@@ -48,7 +42,7 @@ class Line:
         return hash(frozenset((self.a, self.b)))
 
     def __call__(self, *args, **kwargs) -> "Line":
-        """Making a copy of a line.
+        """Making a copy of a line with altered arguments.
 
         Returns:
             Line: A copy of the line with altered params.
@@ -56,14 +50,14 @@ class Line:
         # noinspection PyCallingNonCallable
         return Line(self.a(*args, **kwargs), self.b(*args, **kwargs))
 
-    def __iter__(self) -> Iterator[V3]:
-        """Iterating over line points
+    def __iter__(self):
+        """Iterating over line bounds
         """
         yield self.a
         yield self.b
 
-    def __add__(self, other: V3) -> "Line":
-        """Adding a vector to the line
+    def __add__(self, other: Vector.V3) -> "Line":
+        """Incrementing line bounds by a vector
 
         Args:
             other (V3): Vector to add
@@ -104,9 +98,9 @@ class Line:
 
 
 # noinspection PyCallingNonCallable
-@makeImmutable
-@addInitRepr
-@addCopyCall("points")
+@Decorators.makeImmutable
+@Decorators.addInitRepr
+@Decorators.addCopyCall("points")
 class Face:
     """Class for representing a face
     """
@@ -121,7 +115,7 @@ class Face:
             raise ValueError("Face cannot have duplicate vertices")
         self.points = points
 
-    def __iter__(self) -> Iterator[Line]:
+    def __iter__(self):
         """Iterating over face edges
         """
         for i in range(len(self.points)):
@@ -148,7 +142,7 @@ class Face:
         """
         return hash(frozenset(self))
 
-    def __add__(self, other: V3) -> "Face":
+    def __add__(self, other: Vector.V3) -> "Face":
         """Incrementing face bounds by a vector
 
         Args:
@@ -171,14 +165,14 @@ class Face:
         return self(tuple(point >> other for point in self.points))
 
 
-@addInitRepr
-@makeImmutable
+@Decorators.addInitRepr
+@Decorators.makeImmutable
 ## \todo Refactor & add docs
-class Object(metaclass=Repr):
+class Object(metaclass=Helpers.Repr):
     """Class for containing own mesh and/or other objects
     """
 
-    def __init__(self, name: str = "New object", position: V3 = V3.ZERO, rotation: float = 0, *args, **kwargs) -> None:
+    def __init__(self, name: str = "New object", position: Vector.V3 = Vector.V3.ZERO, rotation: float = 0, *args, **kwargs) -> None:
         """Creating a new object
 
         Args:
@@ -209,14 +203,14 @@ class Object(metaclass=Repr):
         for obj in self.objects:
             yield from obj
 
-    def transform(self, structure: V3 | Line | Face) -> V3:
-        """Getting the position of a point relative to parent
+    def transform(self, structure: Face) -> Face:
+        """Transforming structure positions to be relative to
 
         Args:
-            structure (V3 | Line | Face): 3D structure (relative to object position)
+            structure (Face): 3D structure (relative to object position)
 
         Returns:
-            V3 | Line | Face: Vertex position (relative to parent's object position)
+            Face: Vertex position (relative to parent's object position)
         """
         return (structure >> self.rotation) + self.position
 
@@ -254,26 +248,26 @@ class Object(metaclass=Repr):
             children (str, optional): Line indent for child items. Defaults to "".
             layer (int, optional): Current layer index. Defaults to 0.
         """
-        print(f"{current}{NONE}{repr(self)}")
+        print(f"{current}{Colors.NONE}{repr(self)}")
         for index, child in enumerate(self.objects):
-            color = HIERARCHY[layer % len(HIERARCHY)]
+            color = Colors.HIERARCHY[layer % len(Colors.HIERARCHY)]
             last = index < len(self.objects) - 1
             newCurrent = f"{children}{color}{'┣' if last else '┗'}━━ "
             newChildren = f"{children}{color}{'┃' if last else ' '}   "
             child.printHierarchy(newCurrent, newChildren, layer + 1)
 
 
-def createObjectSubclass(cls: type = Object) -> Callable[[FunctionType], type]:
+def createObjectSubclass(cls: type = Object):
     """Decorator for creating an Object subclass from a generator function
 
     Args:
         cls (type, optional): Object or its subclass type. Defaults to Object.
 
     Returns:
-        type: Decorator for making a subclass of the provided class type
+        Decorator for making a subclass of the provided class type
     """
 
-    def decorator(func: FunctionType) -> type:
+    def decorator(func) -> type:
         class Wrapped(cls):
             pass
 

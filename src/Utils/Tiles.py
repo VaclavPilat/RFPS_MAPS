@@ -1,13 +1,10 @@
 ## \file
 # Implementation of a Tile mesh object
-from .Mesh import Object
-from .Vector import V3
-from .Decorators import makeImmutable, addInitRepr
-
-from enum import Enum
+from . import Decorators, Mesh, Vector
+import enum
 
 
-class Pivot(Enum):
+class Pivot(enum.Enum):
     """Enum for containing all pivot types of a Tile.
 
     Pivot is the origin point of a Tile instance.
@@ -26,18 +23,18 @@ class Pivot(Enum):
 
 
 # noinspection PyCallingNonCallable
-@makeImmutable
+@Decorators.makeImmutable
 class Bounds:
     """Class for representing Tile bounds
     """
 
-    def __init__(self, origin: V3, TL: V3, BR: V3, rotation: int = 0) -> None:
+    def __init__(self, origin: Vector.V3, TL: Vector.V3, BR: Vector.V3, rotation: int = 0) -> None:
         """Initialising Tile boundaries
 
         Args:
-            origin (V3): Tile origin (pivot) point (relative to parent's origin)
-            TL (V3): Top left tile corner (relative to parent's origin)
-            BR (V3): Bottom right tile corner (relative to parent's origin)
+            origin (Vector.V3): Tile origin (pivot) point (relative to parent's origin)
+            TL (Vector.V3): Top left tile corner (relative to parent's origin)
+            BR (Vector.V3): Bottom right tile corner (relative to parent's origin)
             rotation (int, optional): Rotation index. Defaults to 0.
         """
         ## Tile origin (pivot) point (relative to parent's origin)
@@ -60,28 +57,28 @@ class Bounds:
         self.height = abs(self.TL - self.BL)
         assert self.height > 0, "Tile height has to be positive"
 
-    def rotate(self, point: V3) -> V3:
+    def rotate(self, point: Vector.V3) -> Vector.V3:
         """Rotating a vertex point around tile pivot
 
         Args:
-            point (V3): Vertex position to rotate (relative to origin)
+            point (Vector.V3): Vertex position to rotate (relative to origin)
 
         Returns:
-            V3: Rotated vertex position (relative to origin)
+            Vector.V3: Rotated vertex position (relative to origin)
         """
         return point >> self.rotation
 
 
-@addInitRepr
+@Decorators.addInitRepr
 class Box(Bounds):
     """Class for representing a bounding box of a Tile by its size
     """
 
-    def __init__(self, origin: V3, width: float, height: float, rotation: int = 0, pivot: Pivot = Pivot.TOP_LEFT) -> None:
+    def __init__(self, origin: Vector.V3, width: float, height: float, rotation: int = 0, pivot: Pivot = Pivot.TOP_LEFT) -> None:
         """Initialising a bounding box
 
         Args:
-            origin (V3): Tile origin (pivot) point (relative to parent's origin)
+            origin (Vector.V3): Tile origin (pivot) point (relative to parent's origin)
             width (float): Tile width (in meters)
             height (float): Tile height (in meters)
             rotation (int, optional): Rotation index. Defaults to 0.
@@ -89,24 +86,24 @@ class Box(Bounds):
         """
         if pivot == Pivot.TOP_LEFT:
             TL = origin
-            BR = TL + V3.RIGHT * width + V3.BACKWARD * height
+            BR = TL + Vector.V3.RIGHT * width + Vector.V3.BACKWARD * height
         else:
             raise ValueError("Unexpected Pivot value")
         # noinspection PyArgumentList
         super().__init__(origin, TL, BR, rotation)
 
 
-@addInitRepr
+@Decorators.addInitRepr
 class Anchor(Bounds):
     """Class for representing anchor bounds of a Tile by its corner positions
     """
 
-    def __init__(self, TL: V3, BR: V3, rotation: int = 0, pivot: Pivot = Pivot.TOP_LEFT) -> None:
+    def __init__(self, TL: Vector.V3, BR: Vector.V3, rotation: int = 0, pivot: Pivot = Pivot.TOP_LEFT) -> None:
         """Initialising anchor bounds
 
         Args:
-            TL (V3): Top left tile corner (relative to parent's origin)
-            BR (V3): Bottom right tile corner (relative to parent's origin)
+            TL (Vector.V3): Top left tile corner (relative to parent's origin)
+            BR (Vector.V3): Bottom right tile corner (relative to parent's origin)
             rotation (int, optional): Rotation index. Defaults to 0.
             pivot (Pivot, optional): Pivot location. Defaults to Pivot.TOP_LEFT.
         """
@@ -118,8 +115,8 @@ class Anchor(Bounds):
         super().__init__(origin, TL, BR, rotation)
 
 
-@addInitRepr
-class Tile(Object):
+@Decorators.addInitRepr
+class Tile(Mesh.Object):
     """Base class for all Metro Objects
     """
 
