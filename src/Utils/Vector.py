@@ -312,6 +312,14 @@ class V3:
             self.x * other.y - self.y * other.x
         )
 
+    def __bool__(self) -> bool:
+        """Checking whether the vector is non-zero
+
+        Returns:
+            bool: True if the vector is not equal to V3(0, 0, 0)
+        """
+        return self != V3()
+
 
 ## Zero-filled vector, equals to V3(0, 0, 0)
 V3.ZERO = V3()

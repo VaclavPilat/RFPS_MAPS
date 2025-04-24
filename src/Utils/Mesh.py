@@ -91,10 +91,10 @@ class Line:
         # Quick comparison in case both lines are equal
         if self == line:
             return True
-        # Checking if lines are parallel to axis
-        if len(set(self.a) & set(self.b) & set(line.a) & set(line.b)) != 2:
+        # Checking if both points "belong" on the line defined by self bounds
+        if (self.a - self.b) @ (self.a - line.a) or (self.a - self.b) @ (self.a - line.b):
             return False
-        return False
+        return True
 
 
 # noinspection PyCallingNonCallable
