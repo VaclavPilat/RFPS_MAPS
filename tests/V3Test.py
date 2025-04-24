@@ -91,3 +91,11 @@ class V3Test(unittest.TestCase):
         self.assertTrue(V3(z=5) in V3(0, -5, 10))
         self.assertTrue(V3(5, 10, 15) in V3(5, 10, 15))
         self.assertTrue(V3(5, 10, 15) not in V3(5, -10, 15))
+
+    def test_cross(self) -> None:
+        """Testing __matmul__ implementation
+        """
+        self.assertEqual(V3.ZERO @ V3.ZERO, V3.ZERO)
+        self.assertEqual(V3(1, 2, 3) @ V3(1, 2, 3), V3.ZERO)
+        self.assertEqual(V3(1, 2, 3) @ V3(-1, -2, -3), V3.ZERO)
+        self.assertNotEqual(V3(1, 2, 3) @ V3(4, 5, 6), V3.ZERO)

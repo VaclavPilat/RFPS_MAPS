@@ -289,6 +289,29 @@ class V3:
                     return False
         return True
 
+    def __matmul__(self, other: "V3") -> "V3":
+        """Calculating the cross product of two vectors
+
+        Args:
+            other (V3): Other vector
+
+        Returns:
+            V3: Cross product of two vectors
+
+        Examples:
+            >>> V3(1, 2, 3) @ V3(1, 2, 3)
+            V3(0, 0, 0)
+            >>> V3(1, 2, 3) @ V3(4, 5, 6)
+            V3(-3, 6, -3)
+            >>> V3(1, 2, 3) @ V3(-1, -2, -3)
+            V3(0, 0, 0)
+        """
+        return V3(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x
+        )
+
 
 ## Zero-filled vector, equals to V3(0, 0, 0)
 V3.ZERO = V3()
