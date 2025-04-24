@@ -11,15 +11,13 @@ if __name__ == "__main__":
             sys.path.append(directory)
     except ImportError:
         BLENDER = False
+
+from Utils import Mesh, Tiles, Helpers, Grids
 from Utils.Vector import V3
-from Utils.Mesh import createObjectSubclass
-from Utils.Tiles import Tile, Box, Anchor
-from Utils.Helpers import Settings
-from Utils.Grids import Grid
 
 
 ## Setting constants used in the Metro map
-METRO = Settings(
+METRO = Helpers.Settings(
     UECH=0.1,  # Underpass entrance curb height (in meters)
     UECW=0.3,  # Underpass entrance curb width (in meters)
     UEWD=3,  # Underpass entrance width (in meters)
@@ -36,8 +34,8 @@ METRO = Settings(
 )
 
 
-# noinspection PyIncorrectDocstring
-@createObjectSubclass(Tile)
+# noinspection PyIncorrectDocstring,PyPep8Naming
+@Mesh.createObjectSubclass(Tiles.Tile)
 def Stairs(self, D: float, G: int, H: float, L: float) -> None:
     """Generating multiple flights of stairs with resting places in between
 
@@ -69,8 +67,8 @@ def Stairs(self, D: float, G: int, H: float, L: float) -> None:
         TL, BL = (TL2, BL2)
 
 
-# noinspection PyIncorrectDocstring
-@createObjectSubclass(Tile)
+# noinspection PyIncorrectDocstring,PyPep8Naming
+@Mesh.createObjectSubclass(Tiles.Tile)
 def Slopes(self, D: float, S: int, R: float) -> None:
     """Generating multiple (wheelchair accessible) slopes with resting places in between
 
@@ -98,8 +96,8 @@ def Slopes(self, D: float, S: int, R: float) -> None:
         TL, BL = (TL1, BL1)
 
 
-# noinspection PyIncorrectDocstring
-@createObjectSubclass(Tile)
+# noinspection PyIncorrectDocstring,PyPep8Naming
+@Mesh.createObjectSubclass(Tiles.Tile)
 def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     """Generating an underpass entrance
 
@@ -125,17 +123,18 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     self.face(TRI1, TLI1, TLI, TRI)
     # Generating descending mesh
     if C is not None:
-        self.load(C, f"Underpass {str(C).lower()}", Anchor(TLI, BRI), D=METRO.UHDP + METRO.UHHG, **kwargs)
+        self.load(C, f"Underpass {str(C).lower()}", Tiles.Anchor(TLI, BRI), D=METRO.UHDP + METRO.UHHG, **kwargs)
 
 
-@createObjectSubclass()
+# noinspection PyUnresolvedReferences
+@Mesh.createObjectSubclass()
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(UnderpassEntrance, "Underpass stair entrance", Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs,
+    self.load(UnderpassEntrance, "Underpass stair entrance", Tiles.Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs,
               G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
-    Grid(self.load(UnderpassEntrance, "Underpass slope entrance",
-              Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD,
+    Grids.Grid(self.load(UnderpassEntrance, "Underpass slope entrance",
+              Tiles.Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD,
                   rotation=180), C=Slopes, S=METRO.USLC, R=METRO.USLR)).print()
 
 
