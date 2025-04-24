@@ -51,3 +51,18 @@ class LineTest(unittest.TestCase):
         """
         self.assertEqual(Line(V3.RIGHT * 2, V3.FORWARD * 3) >> 90, Line(V3.BACKWARD * 2, V3.RIGHT * 3))
         self.assertEqual(Line(V3.ONE * 2, V3.LEFT * 3) >> 360, Line(V3.LEFT * 3, V3.ONE * 2))
+
+    def test_containment(self) -> None:
+        """Testing Line containment
+        """
+        # Negative cases
+        self.assertTrue(Line(V3.LEFT, V3.RIGHT * 3) not in Line(V3.ZERO, V3.RIGHT * 2))
+        self.assertTrue(Line(V3.ZERO, V3.ONE) + V3.UP not in Line(V3.ZERO, V3.ONE))
+        self.assertTrue(Line(V3.FORWARD, V3.ONE) not in Line(V3.LEFT, V3.RIGHT))
+        self.assertTrue(Line(V3.LEFT, V3.ZERO) not in Line(V3.ZERO, V3.RIGHT))
+        # Positive cases
+        self.assertTrue(Line(V3.ZERO, V3.RIGHT * 2) in Line(V3.ZERO, V3.RIGHT * 2))
+        self.assertTrue(Line(V3.LEFT, V3.ZERO) in Line(V3.ZERO, V3.LEFT))
+        self.assertTrue(Line(V3.LEFT, V3.ZERO) in Line(V3.LEFT, V3.RIGHT))
+        self.assertTrue(Line(V3.RIGHT, V3.ZERO) in Line(V3.LEFT, V3.RIGHT))
+        self.assertTrue(Line(V3.RIGHT, V3.ZERO) in Line(V3.LEFT, V3.RIGHT * 2))

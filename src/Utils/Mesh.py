@@ -100,6 +100,7 @@ class Line:
 # noinspection PyCallingNonCallable
 @Decorators.makeImmutable
 @Decorators.addInitRepr
+@Decorators.addCopyCall("points")
 class Face:
     """Class for representing a face
     """
