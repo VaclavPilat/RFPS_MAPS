@@ -39,3 +39,15 @@ class LineTest(unittest.TestCase):
         self.assertTrue(Line(V3.ZERO, V3.ONE) in {Line(V3.ZERO, V3.ONE), })
         self.assertTrue(Line(V3.ONE, V3.ZERO) in {Line(V3.ZERO, V3.ONE), })
         self.assertFalse(Line(V3.ONE, V3.ZERO) in {Line(V3.ZERO, V3.FORWARD), })
+
+    def test_increment(self) -> None:
+        """Testing Line increment
+        """
+        self.assertEqual(Line(V3.ZERO, V3.ONE) + V3.UP, Line(V3.UP, V3.ONE + V3.UP))
+        self.assertEqual(Line(V3.UP * 2, V3.DOWN) + V3.UP, Line(V3.ZERO, V3.UP * 3))
+
+    def test_rotation(self) -> None:
+        """Testing Line rotations
+        """
+        self.assertEqual(Line(V3.RIGHT * 2, V3.FORWARD * 3) >> 90, Line(V3.BACKWARD * 2, V3.RIGHT * 3))
+        self.assertEqual(Line(V3.ONE * 2, V3.LEFT * 3) >> 360, Line(V3.LEFT * 3, V3.ONE * 2))

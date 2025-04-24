@@ -13,8 +13,8 @@ class Line:
         """Initialize a line.
 
         Args:
-            a (V3): First point of the line.
-            b (V3): Second point of the line.
+            a (Vector.V3): First point of the line.
+            b (Vector.V3): Second point of the line.
         """
         if a == b:
             raise ValueError("Points must be different")
@@ -60,12 +60,12 @@ class Line:
         """Incrementing line bounds by a vector
 
         Args:
-            other (V3): Vector to add
+            other (Vector.V3): Vector to add
 
         Returns:
             Line: A copy of the line with offset line bounds.
         """
-        return self(*(point + other for point in self))
+        return Line(*(point + other for point in self))
 
     def __rshift__(self, other: float) -> "Line":
         """Rotating a line by a vector
@@ -76,7 +76,7 @@ class Line:
         Returns:
             Line: A copy of the line with rotated line bounds.
         """
-        return self(*(point >> other for point in self))
+        return Line(*(point >> other for point in self))
 
     ## \note This method only supports comparisons between lines that are parallel to axis.
     def __contains__(self, line: "Line") -> bool:
@@ -100,7 +100,6 @@ class Line:
 # noinspection PyCallingNonCallable
 @Decorators.makeImmutable
 @Decorators.addInitRepr
-@Decorators.addCopyCall("points")
 class Face:
     """Class for representing a face
     """
@@ -146,7 +145,7 @@ class Face:
         """Incrementing face bounds by a vector
 
         Args:
-            other (V3): Vector to increment face bounds by
+            other (Vector.V3): Vector to increment face bounds by
 
         Returns:
             Face: Incremented face
@@ -177,7 +176,7 @@ class Object(metaclass=Helpers.Repr):
 
         Args:
             name (str, optional): Object name. Defaults to "New object".
-            position (V3, optional): Object location. Defaults to V3.ZERO.
+            position (Vector.V3, optional): Object location. Defaults to V3.ZERO.
             rotation (float, optional): Object rotation in degrees (Z-value only). Defaults to 0.
         """
         ## Object name
