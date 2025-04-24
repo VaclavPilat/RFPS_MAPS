@@ -1,8 +1,9 @@
 ## \file
 # Implementation of a Tile mesh object
-from .Object import Object
+from .Mesh import Object
 from .Vector import V3
 from .Decorators import makeImmutable, addInitRepr
+
 from enum import Enum
 
 

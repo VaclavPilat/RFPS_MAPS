@@ -3,7 +3,7 @@
 from .Decorators import makeImmutable
 from .Colors import NONE, AXIS, TEMPERATURE, lenANSI, BOLD
 from .Vector import V3
-from .Object import Object, Face, Line
+from .Mesh import Object, Face, Line
 
 from typing import Iterator
 import math, re

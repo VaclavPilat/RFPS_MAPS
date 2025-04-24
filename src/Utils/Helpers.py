@@ -1,6 +1,6 @@
 ## \file
 # Classes and various other small helpful constructs
-from .Decorators import *
+from .Decorators import makeImmutable
 
 
 class Repr(type):

@@ -1,6 +1,6 @@
 ## \file
 # Functionality for bridging Blender usage with the rest of code
-from .Object import Object
+from .Mesh import Object
 from .Vector import V3
 
 # noinspection PyUnresolvedReferences

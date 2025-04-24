@@ -1,11 +1,11 @@
 ## \file
 # Line implementation tests
-from src.Utils.Object import Line
+from src.Utils.Mesh import Line
 from src.Utils.Vector import V3
 import unittest
 
 
-class TestLine(unittest.TestCase):
+class LineTest(unittest.TestCase):
     """Class for testing Line implementation.
     """
 

@@ -5,7 +5,7 @@ FILE = *.py
 all: test doc
 
 test:
-	$(PYTHON) -m unittest discover -s tests -p *.py
+	@$(PYTHON) -m unittest discover -s tests -p *.py
 
 doc:
 	@doxygen Doxyfile

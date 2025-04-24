@@ -12,10 +12,10 @@ if __name__ == "__main__":
     except ImportError:
         BLENDER = False
 from Utils.Vector import V3
-from Utils.Object import createObjectSubclass
-from Utils.Tile import Tile, Box, Anchor
+from Utils.Mesh import createObjectSubclass
+from Utils.Tiles import Tile, Box, Anchor
 from Utils.Helpers import Settings
-from Utils.Grid import Grid
+from Utils.Grids import Grid
 
 
 ## Setting constants used in the Metro map
