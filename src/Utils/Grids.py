@@ -232,6 +232,21 @@ class View:
             count = len(Colors.TEMPERATURE) - 1
         return f"{Colors.TEMPERATURE[count]}{('━' if count else '╌') * chars}{Colors.NONE}"
 
+    def colorizeVertical(self, vertical: int, horizontal: int) -> str:
+        """Colorizing a vertical line based on the number of edges behind it
+
+        Args:
+            vertical (int): Vertical line value index
+            horizontal (int): Horizontal line value index
+
+        Returns:
+            str: ANSI colored character representing the line
+        """
+        count = self.verticalCounts[vertical][horizontal]
+        if count >= len(Colors.TEMPERATURE):
+            count = len(Colors.TEMPERATURE) - 1
+        return f"{Colors.TEMPERATURE[count]}{'┃' if count else '┆'}{Colors.NONE}"
+
     def _printVertices(self) -> None:
         """Printing out grid header
         """
@@ -251,7 +266,7 @@ class View:
                     for k, h in enumerate(self.horizontal.labels):
                         if k > 0:
                             print(" " * (self.horizontal.distances[k - 1] * 2 - 1), end="")
-                        print("┆", end="")
+                        print(self.colorizeVertical(i - 1, k), end="")
                     print()
             print(str(v).rjust(self.vertical.just) + " ", end="")
             for j, h in enumerate(self.horizontal.labels):
