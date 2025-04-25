@@ -1,7 +1,23 @@
 ## \file
 # Functionality for rendering Object structure in console
 from . import Decorators, Colors, Mesh, Vector
-import math, re
+import math, re, enum
+
+
+class Point(enum.IntFlag):
+    """Point shape flags
+    """
+
+    ## Contains no lines
+    NONE = 0
+    ## Contains top line
+    TOP = 1
+    ## Contains right line
+    RIGHT = 2
+    ## Contains bottom line
+    BOTTOM = 4
+    ## Contains left line
+    LEFT = 8
 
 
 @Decorators.makeImmutable
@@ -203,6 +219,27 @@ class View:
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
 
+    def pointChar(self, vertical: int, horizontal: int) -> str:
+        """Getting a character representing point shape
+
+        Args:
+            vertical (int): Vertical vertex index
+            horizontal (int): Horizontal vertex index
+
+        Returns:
+            str: Character representing point shape
+        """
+        point = Point.NONE
+        if horizontal > 0 and self.horizontalCounts[vertical][horizontal - 1]:
+            point |= Point.LEFT
+        if vertical > 0 and self.verticalCounts[vertical - 1][horizontal]:
+            point |= Point.TOP
+        if horizontal < len(self.horizontal.values) - 1 and self.horizontalCounts[vertical][horizontal]:
+            point |= Point.RIGHT
+        if vertical < len(self.vertical.values) - 1 and self.verticalCounts[vertical][horizontal]:
+            point |= Point.BOTTOM
+        return "•╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"[point]
+
     def colorizePoint(self, vertical: int, horizontal: int) -> str:
         """Colorizing a single point based on the number of vertices behind it
 
@@ -216,7 +253,7 @@ class View:
         count = self.vertexCounts[vertical][horizontal]
         if count >= len(Colors.TEMPERATURE):
             count = len(Colors.TEMPERATURE) - 1
-        return f"{Colors.TEMPERATURE[count]}{'╋' if count else '┼'}{Colors.NONE}"
+        return f"{Colors.TEMPERATURE[count]}{self.pointChar(vertical, horizontal) if count else '┼'}{Colors.NONE}"
 
     def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
         """Colorizing a horizontal line based on the number of edges behind it
