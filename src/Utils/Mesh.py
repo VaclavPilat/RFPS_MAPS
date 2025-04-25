@@ -91,10 +91,11 @@ class Line:
         # Quick comparison in case both lines are equal
         if self == line:
             return True
-        # Checking if both points "belong" on the line defined by self bounds
         for point in line:
+            # Checking if the point "belongs" on the line defined by self bounds
             if (self.a - self.b) @ (self.a - point):
                 return False
+            # Checking if the point is "between" self bounds
             if not 0 <= ((self.b - self.a) ** (point - self.a)) <= ((self.b - self.a) ** (self.b - self.a)):
                 return False
         return True

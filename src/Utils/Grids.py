@@ -82,7 +82,6 @@ class View:
         self.vertexCounts = self._countVertices(vertices)
         ## Matrix of horizontal line counts for all axis value pairs
         self.lineCounts = self._countLines(lines)
-        print(self.lineCounts)
 
     def _countVertices(self, vertices: set) -> tuple:
         """Counting then number of vertices for each axis value intersection
@@ -190,7 +189,7 @@ class View:
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
 
-    def _pointColor(self, vertical: int, horizontal: int) -> str:
+    def colorPoint(self, vertical: int, horizontal: int) -> str:
         """Colorizing a single point based on the number of vertices behind it
 
         Args:
@@ -202,8 +201,30 @@ class View:
         """
         count = self.vertexCounts[vertical][horizontal]
         if count:
-            return f"{Colors.TEMPERATURE[min(count - 1, len(Colors.TEMPERATURE) - 1)]}╋{Colors.NONE}"
+            if count >= len(Colors.TEMPERATURE):
+                count = len(Colors.TEMPERATURE) - 1
+            count -= 1
+            return f"{Colors.TEMPERATURE[count]}╋{Colors.NONE}"
         return "┼"
+
+    def colorHorizontal(self, vertical: int, horizontal: int) -> str:
+        """Colorizing a horizontal line based on the number of edges behind it
+
+        Args:
+            vertical (int): Vertical line value index
+            horizontal (int): Horizontal line value index
+
+        Returns:
+            str: ANSI colored string representing the line
+        """
+        count = self.lineCounts[vertical][horizontal]
+        chars = self.horizontal.distances[horizontal] * 2 - 1
+        if count:
+            if count >= len(Colors.TEMPERATURE):
+                count = len(Colors.TEMPERATURE) - 1
+            count -= 1
+            return f"{Colors.TEMPERATURE[count]}{'━' * chars}{Colors.NONE}"
+        return "╌" * chars
 
     def _printVertices(self) -> None:
         """Printing out grid header
@@ -229,8 +250,8 @@ class View:
             print(str(v).rjust(self.vertical.just) + "╶", end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print("╌" * (self.horizontal.distances[j - 1] * 2 - 1), end="")
-                print(self._pointColor(i, j), end="")
+                    print(self.colorHorizontal(i, j - 1), end="")
+                print(self.colorPoint(i, j), end="")
             print(f"╴{v}")
         # Footer
         for i in range(self.horizontal.just):
