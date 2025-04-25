@@ -80,8 +80,8 @@ class View:
         self.title = title
         ## Matrix of vertex counts for all axis value intersections
         self.vertexCounts = self._countVertices(vertices)
-        ## Matrix of horizontal line counts for all axis value pairs
-        self.lineCounts = self._countLines(lines)
+        ## Matrices of horizontal and vertical line counts for all axis value pairs
+        self.horizontalCounts, self.verticalCounts = self._countLines(lines)
 
     def _countVertices(self, vertices: set) -> tuple:
         """Counting then number of vertices for each axis value intersection
@@ -105,17 +105,29 @@ class View:
             lines (set): Subset of the object's lines
 
         Returns:
-            tuple: 2D tuple of line counts
+            tuple: 2D tuples of line counts, for horizontal and vertical lines
         """
         lines = tuple(self._flattenLines(lines))
-        return tuple(tuple(
-            len(list(filter(
-                lambda line: Mesh.Line(
-                    Vector.V3(**{self.horizontal.name: h1, self.vertical.name: v}),
-                    Vector.V3(**{self.horizontal.name: h2, self.vertical.name: v})
-                ) in line,
-                lines
-            ))) for h1, h2 in zip(self.horizontal.values, self.horizontal.values[1:])) for v in self.vertical.values)
+        return (
+            tuple(tuple(
+                len(list(filter(
+                    lambda line: Mesh.Line(
+                        Vector.V3(**{self.horizontal.name: h1, self.vertical.name: v}),
+                        Vector.V3(**{self.horizontal.name: h2, self.vertical.name: v})
+                    ) in line,
+                    lines
+                ))) for h1, h2 in zip(self.horizontal.values, self.horizontal.values[1:])
+            ) for v in self.vertical.values),
+            tuple(tuple(
+                len(list(filter(
+                    lambda line: Mesh.Line(
+                        Vector.V3(**{self.horizontal.name: h, self.vertical.name: v1}),
+                        Vector.V3(**{self.horizontal.name: h, self.vertical.name: v2})
+                    ) in line,
+                    lines
+                ))) for h in self.horizontal.values
+            ) for v1, v2 in zip(self.vertical.values, self.vertical.values[1:]))
+        )
 
     def _flattenLines(self, lines: set):
         """Flattening lines (removing their third dimension)
@@ -189,7 +201,7 @@ class View:
             print(f"┴{'─' * (lengths[c] + 2)}", end="")
         print("╯")
 
-    def colorPoint(self, vertical: int, horizontal: int) -> str:
+    def colorizePoint(self, vertical: int, horizontal: int) -> str:
         """Colorizing a single point based on the number of vertices behind it
 
         Args:
@@ -204,7 +216,7 @@ class View:
             count = len(Colors.TEMPERATURE) - 1
         return f"{Colors.TEMPERATURE[count]}{'╋' if count else '┼'}{Colors.NONE}"
 
-    def colorHorizontal(self, vertical: int, horizontal: int) -> str:
+    def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
         """Colorizing a horizontal line based on the number of edges behind it
 
         Args:
@@ -214,7 +226,7 @@ class View:
         Returns:
             str: ANSI colored string representing the line
         """
-        count = self.lineCounts[vertical][horizontal]
+        count = self.horizontalCounts[vertical][horizontal]
         chars = self.horizontal.distances[horizontal] * 2 - 1
         if count >= len(Colors.TEMPERATURE):
             count = len(Colors.TEMPERATURE) - 1
@@ -241,12 +253,12 @@ class View:
                             print(" " * (self.horizontal.distances[k - 1] * 2 - 1), end="")
                         print("┆", end="")
                     print()
-            print(str(v).rjust(self.vertical.just) + "╶", end="")
+            print(str(v).rjust(self.vertical.just) + " ", end="")
             for j, h in enumerate(self.horizontal.labels):
                 if j > 0:
-                    print(self.colorHorizontal(i, j - 1), end="")
-                print(self.colorPoint(i, j), end="")
-            print(f"╴{v}")
+                    print(self.colorizeHorizontal(i, j - 1), end="")
+                print(self.colorizePoint(i, j), end="")
+            print(f" {v}")
         # Footer
         for i in range(self.horizontal.just):
             print(" " * (self.vertical.just + 1), end="")
