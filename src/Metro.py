@@ -132,7 +132,7 @@ def Metro(self) -> None:
     """Generating the Metro station
     """
     Grids.Grid(self.load(UnderpassEntrance, "Underpass stair entrance", Tiles.Box(V3.ZERO, METRO.USCL, METRO.UEWD), C=Stairs,
-              G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)).print()
+              G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)).print(1)
     self.load(UnderpassEntrance, "Underpass slope entrance",
               Tiles.Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT * (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD,
                   rotation=180), C=Slopes, S=METRO.USLC, R=METRO.USLR)

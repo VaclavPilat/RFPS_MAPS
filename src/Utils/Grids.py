@@ -149,7 +149,7 @@ class View:
         Returns:
             tuple: Colors for vertex counts as a string in a tuple
         """
-        return (" ".join(Colors.TEMPERATURE[i] + str(i + 1) for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,)
+        return (" ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(1, len(Colors.TEMPERATURE))) + "+" + Colors.NONE,)
 
     def _printLegend(self) -> None:
         """Printing out grid legend
@@ -200,12 +200,9 @@ class View:
             str: ANSI colored box character representing the point
         """
         count = self.vertexCounts[vertical][horizontal]
-        if count:
-            if count >= len(Colors.TEMPERATURE):
-                count = len(Colors.TEMPERATURE) - 1
-            count -= 1
-            return f"{Colors.TEMPERATURE[count]}╋{Colors.NONE}"
-        return "┼"
+        if count >= len(Colors.TEMPERATURE):
+            count = len(Colors.TEMPERATURE) - 1
+        return f"{Colors.TEMPERATURE[count]}{'╋' if count else '┼'}{Colors.NONE}"
 
     def colorHorizontal(self, vertical: int, horizontal: int) -> str:
         """Colorizing a horizontal line based on the number of edges behind it
@@ -219,12 +216,9 @@ class View:
         """
         count = self.lineCounts[vertical][horizontal]
         chars = self.horizontal.distances[horizontal] * 2 - 1
-        if count:
-            if count >= len(Colors.TEMPERATURE):
-                count = len(Colors.TEMPERATURE) - 1
-            count -= 1
-            return f"{Colors.TEMPERATURE[count]}{'━' * chars}{Colors.NONE}"
-        return "╌" * chars
+        if count >= len(Colors.TEMPERATURE):
+            count = len(Colors.TEMPERATURE) - 1
+        return f"{Colors.TEMPERATURE[count]}{('━' if count else '╌') * chars}{Colors.NONE}"
 
     def _printVertices(self) -> None:
         """Printing out grid header
