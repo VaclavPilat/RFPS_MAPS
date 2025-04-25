@@ -171,7 +171,6 @@ class Face:
 
 @Decorators.addInitRepr
 @Decorators.makeImmutable
-## \todo Refactor & add docs
 class Object(metaclass=Helpers.Repr):
     """Class for containing own mesh and/or other objects
     """

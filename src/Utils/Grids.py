@@ -55,7 +55,9 @@ class Axis:
 
 
 # noinspection PyUnresolvedReferences
-## \todo Highlight lines between vertices (horizontal & vertical)
+## \todo Make line count calculations much faster
+# \todo Change vertex character based on line directions
+# \todo Update legend information and add proper vertex and line counts according to Blender
 @Decorators.makeImmutable
 class View:
     """Class for rendering 3D objects as 2D views in console

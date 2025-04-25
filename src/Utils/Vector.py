@@ -7,8 +7,7 @@ import math
 @Decorators.addInitRepr
 @Decorators.makeImmutable
 @Decorators.addCopyCall("x", "y", "z")
-## \todo Implement rotations for ANY degree values
-# \todo Use Decimal everywhere with float trap set to True
+## \todo Use Decimal everywhere with float trap set to True
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
 

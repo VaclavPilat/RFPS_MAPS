@@ -23,7 +23,6 @@ def create(self):
     return mesh
 
 
-## \todo Update rotation code once V3 supports all-axis rotations
 def build(self):
     """Building a blender object from an Object instance
 
