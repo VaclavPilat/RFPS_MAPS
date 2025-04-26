@@ -5,7 +5,7 @@ import math, re, enum
 
 
 class Point(enum.IntFlag):
-    """Point shape flags
+    """Flags for the shape of a vertex character shown in View
     """
 
     ## Contains no lines
@@ -179,7 +179,7 @@ class View:
         Returns:
             tuple: Colors for vertex counts as a string in a tuple
         """
-        return (" ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(1, len(Colors.TEMPERATURE))) + "+" + Colors.NONE,)
+        return (" ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,)
 
     def _printLegend(self) -> None:
         """Printing out grid legend
@@ -238,7 +238,7 @@ class View:
             point |= Point.RIGHT
         if vertical < len(self.vertical.values) - 1 and self.verticalCounts[vertical][horizontal]:
             point |= Point.BOTTOM
-        return "•╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"[point]
+        return "┼╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"[point]
 
     def colorizePoint(self, vertical: int, horizontal: int) -> str:
         """Colorizing a single point based on the number of vertices behind it
@@ -250,10 +250,16 @@ class View:
         Returns:
             str: ANSI colored box character representing the point
         """
-        count = self.vertexCounts[vertical][horizontal]
+        #count = self.vertexCounts[vertical][horizontal]
+        count = max(
+            0 if horizontal == 0 else self.horizontalCounts[vertical][horizontal - 1],
+            0 if vertical == 0 else self.verticalCounts[vertical - 1][horizontal],
+            0 if horizontal >= len(self.horizontal.values) - 1 else self.horizontalCounts[vertical][horizontal],
+            0 if vertical >= len(self.vertical.values) - 1 else self.verticalCounts[vertical][horizontal]
+        )
         if count >= len(Colors.TEMPERATURE):
             count = len(Colors.TEMPERATURE) - 1
-        return f"{Colors.TEMPERATURE[count]}{self.pointChar(vertical, horizontal) if count else '┼'}{Colors.NONE}"
+        return f"{Colors.TEMPERATURE[count]}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
 
     def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
         """Colorizing a horizontal line based on the number of edges behind it
