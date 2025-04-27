@@ -10,8 +10,6 @@ import math
 ## \todo Use Decimal everywhere with float trap set to True
 class V3:
     """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
-
-    This class is made to be immutable and have an automatic __repr__() implementation using decorators.
     """
 
     def __init__(self, x: float = 0, y: float = 0, z: float = 0) -> None:
@@ -45,7 +43,9 @@ class V3:
             >>> list(V3(1, 2, 3))
             [1, 2, 3]
         """
-        return iter((self.x, self.y, self.z))
+        yield self.x
+        yield self.y
+        yield self.z
 
     def __str__(self) -> str:
         """Converting a V3 object to a string
@@ -57,7 +57,7 @@ class V3:
             >>> str(V3(1, 2, 3))
             '(1, 2, 3)'
         """
-        return "(" + ", ".join([str(a) for a in list(self)]) + ")"
+        return f"({', '.join(map(str, self))})"
 
     def __hash__(self) -> int:
         """Getting the hash of this vector
@@ -87,11 +87,8 @@ class V3:
             False
         """
         if not isinstance(other, self.__class__):
-            return False
-        for a, b in zip(self, other):
-            if a != b:
-                return False
-        return True
+            return NotImplemented
+        return self.x == other.x and self.y == other.y and self.z == other.z
 
     def __add__(self, other: "V3") -> "V3":
         """Adding two vectors together
@@ -107,7 +104,7 @@ class V3:
             V3(-4, 10, 17) 
         """
         if not isinstance(other, self.__class__):
-            raise ValueError("Other value is not a vector")
+            return NotImplemented
         return V3(*(a + b for a, b in zip(self, other)))
 
     def __sub__(self, other: "V3") -> "V3":
@@ -124,7 +121,7 @@ class V3:
             V3(4, 0, -2)
         """
         if not isinstance(other, self.__class__):
-            raise ValueError("Other value is not a vector")
+            return NotImplemented
         return V3(*(a - b for a, b in zip(self, other)))
 
     def __mul__(self, other: float) -> "V3":
@@ -144,9 +141,9 @@ class V3:
             >>> V3(1, 2, 3) * 2
             V3(2, 4, 6)
         """
-        if type(other) in (int, float):
-            return V3(*([other * a for a in self]))
-        raise ValueError("Other value is not a vector or a number")
+        if not isinstance(other, (int, float)):
+            return NotImplemented
+        return V3(*(other * a for a in self))
 
     def __rmul__(self, other: float) -> "V3":
         """Multiplication of a vector by a number
@@ -182,17 +179,17 @@ class V3:
             >>> V3(1, 2, 3) / 2
             V3(0.5, 1.0, 1.5)
         """
-        if type(other) in (int, float):
-            return V3(*([a / other for a in self]))
-        raise ValueError("Other value is not a number")
+        if not isinstance(other, (int, float)):
+            return NotImplemented
+        return V3(*(a / other for a in self))
 
     ## \note Currently only supports float as an argument
     # \todo Add multiple axis rotation: >>> V3() >> V3()
-    def __rshift__(self, angle: float) -> "V3":
+    def __rshift__(self, other: float) -> "V3":
         """Rotating the vector on Z axis, clockwise
 
         Args:
-            angle (float): Rotation angle in degrees
+            other (float): Rotation angle in degrees
 
         Returns:
             V3: Rotated vector
@@ -207,17 +204,19 @@ class V3:
             >>> V3(1, 2, 3) >> 270
             V3(-2, 1, 3)
         """
-        assert angle % 90 == 0, "Vector only supports rotations by multiples of 90 degrees"
-        angle %= 360
-        if angle == 90:
+        if not isinstance(other, int):
+            return NotImplemented
+        if other % 90 != 0:
+            return NotImplemented
+        other %= 360
+        if other == 90:
             return V3(self.y, -self.x, self.z)
-        if angle == 180:
+        if other == 180:
             return V3(-self.x, -self.y, self.z)
-        if angle == 270:
+        if other == 270:
             return V3(-self.y, self.x, self.z)
         return self
 
-    ## \note Same behaviour as __rshift__
     def __lshift__(self, angle: float) -> "V3":
         """Rotating the vector on Z axis, counter-clockwise
 
@@ -257,37 +256,6 @@ class V3:
         """
         return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
-    ## \todo Either change behaviour or remove
-    def __contains__(self, other: "V3") -> bool:
-        """Checking whether a vector "is somewhat heading the same way" as the other one
-
-        Args:
-            other (V3): Other vector whose "direction" is being checked
-
-        Returns:
-            bool: True if this vector has greater or equal values of all non-zero values of the other vector
-        
-        Examples:
-            >>> V3() in V3(1, 2, 3)
-            True
-            >>> V3(0, 2, 1) in V3(1, 2, 3)
-            True
-            >>> V3(5) in V3(10)
-            True
-            >>> V3(-5) in V3(10)
-            False
-            >>> V3(4, 5, 6) in V3(-4, 5, 6)
-            False
-        """
-        for a, b in zip(self, other):
-            if b != 0:
-                if (a > 0 and b > 0) or (a < 0 and b < 0):
-                    if abs(a) < abs(b):
-                        return False
-                else:
-                    return False
-        return True
-
     def __matmul__(self, other: "V3") -> "V3":
         """Calculating the cross product of two vectors
 
@@ -305,6 +273,8 @@ class V3:
             >>> V3(1, 2, 3) @ V3(-1, -2, -3)
             V3(0, 0, 0)
         """
+        if not isinstance(other, self.__class__):
+            return NotImplemented
         return V3(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
@@ -316,8 +286,16 @@ class V3:
 
         Returns:
             bool: True if the vector is not equal to V3(0, 0, 0)
+
+        Examples:
+            >>> bool(V3(1, 2, 3))
+            True
+            >>> bool(V3(0, 1, 0))
+            True
+            >>> bool(V3(0, 0, 0))
+            False
         """
-        return self != V3()
+        return self.x != 0 or self.y != 0 or self.z != 0
 
     def __pow__(self, other: "V3") -> float:
         """Calculating the dot product of two vectors
@@ -327,7 +305,13 @@ class V3:
 
         Returns:
             float: Dot product of two vectors
+
+        Examples:
+            >>> V3(1, 2, 3) ** V3(4, 5, 6)
+            32
         """
+        if not isinstance(other, self.__class__):
+            return NotImplemented
         return self.x * other.x + self.y * other.y + self.z * other.z
 
 
