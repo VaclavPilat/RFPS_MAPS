@@ -135,7 +135,6 @@ class Axis:
 
 # noinspection PyUnresolvedReferences
 ## \todo Make line count calculations much faster
-# \todo Change vertex character based on line directions
 # \todo Update legend information and add proper vertex and line counts according to Blender
 @Decorators.makeImmutable
 class View:
