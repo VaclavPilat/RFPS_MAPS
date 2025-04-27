@@ -17,7 +17,7 @@ if sys.stdout.isatty() or os.getenv('COLOR'):
 else:
     NONE = BOLD = ""
     TEMPERATURE = HIERARCHY = ("",)
-    AXIS = {a: "" for a in ["x", "y", "z"]}
+    AXIS = {"x": "", "y": "", "z": ""}
 
 
 def lenANSI(string: str) -> int:
