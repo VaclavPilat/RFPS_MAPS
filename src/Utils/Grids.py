@@ -19,6 +19,69 @@ class Point(enum.IntFlag):
     ## Contains left line
     LEFT = 8
 
+    def __str__(self) -> str:
+        """Getting a character representing vertex point shape
+
+        Returns:
+            str: String representation of vertex point
+        """
+        return "┼╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"[self]
+
+
+class Show(enum.Enum):
+    """Enum for the type of information View is supposed to show
+    """
+
+    ## Highlight vertices based on their count
+    VERTICES = 0
+    ## Highlight lines based on their count
+    EDGES = 1
+
+    @staticmethod
+    def clamp(count: int) -> int:
+        """Clamping the vertex/edge count to not overflow the color count
+
+        Args:
+            count (int): Number of vertices/edges to clamp
+
+        Returns:
+            int: Clamped final count corresponding to a specific color
+        """
+        if count >= len(Colors.TEMPERATURE):
+            return len(Colors.TEMPERATURE) - 1
+        return count
+
+    def edge(self, edges: int) -> int:
+        """Updating an edge count based on chosen show type
+
+        Args:
+            edges (int): Calculated edge count
+
+        Returns:
+            int: Clamped edge count
+        """
+        if self == Show.VERTICES:
+            return 0
+        if self == Show.EDGES:
+            return Show.clamp(edges)
+        raise NotImplementedError("Unexpected Show type")
+
+    def vertex(self, vertices: int, edges: int) -> int:
+        """Updating a vertex count based on chosen show type
+
+        Args:
+            vertices (int): Calculated vertex count
+            edges (int): Maximum count of neighbouring edges
+
+        Returns:
+            int: Clamped vertex count
+        """
+        if self == Show.VERTICES:
+            return Show.clamp(vertices)
+        if self == Show.EDGES:
+            return Show.clamp(edges)
+        raise NotImplementedError("Unexpected Show type")
+
 
 @Decorators.makeImmutable
 class Axis:
@@ -238,7 +301,7 @@ class View:
             point |= Point.RIGHT
         if vertical < len(self.vertical.values) - 1 and self.verticalCounts[vertical][horizontal]:
             point |= Point.BOTTOM
-        return "┼╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"[point]
+        return str(point)
 
     def colorizePoint(self, vertical: int, horizontal: int) -> str:
         """Colorizing a single point based on the number of vertices behind it
@@ -250,16 +313,14 @@ class View:
         Returns:
             str: ANSI colored box character representing the point
         """
-        #count = self.vertexCounts[vertical][horizontal]
-        count = max(
+        vertices = self.vertexCounts[vertical][horizontal]
+        edges = max(
             0 if horizontal == 0 else self.horizontalCounts[vertical][horizontal - 1],
             0 if vertical == 0 else self.verticalCounts[vertical - 1][horizontal],
             0 if horizontal >= len(self.horizontal.values) - 1 else self.horizontalCounts[vertical][horizontal],
             0 if vertical >= len(self.vertical.values) - 1 else self.verticalCounts[vertical][horizontal]
         )
-        if count >= len(Colors.TEMPERATURE):
-            count = len(Colors.TEMPERATURE) - 1
-        return f"{Colors.TEMPERATURE[count]}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
+        return f"{Colors.TEMPERATURE[Show.VERTICES.vertex(vertices, edges)]}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
 
     def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
         """Colorizing a horizontal line based on the number of edges behind it
@@ -273,9 +334,7 @@ class View:
         """
         count = self.horizontalCounts[vertical][horizontal]
         chars = self.horizontal.distances[horizontal] * 2 - 1
-        if count >= len(Colors.TEMPERATURE):
-            count = len(Colors.TEMPERATURE) - 1
-        return f"{Colors.TEMPERATURE[count]}{('━' if count else '╌') * chars}{Colors.NONE}"
+        return f"{Colors.TEMPERATURE[Show.VERTICES.edge(count)]}{('━' if count else '╌') * chars}{Colors.NONE}"
 
     def colorizeVertical(self, vertical: int, horizontal: int) -> str:
         """Colorizing a vertical line based on the number of edges behind it
@@ -288,9 +347,7 @@ class View:
             str: ANSI colored character representing the line
         """
         count = self.verticalCounts[vertical][horizontal]
-        if count >= len(Colors.TEMPERATURE):
-            count = len(Colors.TEMPERATURE) - 1
-        return f"{Colors.TEMPERATURE[count]}{'┃' if count else '┆'}{Colors.NONE}"
+        return f"{Colors.TEMPERATURE[Show.VERTICES.edge(count)]}{'┃' if count else '┆'}{Colors.NONE}"
 
     def _printVertices(self) -> None:
         """Printing out grid header
