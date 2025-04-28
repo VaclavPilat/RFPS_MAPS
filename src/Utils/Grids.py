@@ -5,7 +5,7 @@ from . import Decorators, Colors, Mesh, Vector
 import math, re, enum
 
 
-class Point(enum.IntFlag):
+class Shape(enum.IntFlag):
     """Flags for the shape of a vertex character shown in View
     """
 
@@ -27,6 +27,96 @@ class Point(enum.IntFlag):
             str: String representation of vertex point
         """
         return "┼╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"[self]
+
+
+class Axis(enum.Enum):
+    """Enum for representing either positive or negative axis
+    """
+
+    ## Positive X axis
+    X = 1
+    ## Positive Y axis
+    Y = 2
+    ## Positive Z axis
+    Z = 3
+    ## Negative X axis
+    _X = -1
+    ## Negative Y axis
+    _Y = -2
+    ## Negative Z axis
+    _Z = -3
+
+    def __bool__(self) -> bool:
+        """Checking whether the axis is positive or negative
+
+        Returns:
+            bool: True if the axis is positive
+        """
+        return self.value > 0
+
+    def __neg__(self) -> "Axis":
+        """Changing axis from positive to negative or vice versa
+
+        Returns:
+            Axis: Negated axis
+        """
+        return Axis(-self.value)
+
+    def __str__(self) -> str:
+        """Getting a character representing axis name
+
+        Returns:
+            str: Character representing axis name
+        """
+        return self.name[-1].lower()
+
+    def __call__(self, vector: Vector.V3) -> float:
+        """Getting the value of a vector that corresponds to self axis
+
+        Args:
+            vector (Vector.V3): Vector to get the axis value of
+
+        Returns:
+            float: Axis value
+        """
+        return getattr(vector, str(self))
+
+
+class Direction(enum.Enum):
+    """Enums representing the directions a 3D object can be rendered from
+    """
+
+    ## Top view direction
+    TOP = ("TOP VIEW", -Axis.X, -Axis.Y)
+    ## Front view direction
+    FRONT = ("FRONT VIEW", -Axis.Z, -Axis.Y)
+    ## Side view direction
+    SIDE = ("SIDE VIEW", -Axis.Z, Axis.X)
+
+    def __init__(self, title: str, vertical: Axis, horizontal: Axis) -> None:
+        """Initializing a Direction instance
+
+        Args:
+            title (str): Direction title
+            vertical (Axis): Vertical axis
+            horizontal (Axis): Horizontal axis
+        """
+        ## Direction title
+        self.title = title
+        ## Vertical axis
+        self.vertical = vertical
+        ## Horizontal axis
+        self.horizontal = horizontal
+
+    def __iter__(self):
+        """Getting strings representing the direction
+        """
+        top = (f"╺{'╋━━'[::1 if self.horizontal else -1]}╸",
+               f"{Colors.AXIS[str(self.horizontal)]}{self.horizontal.name[-1]}{Colors.NONE}", " ")
+        middle = (" ", "┃", "     ")
+        bottom = (" ", f"{Colors.AXIS[str(self.vertical)]}{self.vertical.name[-1]}{Colors.NONE}", "     ")
+        for line in (top, middle, bottom)[::1 if self.vertical else -1]:
+            yield "".join(line[::1 if self.horizontal else -1])
 
 
 class Show(enum.Enum):
@@ -292,16 +382,16 @@ class View:
         Returns:
             str: Character representing point shape
         """
-        point = Point.NONE
+        shape = Shape.NONE
         if horizontal > 0 and self.horizontalCounts[vertical][horizontal - 1]:
-            point |= Point.LEFT
+            shape |= Shape.LEFT
         if vertical > 0 and self.verticalCounts[vertical - 1][horizontal]:
-            point |= Point.TOP
+            shape |= Shape.TOP
         if horizontal < len(self.horizontal.values) - 1 and self.horizontalCounts[vertical][horizontal]:
-            point |= Point.RIGHT
+            shape |= Shape.RIGHT
         if vertical < len(self.vertical.values) - 1 and self.verticalCounts[vertical][horizontal]:
-            point |= Point.BOTTOM
-        return str(point)
+            shape |= Shape.BOTTOM
+        return str(shape)
 
     def colorizePoint(self, vertical: int, horizontal: int) -> str:
         """Colorizing a single point based on the number of vertices behind it

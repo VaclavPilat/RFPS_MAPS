@@ -147,7 +147,7 @@ if __name__ == "__main__":
         Blender.Setup.purgeExistingObjects()
     # noinspection PyTypeChecker
     metro = Metro("Metro station")
-    Grids.Grid(metro).print(2)
+    Grids.Grid(metro).print(1)
     # noinspection PyUnresolvedReferences
     metro.printHierarchy()
     if BLENDER:
