@@ -427,20 +427,14 @@ class Header:
     """Class for displaying information about a grid
     """
 
-    def __init__(self, obj: Mesh.Object, direction: Direction, depth: int = 0) -> None:
+    def __init__(self, grid: "Grid") -> None:
         """Initializing a Header instance
 
         Args:
-            obj (Mesh.Object): Mesh object to be described
-            direction (Direction): View direction to be described
-            depth (int, optional):
+            grid (Grid): Grid instance
         """
-        ## Source Object
-        self.obj = obj
-        ## View direction
-        self.direction = direction
-        ## Render depth
-        self.depth = depth
+        ## Source grid
+        self.grid = grid
 
     def count(self, obj: Mesh.Object, depth: int) -> dict:
         """Counting faces, edges and vertices of a specified object (recursively)
@@ -453,6 +447,7 @@ class Header:
             dict: Dictionary of Blender-like vertex, edge and face counts
         """
         counts = {
+            "objects": 1,
             "vertices": len(set(vertex for face in obj.faces for vertex in face.points)),
             "edges": len(set(line for face in obj.faces for line in face)),
             "faces": len(obj.faces)
@@ -467,10 +462,10 @@ class Header:
         """Getting string information about the object being rendered to be displayed
         """
         # First column
-        yield f"{Colors.BOLD}{self.obj.name}{Colors.NONE}"
-        yield ", ".join(f"{value} {key}" for key, value in self.count(self.obj, self.depth).items())
+        yield f"{Colors.BOLD}{self.grid.obj.name}{Colors.NONE}"
+        yield ", ".join(f"{value} {key}" for key, value in self.count(self.grid.obj, self.grid.depth).items())
         # Second column
-        yield self.direction.title
+        yield self.grid.direction.title
         yield " ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE
 
     def __str__(self) -> str:
@@ -480,7 +475,7 @@ class Header:
              str: String representation of a grid header
         """
         info = tuple(self)
-        lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.direction), f"╰{'─' * 7}"]
+        lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.grid.direction), f"╰{'─' * 7}"]
         for i in range((len(info) + 1) // 2):
             just = max(map(Colors.alen, info[i * 2:i * 2 + 2]))
             for j in range(5):
@@ -522,7 +517,7 @@ class Grid:
         Returns:
              str: String representation of the grid
         """
-        return str(Header(self.obj, self.direction, self.depth))
+        return str(Header(self))
 
     @staticmethod
     def all(obj: Mesh.Object, depth: int = 0) -> str:
