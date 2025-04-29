@@ -452,7 +452,11 @@ class Header:
         Returns:
             dict: Dictionary of Blender-like vertex, edge and face counts
         """
-        counts = {"vertices": 0, "edges": 0, "faces": len(obj.faces)}
+        counts = {
+            "vertices": len(set(vertex for face in obj.faces for vertex in face.points)),
+            "edges": len(set(line for face in obj.faces for line in face)),
+            "faces": len(obj.faces)
+        }
         if depth > 0:
             for child in obj.objects:
                 for key, value in self.count(child, depth - 1).items():
