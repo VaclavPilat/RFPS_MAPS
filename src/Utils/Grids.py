@@ -312,66 +312,6 @@ class View:
             except ValueError:
                 pass
 
-    def _axisInfo(self) -> tuple:
-        """Getting out a diagram of axis orientation
-
-        Returns:
-            tuple: 3 row strings representing selected axis
-        """
-        first = (" ", f"{Colors.AXIS[self.vertical.name]}{self.vertical.name.upper()}{Colors.NONE}", "     ")
-        second = (" ", "┃", "     ")
-        third = (f"╺{'━━╋'[::(-1, 1)[self.horizontal.reversed]]}╸",
-                 f"{Colors.AXIS[self.horizontal.name]}{self.horizontal.name.upper()}{Colors.NONE}", " ")
-        rows = tuple(map(lambda row: "".join(row[::(1, -1)[self.horizontal.reversed]]), (first, second, third)))
-        return rows[::(-1, 1)[self.vertical.reversed]]
-
-    @staticmethod
-    def _colorLegend() -> tuple:
-        """Getting a legend for vertex colors
-
-        Returns:
-            tuple: Colors for vertex counts as a string in a tuple
-        """
-        return (" ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,)
-
-    def _printLegend(self) -> None:
-        """Printing out grid legend
-        """
-        # Variables
-        axis = self._axisInfo()
-        info = (
-                   f"{Colors.BOLD}{sum(sum(row) for row in self.vertexCounts)}{Colors.NONE} vertices",
-                   self.title
-               ) + self._colorLegend()
-        rows = (len(axis) + 1) // 2
-        cols = math.ceil(len(info) / rows)
-        lengths = [max(map(Colors.lenANSI, info[i * rows:(i + 1) * rows])) for i in range(cols)]
-        # Printing out top border
-        print(f"╭{'─' * Colors.lenANSI(axis[0])}", end="")
-        for c in range(cols):
-            print(f"┬{'─' * (lengths[c] + 2)}", end="")
-        print("╮")
-        # Printing out rows
-        for r, line in enumerate(axis):
-            print(f"│{line}", end="")
-            if r % 2 == 0:
-                for c in range(cols):
-                    index = c * rows + r // 2
-                    if len(info) > index:
-                        print(f"│ {info[index] + ' ' * (lengths[c] - Colors.lenANSI(info[index]))} ", end="")
-                    else:
-                        print(f"│ {' ' * lengths[c]} ", end="")
-                print("│")
-            else:
-                for c in range(cols):
-                    print(f"{'┼' if c else '├'}{'─' * (lengths[c] + 2)}", end="")
-                print("┤" if info else "│")
-        # Printing out bottom border
-        print(f"╰{'─' * Colors.lenANSI(axis[0])}", end="")
-        for c in range(cols):
-            print(f"┴{'─' * (lengths[c] + 2)}", end="")
-        print("╯")
-
     def pointChar(self, vertical: int, horizontal: int) -> str:
         """Getting a character representing point shape
 
@@ -482,45 +422,90 @@ class View:
         self._printVertices()
 
 
+@Decorators.makeImmutable
+class Header:
+    """Class for displaying information about a grid
+    """
+
+    def __init__(self, obj: Mesh.Object, direction: Direction, depth: int = 0) -> None:
+        """Initializing a Header instance
+
+        Args:
+            obj (Mesh.Object): Mesh object to be described
+            direction (Direction): View direction to be described
+            depth (int, optional):
+        """
+        ## Source Object
+        self.obj = obj
+        ## View direction
+        self.direction = direction
+        ## Render depth
+        self.depth = depth
+
+    def __str__(self) -> str:
+        """Getting a string representation of a grid header
+
+        Returns:
+             str: String representation of a grid header
+        """
+        info = (
+            self.obj.name,
+            self.direction.title,
+            " ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
+        )
+        lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.direction), f"╰{'─' * 7}"]
+        for i in range((len(info) + 1) // 2):
+            just = max(map(Colors.lenANSI, info[i * 2:i * 2 + 2]))
+            for j in range(5):
+                lines[j] += f"┬│{'┼' if i else '├'}│┴"[j]
+                if j % 2 == 0:
+                    lines[j] += "─" * (just + 2)
+                elif i * 2 + j // 2 < len(info):
+                    lines[j] += f" {info[i * 2 + j // 2].ljust(just)} "
+                else:
+                    lines[j] += " " * (just + 2)
+        return "\n".join(line + f"╮│{'┤' if info else '│'}│╯"[i] for i, line in enumerate(lines))
+
+
 # noinspection PyUnresolvedReferences
 @Decorators.makeImmutable
 class Grid:
-    """Class for processing requests for the rendering of 3D objects in console
+    """Class for rendering a 3D object from a specified direction in console
     """
 
-    def __init__(self, obj: "Object") -> None:
+    def __init__(self, obj: Mesh.Object, direction: Direction, depth: int = 0) -> None:
         """Initialising a Grid instance
 
         Args:
-            obj (Object): Object to create print grids of
+            obj (Mesh.Object): Object whose mesh will be rendered
+            direction (Direction): Direction from which the object is viewed
+            depth (int, optional): Depth from which mesh data will be gathered. Defaults to 0.
         """
         ## Object to visualise
         self.obj = obj
+        ## View direction
+        self.direction = direction
+        ## Render depth
+        assert depth >= 0, "Depth cannot be negative"
+        self.depth = depth
 
-    def _transformedFaces(self, obj: "Object", depth: int) -> set:
-        """Getting all faces found up to the specified depth, transformed
-
-        Args:
-            obj (Object): Object whose faces are being gathered
-            depth (int): Remaining layer depth to go down to
+    def __str__(self) -> str:
+        """Getting string representation of the grid
 
         Returns:
-            set: Object faces with transformed vertex positions
+             str: String representation of the grid
         """
-        faces = set(obj.faces)
-        if depth > 0:
-            for child in obj.objects:
-                faces = faces.union(self._transformedFaces(child, depth - 1))
-        return set(map(obj.transform, faces))
+        return str(Header(self.obj, self.direction, self.depth))
 
-    def print(self, depth: int = 0) -> None:
-        """Printing out a grid
+    @staticmethod
+    def all(obj: Mesh.Object, depth: int = 0) -> str:
+        """Getting the render of an object from ALL directions
 
         Args:
-            depth (int, optional): Maximum layer index. Defaults to 0.
+            obj (Mesh.Object): Object whose mesh will be rendered
+            depth (int, optional): Depth from which mesh data will be gathered. Defaults to 0.
+
+        Returns:
+            str: String with all object renders
         """
-        assert depth >= 0, "Max depth cannot be a negative number"
-        faces = self._transformedFaces(self.obj, depth)
-        View(faces, "-x", "-y", "TOP VIEW").print()
-        View(faces, "-z", "-y", "FRONT VIEW").print()
-        View(faces, "-z", "x", "SIDE VIEW").print()
+        return "\n".join(str(Grid(obj, direction, depth)) for direction in Direction)
