@@ -490,6 +490,7 @@ class Header:
 
 
 # noinspection PyUnresolvedReferences
+## \todo Add an option to show bounding boxes of objects
 @Decorators.makeImmutable
 class Grid:
     """Class for rendering a 3D object from a specified direction in console
@@ -520,14 +521,10 @@ class Grid:
         return str(Header(self))
 
     @staticmethod
-    def all(obj: Mesh.Object, depth: int = 0) -> str:
+    def all(*args, **kwargs) -> str:
         """Getting the render of an object from ALL directions
-
-        Args:
-            obj (Mesh.Object): Object whose mesh will be rendered
-            depth (int, optional): Depth from which mesh data will be gathered. Defaults to 0.
 
         Returns:
             str: String with all object renders
         """
-        return "\n".join(str(Grid(obj, direction, depth)) for direction in Direction)
+        return "\n".join(str(Grid(*args, direction=direction, **kwargs)) for direction in Direction)
