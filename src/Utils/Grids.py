@@ -442,26 +442,49 @@ class Header:
         ## Render depth
         self.depth = depth
 
+    def count(self, obj: Mesh.Object, depth: int) -> dict:
+        """Counting faces, edges and vertices of a specified object (recursively)
+
+        Args:
+            obj (Mesh.Object): Object whose mesh is being counted
+            depth (int): Remaining recursion depth
+
+        Returns:
+            dict: Dictionary of Blender-like vertex, edge and face counts
+        """
+        counts = {"vertices": 0, "edges": 0, "faces": len(obj.faces)}
+        if depth > 0:
+            for child in obj.objects:
+                for key, value in self.count(child, depth - 1).items():
+                    counts[key] += value
+        return counts
+
+    def __iter__(self):
+        """Getting string information about the object being rendered to be displayed
+        """
+        # First column
+        yield f"{Colors.BOLD}{self.obj.name}{Colors.NONE}"
+        yield ", ".join(f"{value} {key}" for key, value in self.count(self.obj, self.depth).items())
+        # Second column
+        yield self.direction.title
+        yield " ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE
+
     def __str__(self) -> str:
         """Getting a string representation of a grid header
 
         Returns:
              str: String representation of a grid header
         """
-        info = (
-            self.obj.name,
-            self.direction.title,
-            " ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
-        )
+        info = tuple(self)
         lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.direction), f"╰{'─' * 7}"]
         for i in range((len(info) + 1) // 2):
-            just = max(map(Colors.lenANSI, info[i * 2:i * 2 + 2]))
+            just = max(map(Colors.alen, info[i * 2:i * 2 + 2]))
             for j in range(5):
                 lines[j] += f"┬│{'┼' if i else '├'}│┴"[j]
                 if j % 2 == 0:
                     lines[j] += "─" * (just + 2)
                 elif i * 2 + j // 2 < len(info):
-                    lines[j] += f" {info[i * 2 + j // 2].ljust(just)} "
+                    lines[j] += f" {info[i * 2 + j // 2]}{' ' * (just - Colors.alen(info[i * 2 + j // 2]) + 1)}"
                 else:
                     lines[j] += " " * (just + 2)
         return "\n".join(line + f"╮│{'┤' if info else '│'}│╯"[i] for i, line in enumerate(lines))

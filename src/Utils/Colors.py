@@ -1,6 +1,6 @@
 ## \file
 # Variables with ANSI color strings
-import sys, os
+import sys, os, re
 
 
 if sys.stdout.isatty() or os.getenv('COLOR'):
@@ -20,7 +20,7 @@ else:
     AXIS = {"x": "", "y": "", "z": ""}
 
 
-def lenANSI(string: str) -> int:
+def alen(string: str) -> int:
     """Getting the length of a string while ignoring ANSI escape sequences
 
     Args:
@@ -29,6 +29,4 @@ def lenANSI(string: str) -> int:
     Returns:
         int: Length of the pure string
     """
-    for color in TEMPERATURE + tuple(AXIS.values()) + (NONE, BOLD):
-        string = string.replace(color, "")
-    return len(string)
+    return len(re.sub("\\033\[\d+;?\d*m", "", string))
