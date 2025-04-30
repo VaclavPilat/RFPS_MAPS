@@ -1,7 +1,7 @@
 ## \file
 # Functionality for rendering Object structure in console
 # Refactor and add tests
-from . import Decorators, Colors, Mesh, Vector
+from . import Decorators, Colors, Mesh, Vector, Helpers
 import math, re, enum
 
 
@@ -422,7 +422,29 @@ class View:
         self._printVertices()
 
 
-@Decorators.makeImmutable
+
+class View:
+    """Class for rendering a 3D mesh as text
+    """
+
+    def __init__(self, grid: "Grid") -> None:
+        """Initializing a View instance
+
+        Args:
+            grid (Grid): Grid instance to visualise
+        """
+        ## Source grid
+        self.grid = grid
+
+    def __str__(self) -> str:
+        """Getting string representation of the grid mesh
+
+        Returns:
+            str: ANSI colored string representing the grid view
+        """
+        return ""
+
+
 class Header:
     """Class for displaying information about a grid
     """
@@ -431,7 +453,7 @@ class Header:
         """Initializing a Header instance
 
         Args:
-            grid (Grid): Grid instance
+            grid (Grid): Grid instance to describe
         """
         ## Source grid
         self.grid = grid
@@ -472,7 +494,7 @@ class Header:
         """Getting a string representation of a grid header
 
         Returns:
-             str: String representation of a grid header
+             str: ANSI colored string representation of a grid header
         """
         info = tuple(self)
         lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.grid.direction), f"╰{'─' * 7}"]
@@ -491,9 +513,10 @@ class Header:
 
 # noinspection PyUnresolvedReferences
 ## \todo Add an option to show bounding boxes of objects
+# \todo Add an option for toggling between fixed/independent axis value diffs
 @Decorators.makeImmutable
 class Grid:
-    """Class for rendering a 3D object from a specified direction in console
+    """Class for rendering a 3D object from a specified direction
     """
 
     def __init__(self, obj: Mesh.Object, direction: Direction, depth: int = 0) -> None:
@@ -518,9 +541,10 @@ class Grid:
         Returns:
              str: String representation of the grid
         """
-        return str(Header(self))
+        return f"{Header(self)}\n{View(self)}"
 
     @staticmethod
+    @Helpers.elapsedTime
     def all(*args, **kwargs) -> str:
         """Getting the render of an object from ALL directions
 

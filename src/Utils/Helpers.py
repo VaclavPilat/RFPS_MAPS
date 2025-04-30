@@ -2,6 +2,7 @@
 # Classes and various other small helpful constructs
 # \todo Add tests
 from . import Decorators
+import time
 
 
 class Repr(type):
@@ -27,3 +28,20 @@ class Settings:
         """
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+
+def elapsedTime(function):
+    """Decorator for measuring time spent on a function call and printing it out
+
+    Args:
+        function (function): Function whose calls are being examined
+    """
+
+    def wrapped(*args, **kwargs):
+        start = time.time()
+        output = function(*args, **kwargs)
+        elapsed = time.time() - start
+        print(f"{function.__name__}() - {round(elapsed, 3)}s")
+        return output
+
+    return wrapped
