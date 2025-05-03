@@ -207,14 +207,14 @@ class Object(metaclass=Helpers.Repr):
         for obj in self.objects:
             yield from obj
 
-    def transform(self, structure: Face) -> Face:
-        """Transforming structure positions to be relative to
+    def __matmul__(self, structure: Vector.V3 | Line | Face) -> Face:
+        """Transforming structure positions to be relative to parent
 
         Args:
-            structure (Face): 3D structure (relative to object position)
+            structure (Vector.V3 | Line | Face): 3D structure (relative to self position)
 
         Returns:
-            Face: Vertex position (relative to parent's object position)
+            Vector.V3 | Line | Face: Vertex position (relative to parent's position)
         """
         return (structure >> self.rotation) + self.position
 

@@ -1,6 +1,6 @@
 ## \file
 # Functionality for rendering Object structure in console
-# Refactor and add tests
+# \todo Refactor and add tests
 from . import Decorators, Colors, Mesh, Vector, Helpers
 import math, re, enum
 
@@ -117,61 +117,6 @@ class Direction(enum.Enum):
         bottom = (" ", f"{Colors.AXIS[str(self.vertical)]}{self.vertical.name[-1]}{Colors.NONE}", "     ")
         for line in (top, middle, bottom)[::1 if self.vertical else -1]:
             yield "".join(line[::1 if self.horizontal else -1])
-
-
-class Show(enum.Enum):
-    """Enum for the type of information View is supposed to show
-    """
-
-    ## Highlight vertices based on their count
-    VERTICES = 0
-    ## Highlight lines based on their count
-    EDGES = 1
-
-    @staticmethod
-    def clamp(count: int) -> int:
-        """Clamping the vertex/edge count to not overflow the color count
-
-        Args:
-            count (int): Number of vertices/edges to clamp
-
-        Returns:
-            int: Clamped final count corresponding to a specific color
-        """
-        if count >= len(Colors.TEMPERATURE):
-            return len(Colors.TEMPERATURE) - 1
-        return count
-
-    def edge(self, edges: int) -> int:
-        """Updating an edge count based on chosen show type
-
-        Args:
-            edges (int): Calculated edge count
-
-        Returns:
-            int: Clamped edge count
-        """
-        if self == Show.VERTICES:
-            return 0
-        if self == Show.EDGES:
-            return Show.clamp(edges)
-        raise NotImplementedError("Unexpected Show type")
-
-    def vertex(self, vertices: int, edges: int) -> int:
-        """Updating a vertex count based on chosen show type
-
-        Args:
-            vertices (int): Calculated vertex count
-            edges (int): Maximum count of neighbouring edges
-
-        Returns:
-            int: Clamped vertex count
-        """
-        if self == Show.VERTICES:
-            return Show.clamp(vertices)
-        if self == Show.EDGES:
-            return Show.clamp(edges)
-        raise NotImplementedError("Unexpected Show type")
 
 
 @Decorators.makeImmutable
@@ -422,31 +367,8 @@ class View:
         self._printVertices()
 
 
-
-class View:
-    """Class for rendering a 3D mesh as text
-    """
-
-    def __init__(self, grid: "Grid") -> None:
-        """Initializing a View instance
-
-        Args:
-            grid (Grid): Grid instance to visualise
-        """
-        ## Source grid
-        self.grid = grid
-
-    def __str__(self) -> str:
-        """Getting string representation of the grid mesh
-
-        Returns:
-            str: ANSI colored string representing the grid view
-        """
-        return ""
-
-
 class Header:
-    """Class for displaying information about a grid
+    """Class for displaying basic information about a grid
     """
 
     def __init__(self, grid: "Grid") -> None:
@@ -457,6 +379,8 @@ class Header:
         """
         ## Source grid
         self.grid = grid
+        ## Data counts
+        self.counts = self.count(self.grid.obj, self.grid.depth)
 
     def count(self, obj: Mesh.Object, depth: int) -> dict:
         """Counting faces, edges and vertices of a specified object (recursively)
@@ -485,7 +409,7 @@ class Header:
         """
         # First column
         yield f"{Colors.BOLD}{self.grid.obj.name}{Colors.NONE}"
-        yield ", ".join(f"{value} {key}" for key, value in self.count(self.grid.obj, self.grid.depth).items())
+        yield ", ".join(f"{value} {key}" for key, value in self.counts.items())
         # Second column
         yield self.grid.direction.title
         yield " ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE
@@ -511,12 +435,58 @@ class Header:
         return "\n".join(line + f"╮│{'┤' if info else '│'}│╯"[i] for i, line in enumerate(lines))
 
 
+class View:
+    """Class for rendering a 3D mesh as text
+    """
+
+    def __init__(self, grid: "Grid") -> None:
+        """Initializing a View instance
+
+        Args:
+            grid (Grid): Grid instance to visualise
+        """
+        ## Source grid
+        self.grid = grid
+        ## Transformed source data
+        self.data = self.transform(self.grid.obj, self.grid.depth)
+
+    def transform(self, obj: Mesh.Object, depth: int) -> dict:
+        """Getting transformed mesh data of a specified object (recursively)
+
+        Args:
+            obj (Mesh.Object): Object whose mesh is being transformed
+            depth (int): Remaining recursion depth
+
+        Returns:
+            dict: Dictionary of transformed Blender-like vertex and edge positions
+        """
+        data = {
+            "vertices": tuple(set(vertex for face in obj.faces for vertex in face.points)),
+            "edges": tuple(set(line for face in obj.faces for line in face)),
+        }
+        if depth > 0:
+            for child in obj.objects:
+                for key, value in self.transform(child, depth - 1).items():
+                    data[key] += value
+        for key, value in data.items():
+            data[key] = tuple(map(self.grid.obj.__matmul__, value))
+        return data
+
+    def __str__(self) -> str:
+        """Getting string representation of the grid mesh
+
+        Returns:
+            str: ANSI colored string representing the grid view
+        """
+        return f"{len(self.data['vertices'])} vertices, {len(self.data['edges'])} edges"
+
+
 # noinspection PyUnresolvedReferences
 ## \todo Add an option to show bounding boxes of objects
 # \todo Add an option for toggling between fixed/independent axis value diffs
 @Decorators.makeImmutable
 class Grid:
-    """Class for rendering a 3D object from a specified direction
+    """Class for rendering 3D object(s) from a specified direction
     """
 
     def __init__(self, obj: Mesh.Object, direction: Direction, depth: int = 0) -> None:
