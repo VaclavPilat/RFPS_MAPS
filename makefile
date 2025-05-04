@@ -19,7 +19,7 @@ clean:
 run:
 	@cd src; \
 	for file in $(FILE); do \
-		COLOR=1 $(PYTHON) "$$file" | less -FRS -# 4; \
+		COLOR=1 $(PYTHON) "$$file" | less -FRS~# 4; \
 	done; \
 	cd ..
 

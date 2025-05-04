@@ -119,61 +119,11 @@ class Direction(enum.Enum):
             yield "".join(line[::1 if self.horizontal else -1])
 
 
-@Decorators.makeImmutable
-class Axis:
-    """Class for containing axis information
-    """
-
-    def __init__(self, name: str, vertices: set) -> None:
-        """Initialising an Axis instance
-
-        Args:
-            name (str): Axis name
-            vertices (set): Set of object vertices
-        """
-        ## Axis name
-        assert re.fullmatch("-?[xyz]", name), "Invalid axis name"
-        self.name = name[-1]
-        ## Is the axis in reverse?
-        self.reversed = name.startswith("-")
-        ## Axis values
-        self.values = sorted(set(getattr(vertex, self.name) for vertex in vertices))
-        assert len(self.values), "Axis has to contain at least one vertex value"
-        ## Differences in axis values
-        differences = [self.values[i] - self.values[i - 1] for i in range(1, len(self.values))]
-        if self.reversed:
-            self.values.reverse()
-            differences.reverse()
-        if differences:
-            minimum = min(differences)
-            assert minimum > 0.001, "Map contains floating point errors"
-            ## Axis value distances
-            self.distances = tuple(map(lambda d: round(d / minimum), differences))
-        else:
-            self.distances = tuple()
-        ## Axis value labels
-        self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
-        ## Most amount of space a single axis value can take up
-        self.just = max(map(lambda value: len(str(value)), self.labels))
-
-    def match(self, vertex: Vector.V3, value: float) -> bool:
-        """Checking whether an axis value "matches" a vertex point
-
-        Args:
-            vertex (Vector.V3): Vertex to check
-            value (float): Value on the current axis
-
-        Returns:
-            func: True if the vertex has the value as a component of the current axis
-        """
-        return getattr(vertex, self.name) == value
-
-
 # noinspection PyUnresolvedReferences
 ## \todo Make line count calculations much faster
 # \todo Update legend information and add proper vertex and line counts according to Blender
 @Decorators.makeImmutable
-class View:
+class _View:
     """Class for rendering 3D objects as 2D views in console
     """
 
@@ -435,6 +385,32 @@ class Header:
         return "\n".join(line + f"╮│{'┤' if info else '│'}│╯"[i] for i, line in enumerate(lines))
 
 
+## \note `distances = tuple(map(lambda d: round(d / minimum), differences))`
+class Values:
+    """Class for containing detailed information on axis values
+    """
+
+    def __init__(self, axis: Axis, vertices: tuple) -> None:
+        """Initialising Values instance
+
+        Args:
+            axis (Axis): Axis
+            vertices (tuple): Tuple of transformed vertex positions
+        """
+        ## Axis values
+        if not vertices:
+            raise ValueError("No vertices were provided")
+        self.values = sorted(set(map(axis, vertices)), reverse=not axis)
+        ## Axis value differences
+        self.differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
+        if self.differences and min(self.differences) < 0.001:
+            raise ValueError("Mesh contains floating point errors")
+        ## Axis value labels
+        self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
+        ## Label justify length
+        self.justify = max(map(lambda value: len(str(value)), self.labels))
+
+
 class View:
     """Class for rendering a 3D mesh as text
     """
@@ -449,6 +425,10 @@ class View:
         self.grid = grid
         ## Transformed source data
         self.data = self.transform(self.grid.obj, self.grid.depth)
+        ## Horizontal axis values
+        self.horizontal = Values(self.grid.direction.horizontal, self.data["vertices"])
+        ## Vertical axis values
+        self.vertical = Values(self.grid.direction.vertical, self.data["vertices"])
 
     def transform(self, obj: Mesh.Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
@@ -469,7 +449,7 @@ class View:
                 for key, value in self.transform(child, depth - 1).items():
                     data[key] += value
         for key, value in data.items():
-            data[key] = tuple(map(self.grid.obj.__matmul__, value))
+            data[key] = tuple(map(obj.__matmul__, value))
         return data
 
     def __str__(self) -> str:
