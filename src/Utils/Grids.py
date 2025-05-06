@@ -2,7 +2,7 @@
 # Functionality for rendering Object structure in console
 # \todo Refactor and add tests
 from . import Decorators, Colors, Mesh, Vector, Helpers
-import math, re, enum
+import enum
 
 
 class Shape(enum.IntFlag):
@@ -274,48 +274,6 @@ class _View:
         count = self.verticalCounts[vertical][horizontal]
         return f"{Colors.TEMPERATURE[Show.VERTICES.edge(count)]}{'┃' if count else '┆'}{Colors.NONE}"
 
-    def _printVertices(self) -> None:
-        """Printing out grid header
-        """
-        # Header
-        for i in range(self.horizontal.just):
-            print(" " * (self.vertical.just + 1), end="")
-            for j, h in enumerate(self.horizontal.labels):
-                if j > 0:
-                    print(" " * (self.horizontal.distances[j - 1] * 2 - 1), end="")
-                print(str(h).rjust(self.horizontal.just)[i], end="")
-            print()
-        # Body
-        for i, v in enumerate(self.vertical.labels):
-            if i > 0:
-                for j in range(self.vertical.distances[i - 1] - 1):
-                    print(" " * (self.vertical.just + 1), end="")
-                    for k, h in enumerate(self.horizontal.labels):
-                        if k > 0:
-                            print(" " * (self.horizontal.distances[k - 1] * 2 - 1), end="")
-                        print(self.colorizeVertical(i - 1, k), end="")
-                    print()
-            print(str(v).rjust(self.vertical.just) + " ", end="")
-            for j, h in enumerate(self.horizontal.labels):
-                if j > 0:
-                    print(self.colorizeHorizontal(i, j - 1), end="")
-                print(self.colorizePoint(i, j), end="")
-            print(f" {v}")
-        # Footer
-        for i in range(self.horizontal.just):
-            print(" " * (self.vertical.just + 1), end="")
-            for j, h in enumerate(self.horizontal.labels):
-                if j > 0:
-                    print(" " * (self.horizontal.distances[j - 1] * 2 - 1), end="")
-                print(str(h).ljust(self.horizontal.just)[i], end="")
-            print()
-
-    def print(self) -> None:
-        """Printing out the grid view
-        """
-        self._printLegend()
-        self._printVertices()
-
 
 class Header:
     """Class for displaying basic information about a grid
@@ -391,25 +349,29 @@ class Values:
     """Class for containing detailed information on axis values
     """
 
-    def __init__(self, axis: Axis, vertices: tuple) -> None:
+    def __init__(self, axis: Axis, vertices: tuple, multiplier: int) -> None:
         """Initialising Values instance
 
         Args:
             axis (Axis): Axis
             vertices (tuple): Tuple of transformed vertex positions
+            multiplier (int): Offset size multiplier
         """
         ## Axis values
         if not vertices:
             raise ValueError("No vertices were provided")
         self.values = sorted(set(map(axis, vertices)), reverse=not axis)
-        ## Axis value differences
-        self.differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
-        if self.differences and min(self.differences) < 0.001:
-            raise ValueError("Mesh contains floating point errors")
         ## Axis value labels
         self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
         ## Label justify length
-        self.justify = max(map(lambda value: len(str(value)), self.labels))
+        self.just = max(map(lambda value: len(str(value)), self.labels))
+        differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
+        if differences:
+            minimum = min(differences)
+            if minimum < 0.001:
+                raise ValueError("Mesh contains floating point errors")
+            ## Axis value offsets
+            self.offsets = tuple(map(lambda d: round(d / minimum) * multiplier - 1, differences))
 
 
 class View:
@@ -427,9 +389,9 @@ class View:
         ## Transformed source data
         self.data = self.transform(self.grid.obj, self.grid.depth)
         ## Horizontal axis values
-        self.horizontal = Values(self.grid.direction.horizontal, self.data["vertices"])
+        self.horizontal = Values(self.grid.direction.horizontal, self.data["vertices"], 2)
         ## Vertical axis values
-        self.vertical = Values(self.grid.direction.vertical, self.data["vertices"])
+        self.vertical = Values(self.grid.direction.vertical, self.data["vertices"], 1)
 
     def transform(self, obj: Mesh.Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
@@ -459,7 +421,40 @@ class View:
         Returns:
             str: ANSI colored string representing the grid view
         """
-        return f"{len(self.data['vertices'])} vertices, {len(self.data['edges'])} edges"
+        output = ""
+        # Header
+        for i in range(self.horizontal.just):
+            output += " " * (self.vertical.just + 1)
+            for j, h in enumerate(self.horizontal.labels):
+                if j > 0:
+                    output += " " * self.horizontal.offsets[j - 1]
+                output += str(h).rjust(self.horizontal.just)[i]
+            output += "\n"
+        # Body
+        for i, v in enumerate(self.vertical.labels):
+            if i > 0:
+                for j in range(self.vertical.offsets[i - 1]):
+                    output += " " * (self.vertical.just + 1)
+                    for k, h in enumerate(self.horizontal.labels):
+                        if k > 0:
+                            output += " " * self.horizontal.offsets[k - 1]
+                        #output += self.colorizeVertical(i - 1, k)
+                    output += "\n"
+            output += str(v).rjust(self.vertical.just) + " "
+            #for j, h in enumerate(self.horizontal.labels):
+            #    if j > 0:
+            #        output += self.colorizeHorizontal(i, j - 1)
+            #    output += self.colorizePoint(i, j)
+            output += f" {v}\n"
+        # Footer
+        for i in range(self.horizontal.just):
+            output += " " * (self.vertical.just + 1)
+            for j, h in enumerate(self.horizontal.labels):
+                if j > 0:
+                    output += " " * self.horizontal.offsets[j - 1]
+                output += str(h).ljust(self.horizontal.just)[i]
+            output += "\n"
+        return output
 
 
 # noinspection PyUnresolvedReferences
