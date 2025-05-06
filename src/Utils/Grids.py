@@ -346,7 +346,8 @@ class Header:
             "objects": 1,
             "vertices": len(set(vertex for face in obj.faces for vertex in face.points)),
             "edges": len(set(line for face in obj.faces for line in face)),
-            "faces": len(obj.faces)
+            "faces": len(obj.faces),
+            "triangles": sum(len(face.points) - 2 for face in obj.faces),
         }
         if depth > 0:
             for child in obj.objects:
