@@ -127,43 +127,6 @@ class _View:
     """Class for rendering 3D objects as 2D views in console
     """
 
-    def __init__(self, faces: set, vertical: str, horizontal: str, title: str) -> None:
-        """Initialising a View instance
-
-        Args:
-            faces (tuple): Object faces to render
-            vertical (Axis): Vertical axis name
-            horizontal (Axis): Horizontal axis name
-            title (str): View title
-        """
-        lines = set(line for face in faces for line in face)
-        vertices = set(line.a for line in lines)
-        ## Vertical axis
-        self.vertical = Axis(vertical, vertices)
-        ## Horizontal axis
-        self.horizontal = Axis(horizontal, vertices)
-        ## View title
-        self.title = title
-        ## Matrix of vertex counts for all axis value intersections
-        self.vertexCounts = self._countVertices(vertices)
-        ## Matrices of horizontal and vertical line counts for all axis value pairs
-        self.horizontalCounts, self.verticalCounts = self._countLines(lines)
-
-    def _countVertices(self, vertices: set) -> tuple:
-        """Counting then number of vertices for each axis value intersection
-
-        Args:
-            vertices (set): Subset of the object's vertices
-
-        Returns:
-            tuple: 2D tuple of vertex counts
-        """
-        return tuple(tuple(
-            len(list(filter(
-                lambda vertex: self.vertical.match(vertex, v) and self.horizontal.match(vertex, h),
-                vertices
-            ))) for h in self.horizontal.values) for v in self.vertical.values)
-
     def _countLines(self, lines: set) -> tuple:
         """Counting then number of lines for each axis value pair
 
@@ -344,7 +307,6 @@ class Header:
         return "\n".join(line + f"╮│{'┤' if info else '│'}│╯"[i] for i, line in enumerate(lines))
 
 
-## \note `distances = tuple(map(lambda d: round(d / minimum), differences))`
 class Values:
     """Class for containing detailed information on axis values
     """
@@ -392,6 +354,8 @@ class View:
         self.horizontal = Values(self.grid.direction.horizontal, self.data["vertices"], 2)
         ## Vertical axis values
         self.vertical = Values(self.grid.direction.vertical, self.data["vertices"], 1)
+        ## Matrix of vertex counts
+        self.vertexCounts = self.countVertices()
 
     def transform(self, obj: Mesh.Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
@@ -414,6 +378,19 @@ class View:
         for key, value in data.items():
             data[key] = tuple(map(obj.__matmul__, value))
         return data
+
+    @Helpers.elapsedTime
+    def countVertices(self) -> list:
+        """Counting vertices whose values match axis values
+
+        Returns:
+            list: 2D list of vertex counts
+        """
+        counts = [[0 for _ in self.horizontal.values] for _ in self.vertical.values]
+        for vertex in self.data["vertices"]:
+            counts[self.vertical.values.index(self.grid.direction.vertical(vertex))] \
+                [self.horizontal.values.index(self.grid.direction.horizontal(vertex))] += 1
+        return counts
 
     def __str__(self) -> str:
         """Getting string representation of the grid mesh
@@ -490,7 +467,6 @@ class Grid:
         return f"{Header(self)}\n{View(self)}"
 
     @staticmethod
-    @Helpers.elapsedTime
     def all(*args, **kwargs) -> str:
         """Getting the render of an object from ALL directions
 
