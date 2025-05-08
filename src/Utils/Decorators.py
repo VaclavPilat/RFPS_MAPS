@@ -116,36 +116,3 @@ def addCopyCall(*fields):
         return cls
 
     return decorator
-
-
-# noinspection PyTypeChecker
-def defaultKwargsValues(*fields):
-    """Creating a decorator that adds default values for kwargs from self fields.
-    Providing new values in meant to be done only using kwargs.
-
-    Returns:
-        Decorator that adds default values to kwargs
-    
-    Examples:
-        >>> class Test:
-        ...     def __init__(self, value):
-        ...             self.value = value
-        ...     @defaultKwargsValues("value")
-        ...     def stringify(self, value):
-        ...             return str(value)
-        ... 
-        >>> Test(10).stringify()
-        '10'
-        >>> Test(10).stringify(value=20)
-        '20'
-    """
-
-    def decorator(method):
-        def wrapper(self, *args, **kwargs):
-            data = {field: getattr(self, field) for field in fields}
-            data.update(**kwargs)
-            return method(self, *args, **data)
-
-        return wrapper
-
-    return decorator
