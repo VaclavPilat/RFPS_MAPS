@@ -118,9 +118,9 @@ def addCopyCall(*fields):
     return decorator
 
 
-# noinspection IncorrectFormatting,PyUnresolvedReferences
+# noinspection PyUnresolvedReferences
 def addOperators(cls: type) -> type:
-    """A decorator for adding counterparts of already defined math operators to classes
+    """A class decorator for adding counterparts of already defined math operators
 
     Args:
         cls (type): Data class type to add operators to
@@ -141,14 +141,14 @@ def addOperators(cls: type) -> type:
         >>> (Number(3) - Number(7)).value
         -4
     """
-    # __add__ + __sub__
-    if hasattr(cls, "__add__") and not hasattr(cls, "__sub__"):
-        def sub(self, other):
-            return self + (-other)
-        cls.__sub__ = sub
-    # __rshift__ + __lshift__
-    if hasattr(cls, "__rshift__") and not hasattr(cls, "__lshift__"):
-        def lshift(self, other):
-            return self >> -other
-        cls.__lshift__ = lshift
+
+    def createOperator(operation: str):
+        def operator(self, other):
+            return getattr(self, operation)(-other)
+
+        return operator
+
+    for positive, negative in {"__add__": "__sub__", "__rshift__": "__lshift__"}.items():
+        if hasattr(cls, positive) and not hasattr(cls, negative):
+            setattr(cls, negative, createOperator(positive))
     return cls
