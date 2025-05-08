@@ -15,16 +15,16 @@ def addInitRepr(cls: type) -> type:
     
     Examples:
         >>> @addInitRepr
-        ... class Wrapped:
+        ... class Number:
         ...     def __init__(self, value=0):
         ...             self.value = value
         ... 
-        >>> repr(Wrapped())
-        'Wrapped()'
-        >>> repr(Wrapped(20))
-        'Wrapped(20)'
-        >>> repr(Wrapped(value=10))
-        'Wrapped(value=10)' 
+        >>> repr(Number())
+        'Number()'
+        >>> repr(Number(20))
+        'Number(20)'
+        >>> repr(Number(value=10))
+        'Number(value=10)'
     """
     oldInit = cls.__init__
 
@@ -53,15 +53,15 @@ def makeImmutable(cls: type) -> type:
     
     Examples:
         >>> @makeImmutable
-        ... class Wrapped:
+        ... class Number:
         ...     def __init__(self, value):
         ...             self.value = value
         ... 
-        >>> Wrapped(5).value
+        >>> Number(5).value
         5
-        >>> Wrapped(10).value = 20
+        >>> Number(10).value = 20
             ...
-        AttributeError: Attempting to modify Wrapped.value 
+        AttributeError: Attempting to modify Number.value
     """
     oldInit = cls.__init__
     oldSetattr = cls.__setattr__
@@ -92,15 +92,15 @@ def addCopyCall(*fields):
     
     Examples:
         >>> @addCopyCall("value")
-        ... class Wrapped:
+        ... class Number:
         ...     def __init__(self, value=0):
         ...             self.value = value
         ... 
-        >>> Wrapped()(10).value
+        >>> Number()(10).value
         10
-        >>> Wrapped(20)().value
+        >>> Number(20)().value
         20
-        >>> Wrapped(30)(value=-5).value
+        >>> Number(30)(value=-5).value
         -5
     """
 
@@ -118,7 +118,7 @@ def addCopyCall(*fields):
     return decorator
 
 
-# noinspection IncorrectFormatting
+# noinspection IncorrectFormatting,PyUnresolvedReferences
 def addOperators(cls: type) -> type:
     """A decorator for adding counterparts of already defined math operators to classes
 
@@ -127,6 +127,19 @@ def addOperators(cls: type) -> type:
 
     Returns:
         type: The same class type with added operators
+
+    Examples:
+        >>> @addOperators
+        ... class Number:
+        ...     def __init__(self, value):
+        ...         self.value = value
+        ...     def __neg__(self) -> "Number":
+        ...         return Number(-self.value)
+        ...     def __add__(self, other: "Number") -> "Number":
+        ...         return Number(self.value + other.value)
+        ...
+        >>> (Number(3) - Number(7)).value
+        -4
     """
     # __add__ + __sub__
     if hasattr(cls, "__add__") and not hasattr(cls, "__sub__"):
