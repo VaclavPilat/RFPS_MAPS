@@ -66,3 +66,11 @@ class LineTest(unittest.TestCase):
         self.assertTrue(Line(V3.LEFT, V3.ZERO) in Line(V3.LEFT, V3.RIGHT))
         self.assertTrue(Line(V3.RIGHT, V3.ZERO) in Line(V3.LEFT, V3.RIGHT))
         self.assertTrue(Line(V3.RIGHT, V3.ZERO) in Line(V3.LEFT, V3.RIGHT * 2))
+
+    def test_parallel(self) -> None:
+        """Testing Line collinearity
+        """
+        self.assertTrue(Line(V3.ZERO, V3.FORWARD) | Line(V3.ZERO, V3.FORWARD))
+        self.assertTrue(Line(V3.ZERO, V3.FORWARD) | Line(V3.ZERO, V3.BACKWARD))
+        self.assertFalse(Line(V3.ZERO, V3.FORWARD) | Line(V3.ZERO, V3.LEFT))
+        self.assertTrue((Line(V3.ZERO, V3.FORWARD) + V3.ONE) | Line(V3.ZERO, V3.FORWARD))

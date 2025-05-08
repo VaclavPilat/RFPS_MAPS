@@ -16,6 +16,14 @@ class Line:
         Args:
             a (Vector.V3): First point of the line.
             b (Vector.V3): Second point of the line.
+
+        Examples:
+            >>> Line(Vector.V3.ZERO, Vector.V3.RIGHT)
+            Line(V3(), V3(y=-1))
+            >>> Line(Vector.V3.FORWARD, Vector.V3.FORWARD)
+            Traceback (most recent call last):
+            ...
+            ValueError: Points must be different
         """
         if a == b:
             raise ValueError("Points must be different")
@@ -29,6 +37,14 @@ class Line:
 
         Returns:
             bool: True if the line is equal to the other line.
+
+        Examples:
+            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) == Line(Vector.V3.ZERO, Vector.V3.ONE)
+            True
+            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) == Line(Vector.V3.ONE, Vector.V3.ZERO)
+            True
+            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) == Line(Vector.V3.ONE, Vector.V3.LEFT)
+            False
         """
         if not isinstance(other, self.__class__):
             return False
@@ -39,6 +55,14 @@ class Line:
 
         Returns:
             int: The hash value of the instance.
+
+        Examples:
+            >>> hash(Line(Vector.V3.ZERO, Vector.V3.ONE))
+            6806318608114759100
+            >>> hash(Line(Vector.V3.ONE, Vector.V3.ZERO))
+            6806318608114759100
+            >>> hash(Line(Vector.V3.ONE, Vector.V3.LEFT))
+            4011719437145138455
         """
         return hash(frozenset((self.a, self.b)))
 
@@ -47,12 +71,22 @@ class Line:
 
         Returns:
             Line: A copy of the line with altered params.
+
+        Examples:
+            >>> Line(Vector.V3.LEFT, Vector.V3.RIGHT)()
+            Line(V3(x=0, y=1, z=0), V3(x=0, y=-1, z=0))
+            >>> Line(Vector.V3.ONE, Vector.V3.UP)(z=0)
+            Line(V3(x=1, y=1, z=0), V3(x=0, y=0, z=0))
         """
         # noinspection PyCallingNonCallable
         return Line(self.a(*args, **kwargs), self.b(*args, **kwargs))
 
     def __iter__(self):
         """Iterating over line bounds
+
+        Examples:
+            >>> list(Line(Vector.V3.LEFT, Vector.V3.RIGHT))
+            [V3(y=1), V3(y=-1)]
         """
         yield self.a
         yield self.b
@@ -65,37 +99,70 @@ class Line:
 
         Returns:
             Line: A copy of the line with offset line bounds.
+
+        Examples:
+            >>> Line(Vector.V3.ONE, Vector.V3.UP) + Vector.V3.UP
+            Line(V3(1, 1, 2), V3(0, 0, 2))
         """
+        if not isinstance(other, Vector.V3):
+            return NotImplemented
         return Line(*(point + other for point in self))
 
-    def __rshift__(self, other: float) -> "Line":
+    def __rshift__(self, other: float | int) -> "Line":
         """Rotating a line by a vector
 
         Args:
-            other (float): Angle to rotate by
+            other (float | int): Angle to rotate by
 
         Returns:
             Line: A copy of the line with rotated line bounds.
+
+        Examples:
+            >>> Line(Vector.V3.ONE, Vector.V3.LEFT) >> 90
+            Line(V3(1, -1, 1), V3(1, 0, 0))
         """
+        if not isinstance(other, (float, int)):
+            return NotImplemented
         return Line(*(point >> other for point in self))
 
+    def __or__(self, other: "Line") -> bool:
+        """Checking whether both lines are in parallel
+
+        Args:
+            other (Line): Other line
+
+        Returns:
+            bool: True if both lines are in parallel
+
+        Examples:
+            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) | Line(Vector.V3.ZERO, Vector.V3.ONE)
+            True
+            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) | Line(Vector.V3.UP, Vector.V3.ONE + Vector.V3.UP)
+            True
+            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) | Line(Vector.V3.UP, Vector.V3.RIGHT)
+            False
+        """
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return not (self.a - self.b) @ (other.a - other.b)
+
     ## \note This method only supports comparisons between lines that are parallel to axis.
-    def __contains__(self, line: "Line") -> bool:
+    def __contains__(self, other: "Line") -> bool:
         """Checking whether a line is contained by this one.
 
         Args:
-            line (Line): Line to check
+            other (Line): Line to check
 
         Returns:
             bool: True if the line is contained by this one.
         """
-        # Quick comparison in case both lines are equal
-        if self == line:
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        if self == other:
             return True
-        for point in line:
-            # Checking if the point "belongs" on the line defined by self bounds
-            if (self.a - self.b) @ (self.a - point):
-                return False
+        if not self | other:
+            return False
+        for point in other:
             # Checking if the point is "between" self bounds
             if not 0 <= ((self.b - self.a) ** (point - self.a)) <= ((self.b - self.a) ** (self.b - self.a)):
                 return False
