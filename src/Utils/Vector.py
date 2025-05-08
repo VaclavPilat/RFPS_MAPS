@@ -4,6 +4,7 @@ from . import Decorators
 import math
 
 
+@Decorators.addOperators
 @Decorators.addInitRepr
 @Decorators.makeImmutable
 @Decorators.addCopyCall("x", "y", "z")
@@ -90,6 +91,18 @@ class V3:
             return NotImplemented
         return self.x == other.x and self.y == other.y and self.z == other.z
 
+    def __neg__(self) -> "V3":
+        """Negating this vector
+
+        Returns:
+            V3: Vector with negated axis values
+
+        Examples:
+            >>> -V3(3, -5, 8)
+            V3(-3, 5, -8)
+        """
+        return V3(-self.x, -self.y, -self.z)
+
     def __add__(self, other: "V3") -> "V3":
         """Adding two vectors together
 
@@ -106,23 +119,6 @@ class V3:
         if not isinstance(other, self.__class__):
             return NotImplemented
         return V3(*(a + b for a, b in zip(self, other)))
-
-    def __sub__(self, other: "V3") -> "V3":
-        """Subtracting one vector from another
-
-        Args:
-            other (V3): Other vector
-
-        Returns:
-            V3: Difference of this and the other vector
-        
-        Examples:
-            >>> V3(1, 2, 3) - V3(-3, 2, 5)
-            V3(4, 0, -2)
-        """
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return V3(*(a - b for a, b in zip(self, other)))
 
     def __mul__(self, other: float) -> "V3":
         """Multiplication of a vector by a number
@@ -216,27 +212,6 @@ class V3:
         if other == 270:
             return V3(-self.y, self.x, self.z)
         return self
-
-    def __lshift__(self, angle: float) -> "V3":
-        """Rotating the vector on Z axis, counter-clockwise
-
-        Args:
-            angle (float): Rotation angle in degreees
-
-        Returns:
-            V3: Rotated vector
-        
-        Examples:
-            >>> V3(1, 2, 3) << 0
-            V3(1, 2, 3)
-            >>> V3(1, 2, 3) << 90
-            V3(-2, 1, 3)
-            >>> V3(1, 2, 3) << 180
-            V3(-1, -2, 3)
-            >>> V3(1, 2, 3) << 270
-            V3(2, -1, 3)
-        """
-        return self.__rshift__(-angle)
 
     def __abs__(self) -> float:
         """Calculating the magnitude of the vector

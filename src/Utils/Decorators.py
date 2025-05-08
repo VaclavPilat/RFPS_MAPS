@@ -116,3 +116,26 @@ def addCopyCall(*fields):
         return cls
 
     return decorator
+
+
+# noinspection IncorrectFormatting
+def addOperators(cls: type) -> type:
+    """A decorator for adding counterparts of already defined math operators to classes
+
+    Args:
+        cls (type): Data class type to add operators to
+
+    Returns:
+        type: The same class type with added operators
+    """
+    # __add__ + __sub__
+    if hasattr(cls, "__add__") and not hasattr(cls, "__sub__"):
+        def sub(self, other):
+            return self + (-other)
+        cls.__sub__ = sub
+    # __rshift__ + __lshift__
+    if hasattr(cls, "__rshift__") and not hasattr(cls, "__lshift__"):
+        def lshift(self, other):
+            return self >> -other
+        cls.__lshift__ = lshift
+    return cls

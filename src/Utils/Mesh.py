@@ -4,6 +4,7 @@
 from . import Decorators, Helpers, Colors, Vector
 
 
+@Decorators.addOperators
 @Decorators.makeImmutable
 @Decorators.addInitRepr
 class Line:
