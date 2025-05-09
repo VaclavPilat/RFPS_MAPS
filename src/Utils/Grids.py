@@ -125,82 +125,6 @@ class Direction(enum.Enum):
             yield "".join(line[::1 if self.horizontal else -1])
 
 
-# noinspection PyUnresolvedReferences
-## \todo Make line count calculations much faster
-# \todo Update legend information and add proper vertex and line counts according to Blender
-@Decorators.makeImmutable
-class _View:
-    """Class for rendering 3D objects as 2D views in console
-    """
-
-    def pointChar(self, vertical: int, horizontal: int) -> str:
-        """Getting a character representing point shape
-
-        Args:
-            vertical (int): Vertical vertex index
-            horizontal (int): Horizontal vertex index
-
-        Returns:
-            str: Character representing point shape
-        """
-        shape = Shape.NONE
-        if horizontal > 0 and self.horizontalCounts[vertical][horizontal - 1]:
-            shape |= Shape.LEFT
-        if vertical > 0 and self.verticalCounts[vertical - 1][horizontal]:
-            shape |= Shape.TOP
-        if horizontal < len(self.horizontal.values) - 1 and self.horizontalCounts[vertical][horizontal]:
-            shape |= Shape.RIGHT
-        if vertical < len(self.vertical.values) - 1 and self.verticalCounts[vertical][horizontal]:
-            shape |= Shape.BOTTOM
-        return str(shape)
-
-    def colorizePoint(self, vertical: int, horizontal: int) -> str:
-        """Colorizing a single point based on the number of vertices behind it
-
-        Args:
-            vertical (int): Vertical axis value index
-            horizontal (int): Horizontal axis value index
-
-        Returns:
-            str: ANSI colored box character representing the point
-        """
-        vertices = self.vertexCounts[vertical][horizontal]
-        edges = max(
-            0 if horizontal == 0 else self.horizontalCounts[vertical][horizontal - 1],
-            0 if vertical == 0 else self.verticalCounts[vertical - 1][horizontal],
-            0 if horizontal >= len(self.horizontal.values) - 1 else self.horizontalCounts[vertical][horizontal],
-            0 if vertical >= len(self.vertical.values) - 1 else self.verticalCounts[vertical][horizontal]
-        )
-        return f"{Colors.TEMPERATURE[Show.VERTICES.vertex(vertices, edges)]}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
-
-    def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
-        """Colorizing a horizontal line based on the number of edges behind it
-
-        Args:
-            vertical (int): Vertical line value index
-            horizontal (int): Horizontal line value index
-
-        Returns:
-            str: ANSI colored string representing the line
-        """
-        count = self.horizontalCounts[vertical][horizontal]
-        chars = self.horizontal.distances[horizontal] * 2 - 1
-        return f"{Colors.TEMPERATURE[Show.VERTICES.edge(count)]}{('━' if count else '╌') * chars}{Colors.NONE}"
-
-    def colorizeVertical(self, vertical: int, horizontal: int) -> str:
-        """Colorizing a vertical line based on the number of edges behind it
-
-        Args:
-            vertical (int): Vertical line value index
-            horizontal (int): Horizontal line value index
-
-        Returns:
-            str: ANSI colored character representing the line
-        """
-        count = self.verticalCounts[vertical][horizontal]
-        return f"{Colors.TEMPERATURE[Show.VERTICES.edge(count)]}{'┃' if count else '┆'}{Colors.NONE}"
-
-
 class Header:
     """Class for displaying basic information about a grid
     """
@@ -324,6 +248,73 @@ class View:
         ## Vertical and horizontal line counts
         self.verticalCounts, self.horizontalCounts = self.countLines()
 
+    def pointChar(self, vertical: int, horizontal: int) -> str:
+        """Getting a character representing point shape
+
+        Args:
+            vertical (int): Vertical vertex index
+            horizontal (int): Horizontal vertex index
+
+        Returns:
+            str: Character representing point shape
+        """
+        shape = Shape.NONE
+        if horizontal > 0 and self.horizontalCounts[vertical][horizontal - 1]:
+            shape |= Shape.LEFT
+        if vertical > 0 and self.verticalCounts[vertical - 1][horizontal]:
+            shape |= Shape.TOP
+        if horizontal < len(self.horizontal.values) - 1 and self.horizontalCounts[vertical][horizontal]:
+            shape |= Shape.RIGHT
+        if vertical < len(self.vertical.values) - 1 and self.verticalCounts[vertical][horizontal]:
+            shape |= Shape.BOTTOM
+        return str(shape)
+
+    def colorizePoint(self, vertical: int, horizontal: int) -> str:
+        """Colorizing a single point based on the number of vertices behind it
+
+        Args:
+            vertical (int): Vertical axis value index
+            horizontal (int): Horizontal axis value index
+
+        Returns:
+            str: ANSI colored box character representing the point
+        """
+        vertices = self.vertexCounts[vertical][horizontal]
+        edges = max(
+            0 if horizontal == 0 else self.horizontalCounts[vertical][horizontal - 1],
+            0 if vertical == 0 else self.verticalCounts[vertical - 1][horizontal],
+            0 if horizontal >= len(self.horizontal.values) - 1 else self.horizontalCounts[vertical][horizontal],
+            0 if vertical >= len(self.vertical.values) - 1 else self.verticalCounts[vertical][horizontal]
+        )
+        return f"{Colors.TEMPERATURE[edges]}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
+
+    def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
+        """Colorizing a horizontal line based on the number of edges behind it
+
+        Args:
+            vertical (int): Vertical line value index
+            horizontal (int): Horizontal line value index
+
+        Returns:
+            str: ANSI colored string representing the line
+        """
+        count = self.horizontalCounts[vertical][horizontal]
+        chars = self.horizontal.offsets[horizontal]
+        return f"{Colors.TEMPERATURE[count]}{('━' if count else '╌') * chars}{Colors.NONE}"
+
+    def colorizeVertical(self, vertical: int, horizontal: int) -> str:
+        """Colorizing a vertical line based on the number of edges behind it
+
+        Args:
+            vertical (int): Vertical line value index
+            horizontal (int): Horizontal line value index
+
+        Returns:
+            str: ANSI colored character representing the line
+        """
+        count = self.verticalCounts[vertical][horizontal]
+        return f"{Colors.TEMPERATURE[count]}{'┃' if count else '┆'}{Colors.NONE}"
+
     def transform(self, obj: Mesh.Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
 
@@ -418,13 +409,13 @@ class View:
                     for k, h in enumerate(self.horizontal.labels):
                         if k > 0:
                             output += " " * self.horizontal.offsets[k - 1]
-                        #output += self.colorizeVertical(i - 1, k)
+                        output += self.colorizeVertical(i - 1, k)
                     output += "\n"
             output += str(v).rjust(self.vertical.just) + " "
-            #for j, h in enumerate(self.horizontal.labels):
-            #    if j > 0:
-            #        output += self.colorizeHorizontal(i, j - 1)
-            #    output += self.colorizePoint(i, j)
+            for j, h in enumerate(self.horizontal.labels):
+                if j > 0:
+                    output += self.colorizeHorizontal(i, j - 1)
+                output += self.colorizePoint(i, j)
             output += f" {v}\n"
         # Footer
         for i in range(self.horizontal.just):
