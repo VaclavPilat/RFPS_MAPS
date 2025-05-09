@@ -46,6 +46,12 @@ class Axis(enum.Enum):
     ## Negative Z axis
     _Z = -3
 
+    def __init__(self, value: int) -> None:
+        """Initialising an Axis instance
+        """
+        ## Line representing axis direction
+        self.line = Mesh.Line(Vector.V3.ZERO, Vector.V3(**{str(self): value}))
+
     def __bool__(self) -> bool:
         """Checking whether the axis is positive or negative
 
@@ -126,49 +132,6 @@ class Direction(enum.Enum):
 class _View:
     """Class for rendering 3D objects as 2D views in console
     """
-
-    def _countLines(self, lines: set) -> tuple:
-        """Counting then number of lines for each axis value pair
-
-        Args:
-            lines (set): Subset of the object's lines
-
-        Returns:
-            tuple: 2D tuples of line counts, for horizontal and vertical lines
-        """
-        lines = tuple(self._flattenLines(lines))
-        return (
-            tuple(tuple(
-                len(list(filter(
-                    lambda line: Mesh.Line(
-                        Vector.V3(**{self.horizontal.name: h1, self.vertical.name: v}),
-                        Vector.V3(**{self.horizontal.name: h2, self.vertical.name: v})
-                    ) in line,
-                    lines
-                ))) for h1, h2 in zip(self.horizontal.values, self.horizontal.values[1:])
-            ) for v in self.vertical.values),
-            tuple(tuple(
-                len(list(filter(
-                    lambda line: Mesh.Line(
-                        Vector.V3(**{self.horizontal.name: h, self.vertical.name: v1}),
-                        Vector.V3(**{self.horizontal.name: h, self.vertical.name: v2})
-                    ) in line,
-                    lines
-                ))) for h in self.horizontal.values
-            ) for v1, v2 in zip(self.vertical.values, self.vertical.values[1:]))
-        )
-
-    def _flattenLines(self, lines: set):
-        """Flattening lines (removing their third dimension)
-
-        Args:
-            lines (set): Subset of the object's lines
-        """
-        for line in lines:
-            try:
-                yield line(**{({"x", "y", "z"} - {self.horizontal.name, self.vertical.name}).pop(): 0})
-            except ValueError:
-                pass
 
     def pointChar(self, vertical: int, horizontal: int) -> str:
         """Getting a character representing point shape
@@ -319,6 +282,8 @@ class Values:
             vertices (tuple): Tuple of transformed vertex positions
             multiplier (int): Offset size multiplier
         """
+        ## Axis
+        self.axis = axis
         ## Axis values
         if not vertices:
             raise ValueError("No vertices were provided")
@@ -356,6 +321,8 @@ class View:
         self.vertical = Values(self.grid.direction.vertical, self.data["vertices"], 1)
         ## Matrix of vertex counts
         self.vertexCounts = self.countVertices()
+        ## Vertical and horizontal line counts
+        self.verticalCounts, self.horizontalCounts = self.countLines()
 
     def transform(self, obj: Mesh.Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
@@ -379,7 +346,6 @@ class View:
             data[key] = tuple(map(obj.__matmul__, value))
         return data
 
-    @Helpers.elapsedTime
     def countVertices(self) -> list:
         """Counting vertices whose values match axis values
 
@@ -388,9 +354,46 @@ class View:
         """
         counts = [[0 for _ in self.horizontal.values] for _ in self.vertical.values]
         for vertex in self.data["vertices"]:
-            counts[self.vertical.values.index(self.grid.direction.vertical(vertex))] \
-                [self.horizontal.values.index(self.grid.direction.horizontal(vertex))] += 1
+            counts[self.vertical.values.index(self.vertical.axis(vertex))] \
+                [self.horizontal.values.index(self.horizontal.axis(vertex))] += 1
         return counts
+
+    def flattenLines(self, lines: set):
+        """Flattening lines (removing their third dimension)
+
+        Args:
+            lines (set): Subset of the object's lines
+        """
+        for line in lines:
+            try:
+                yield line(**{({"x", "y", "z"} - {str(self.horizontal.axis), str(self.vertical.axis)}).pop(): 0})
+            except ValueError:
+                pass
+
+    # noinspection DuplicatedCode
+    @Helpers.elapsedTime
+    def countLines(self) -> tuple:
+        """Counting the number of lines for each axis value pair
+
+        Returns:
+            tuple: Tuple of 2D lists of line counts
+        """
+        verticalCounts = [[0 for _ in self.horizontal.values] for _ in range(len(self.vertical.values) - 1)]
+        horizontalCounts = [[0 for _ in range(len(self.horizontal.values) - 1)] for _ in self.vertical.values]
+        for line in self.flattenLines(self.data["edges"]):
+            if line | self.vertical.axis.line:
+                v1 = self.vertical.values.index(self.vertical.axis(line.a))
+                v2 = self.vertical.values.index(self.vertical.axis(line.b))
+                h = self.horizontal.values.index(self.horizontal.axis(line.a))
+                for i in range(min(v1, v2), max(v1, v2)):
+                    verticalCounts[i][h] += 1
+            elif line | self.horizontal.axis.line:
+                v = self.vertical.values.index(self.vertical.axis(line.a))
+                h1 = self.horizontal.values.index(self.horizontal.axis(line.a))
+                h2 = self.horizontal.values.index(self.horizontal.axis(line.b))
+                for i in range(min(h1, h2), max(h1, h2)):
+                    horizontalCounts[v][i] += 1
+        return verticalCounts, horizontalCounts
 
     def __str__(self) -> str:
         """Getting string representation of the grid mesh

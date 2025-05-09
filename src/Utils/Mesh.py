@@ -147,28 +147,6 @@ class Line:
             return NotImplemented
         return not (self.a - self.b) @ (other.a - other.b)
 
-    ## \note This method only supports comparisons between lines that are parallel to axis.
-    def __contains__(self, other: "Line") -> bool:
-        """Checking whether a line is contained by this one.
-
-        Args:
-            other (Line): Line to check
-
-        Returns:
-            bool: True if the line is contained by this one.
-        """
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        if self == other:
-            return True
-        if not self | other:
-            return False
-        for point in other:
-            # Checking if the point is "between" self bounds
-            if not 0 <= ((self.b - self.a) ** (point - self.a)) <= ((self.b - self.a) ** (self.b - self.a)):
-                return False
-        return True
-
 
 # noinspection PyCallingNonCallable
 @Decorators.makeImmutable

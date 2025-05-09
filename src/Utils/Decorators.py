@@ -133,9 +133,9 @@ def addOperators(cls: type) -> type:
         ... class Number:
         ...     def __init__(self, value):
         ...         self.value = value
-        ...     def __neg__(self) -> "Number":
+        ...     def __neg__(self):
         ...         return Number(-self.value)
-        ...     def __add__(self, other: "Number") -> "Number":
+        ...     def __add__(self, other):
         ...         return Number(self.value + other.value)
         ...
         >>> (Number(3) - Number(7)).value
