@@ -30,3 +30,17 @@ def alen(string: str) -> int:
         int: Length of the pure string
     """
     return len(re.sub("\\033\[\d+;?\d*m", "", string))
+
+
+def temperature(count: int) -> str:
+    """Getting a color representing the provided amount
+
+    Args:
+        count (int): Amount of items to represent by a color
+
+    Returns:
+        str: Color representing the provided amount
+    """
+    if count >= len(TEMPERATURE):
+        count = len(TEMPERATURE) - 1
+    return TEMPERATURE[count]

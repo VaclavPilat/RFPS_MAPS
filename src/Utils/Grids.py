@@ -125,6 +125,28 @@ class Direction(enum.Enum):
             yield "".join(line[::1 if self.horizontal else -1])
 
 
+class Show(enum.Enum):
+    """Enums for adjusting vertex and line colors
+    """
+
+    ## Colorizing vertices based on their counts and disregarding line counts
+    VERTICES = (lambda vertex, top, right, bottom, left: vertex, lambda line: 0)
+    ## Colorizing vertices based on neighbouring line counts
+    EDGES = (lambda vertex, top, right, bottom, left: max(top, right, bottom, left), lambda line: line)
+
+    def __init__(self, point, line) -> None:
+        """Initialising a Show instance
+
+        Args:
+            point: Function for updating color index for points
+            line: Function for updating color index for lines
+        """
+        ## Function for adjusting point count
+        self.point = point
+        ## Function for adjusting line count
+        self.line = line
+
+
 class Header:
     """Class for displaying basic information about a grid
     """
@@ -170,8 +192,8 @@ class Header:
         yield f"{Colors.BOLD}{self.grid.obj.name}{Colors.NONE}"
         yield ", ".join(f"{value} {key}" for key, value in self.counts.items())
         # Second column
-        yield self.grid.direction.title
-        yield " ".join(f"{Colors.TEMPERATURE[i]}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE
+        yield f"{self.grid.direction.title} of {self.grid.show.name}"
+        yield " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE
 
     def __str__(self) -> str:
         """Getting a string representation of a grid header
@@ -280,13 +302,12 @@ class View:
             str: ANSI colored box character representing the point
         """
         vertices = self.vertexCounts[vertical][horizontal]
-        edges = max(
-            0 if horizontal == 0 else self.horizontalCounts[vertical][horizontal - 1],
-            0 if vertical == 0 else self.verticalCounts[vertical - 1][horizontal],
-            0 if horizontal >= len(self.horizontal.values) - 1 else self.horizontalCounts[vertical][horizontal],
-            0 if vertical >= len(self.vertical.values) - 1 else self.verticalCounts[vertical][horizontal]
-        )
-        return f"{Colors.TEMPERATURE[edges]}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
+        left = 0 if horizontal == 0 else self.horizontalCounts[vertical][horizontal - 1]
+        top = 0 if vertical == 0 else self.verticalCounts[vertical - 1][horizontal]
+        right = 0 if horizontal >= len(self.horizontal.values) - 1 else self.horizontalCounts[vertical][horizontal]
+        bottom = 0 if vertical >= len(self.vertical.values) - 1 else self.verticalCounts[vertical][horizontal]
+        count = self.grid.show.point(vertices, top, right, bottom, left)
+        return f"{Colors.temperature(count)}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
 
     def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
         """Colorizing a horizontal line based on the number of edges behind it
@@ -300,7 +321,7 @@ class View:
         """
         count = self.horizontalCounts[vertical][horizontal]
         chars = self.horizontal.offsets[horizontal]
-        return f"{Colors.TEMPERATURE[count]}{('━' if count else '╌') * chars}{Colors.NONE}"
+        return f"{Colors.temperature(self.grid.show.line(count))}{('━' if count else '╌') * chars}{Colors.NONE}"
 
     def colorizeVertical(self, vertical: int, horizontal: int) -> str:
         """Colorizing a vertical line based on the number of edges behind it
@@ -313,7 +334,7 @@ class View:
             str: ANSI colored character representing the line
         """
         count = self.verticalCounts[vertical][horizontal]
-        return f"{Colors.TEMPERATURE[count]}{'┃' if count else '┆'}{Colors.NONE}"
+        return f"{Colors.temperature(self.grid.show.line(count))}{'┃' if count else '┆'}{Colors.NONE}"
 
     def transform(self, obj: Mesh.Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
@@ -362,7 +383,6 @@ class View:
                 pass
 
     # noinspection DuplicatedCode
-    @Helpers.elapsedTime
     def countLines(self) -> tuple:
         """Counting the number of lines for each axis value pair
 
@@ -436,21 +456,23 @@ class Grid:
     """Class for rendering 3D object(s) from a specified direction
     """
 
-    def __init__(self, obj: Mesh.Object, direction: Direction, depth: int = 0) -> None:
+    def __init__(self, obj: Mesh.Object, depth: int = 0, direction: Direction = Direction.TOP, show: Show = Show.EDGES) -> None:
         """Initialising a Grid instance
 
         Args:
             obj (Mesh.Object): Object whose mesh will be rendered
-            direction (Direction): Direction from which the object is viewed
             depth (int, optional): Depth from which mesh data will be gathered. Defaults to 0.
+            direction (Direction, optional): Direction from which the object is viewed. Defaults to Direction.TOP.
+            show (Show, optional): Selection of how colors do get shown. Defaults to Show.EDGES.
         """
         ## Object to visualise
         self.obj = obj
+        ## Render depth
+        self.depth = depth
         ## View direction
         self.direction = direction
-        ## Render depth
-        assert depth >= 0, "Depth cannot be negative"
-        self.depth = depth
+        ## Show settings
+        self.show = show
 
     def __str__(self) -> str:
         """Getting string representation of the grid
