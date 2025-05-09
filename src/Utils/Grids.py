@@ -132,7 +132,8 @@ class Show(enum.Enum):
     ## Colorizing vertices based on their counts and disregarding line counts
     VERTICES = (lambda vertex, top, right, bottom, left: vertex, lambda line: 0)
     ## Colorizing vertices based on neighbouring line counts
-    EDGES = (lambda vertex, top, right, bottom, left: max(top, right, bottom, left), lambda line: line)
+    EDGES = (lambda vertex, top, right, bottom, left: next((x for x in (top, bottom, left, right) if x), 0),
+             lambda line: line)
 
     def __init__(self, point, line) -> None:
         """Initialising a Show instance
