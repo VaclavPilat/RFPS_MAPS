@@ -148,6 +148,7 @@ class Show(enum.Enum):
         self.line = line
 
 
+@Decorators.makeImmutable
 class Header:
     """Class for displaying basic information about a grid
     """
@@ -162,6 +163,15 @@ class Header:
         self.grid = grid
         ## Data counts
         self.counts = self.count(self.grid.obj, self.grid.depth)
+        ## Info strings
+        self.info = (
+            # First column
+            f"{Colors.BOLD}{self.grid.obj.name}{Colors.NONE}" + f" (+{self.grid.depth} layers deep)",
+            ", ".join(f"{value} {key}" for key, value in self.counts.items()),
+            # Second column
+            f"{self.grid.direction.title} of {self.grid.show.name}",
+            " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
+        )
 
     def count(self, obj: Mesh.Object, depth: int) -> dict:
         """Counting faces, edges and vertices of a specified object (recursively)
@@ -186,37 +196,28 @@ class Header:
                     counts[key] += value
         return counts
 
-    def __iter__(self):
-        """Getting string information about the object being rendered to be displayed
-        """
-        # First column
-        yield f"{Colors.BOLD}{self.grid.obj.name}{Colors.NONE}"
-        yield ", ".join(f"{value} {key}" for key, value in self.counts.items())
-        # Second column
-        yield f"{self.grid.direction.title} of {self.grid.show.name}"
-        yield " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE
-
     def __str__(self) -> str:
         """Getting a string representation of a grid header
 
         Returns:
              str: ANSI colored string representation of a grid header
         """
-        info = tuple(self)
         lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.grid.direction), f"╰{'─' * 7}"]
-        for i in range((len(info) + 1) // 2):
-            just = max(map(Colors.alen, info[i * 2:i * 2 + 2]))
+        for i in range((len(self.info) + 1) // 2):
+            just = max(map(Colors.alen, self.info[i * 2:i * 2 + 2]))
             for j in range(5):
                 lines[j] += f"┬│{'┼' if i else '├'}│┴"[j]
+                index = i * 2 + j // 2
                 if j % 2 == 0:
                     lines[j] += "─" * (just + 2)
-                elif i * 2 + j // 2 < len(info):
-                    lines[j] += f" {info[i * 2 + j // 2]}{' ' * (just - Colors.alen(info[i * 2 + j // 2]) + 1)}"
+                elif index < len(self.info):
+                    lines[j] += f" {self.info[index]}{' ' * (just - Colors.alen(self.info[index]) + 1)}"
                 else:
                     lines[j] += " " * (just + 2)
-        return "\n".join(line + f"╮│{'┤' if info else '│'}│╯"[i] for i, line in enumerate(lines))
+        return "\n".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] for i, line in enumerate(lines))
 
 
+@Decorators.makeImmutable
 class Values:
     """Class for containing detailed information on axis values
     """
@@ -248,6 +249,7 @@ class Values:
             self.offsets = tuple(map(lambda d: round(d / minimum) * multiplier - 1, differences))
 
 
+@Decorators.makeImmutable
 class View:
     """Class for rendering a 3D mesh as text
     """
