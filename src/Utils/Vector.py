@@ -1,5 +1,7 @@
 ## \file
-# Implementations of vector classes
+# Implementations of a vector class.
+# \todo Use Decimal everywhere with float trap set to True
+# \todo Add multiple axis rotation: `V3 >> V3`
 from . import Decorators
 import math
 
@@ -8,9 +10,11 @@ import math
 @Decorators.addInitRepr
 @Decorators.makeImmutable
 @Decorators.addCopyCall("x", "y", "z")
-## \todo Use Decimal everywhere with float trap set to True
 class V3:
-    """Class for representing a 3D vector, similar to a Unity3D implementation of Vector3
+    """Class for representing a 3D vector.
+
+    It is similar to a Unity3D implementation of Vector3.
+    The X axis is for forward/backward values, Y is for left/right and Z is for vertical values.
     """
 
     def __init__(self, x: float = 0, y: float = 0, z: float = 0) -> None:
@@ -179,8 +183,6 @@ class V3:
             return NotImplemented
         return V3(*(a / other for a in self))
 
-    ## \note Currently only supports float as an argument
-    # \todo Add multiple axis rotation: >>> V3() >> V3()
     def __rshift__(self, other: float) -> "V3":
         """Rotating the vector on Z axis, clockwise
 

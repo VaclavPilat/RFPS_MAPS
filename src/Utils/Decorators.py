@@ -1,6 +1,6 @@
 ## \file
 # Custom decorator functions for data classes.
-# Method injection is preferred over subclassing
+# Method injection is preferred over subclassing.
 
 
 def addInitRepr(cls: type) -> type:

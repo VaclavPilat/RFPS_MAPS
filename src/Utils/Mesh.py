@@ -1,6 +1,7 @@
 ## \file
-# Classes for representing mesh data
-# \todo Refactor and add tests
+# Classes for representing mesh data.
+# Mesh data is stored in Objects (a recursive tree-like structure) that contain Faces that consist of Lines.
+# \todo Refactor and add tests (Face, Object)
 from . import Decorators, Helpers, Colors, Vector
 
 
@@ -8,7 +9,9 @@ from . import Decorators, Helpers, Colors, Vector
 @Decorators.makeImmutable
 @Decorators.addInitRepr
 class Line:
-    """A line connecting two points.
+    """A line between two points.
+
+    It is defined as a set of 2 vertices (since it does not have a direction).
     """
 
     def __init__(self, a: Vector.V3, b: Vector.V3) -> None:

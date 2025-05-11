@@ -1,6 +1,6 @@
 ## \file
-# Classes and various other small helpful constructs
-# \todo Add tests
+# Small helpful constructs that don't fit anywhere else.
+# \todo Add tests and better docstrings
 from . import Decorators
 import time
 

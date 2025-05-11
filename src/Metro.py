@@ -1,5 +1,5 @@
 ## \file
-# Implementation of the Metro station map
+# Implementation of the Metro station map.
 # \todo Refactor
 if __name__ == "__main__":
     try:

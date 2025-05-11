@@ -1,5 +1,6 @@
 ## \file
-# Implementation of a Tile mesh object
+# Implementation of a Tile mesh object.
+# Tiles are Objects that are rectangle-shaped (without specifying height).
 # \todo Refactor and add tests
 from . import Decorators, Mesh, Vector
 import enum

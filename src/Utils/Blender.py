@@ -1,5 +1,5 @@
 ## \file
-# Functionality for bridging Blender usage with the rest of code
+# Functionality for bridging own mesh classes with Blender.
 from . import Mesh, Vector
 # noinspection PyUnresolvedReferences
 import bpy, bmesh, math

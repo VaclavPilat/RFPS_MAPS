@@ -1,5 +1,7 @@
 ## \file
-# Variables with ANSI color strings
+# Variables and function for dealing with ANSI color strings.
+# Color will not be used if python detects that stdout is not a tty (console).
+# This can be overturned by setting a "COLOR" environment variable to any value.
 import sys, os, re
 
 

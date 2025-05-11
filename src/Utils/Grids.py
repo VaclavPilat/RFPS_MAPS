@@ -1,6 +1,9 @@
 ## \file
-# Functionality for rendering Object structure in console
-# \todo Add tests
+# Functionality for rendering Object structure in console.
+# Logic for presenting 3D objects as 2D renders from preset directions and other customizable settings.
+# \todo Refactor, add tests and better docstrings
+# \todo Add an option to show bounding boxes of objects
+# \todo Add an option for toggling between fixed/independent axis value diffs
 from . import Decorators, Colors, Mesh, Vector
 import enum
 
@@ -452,8 +455,6 @@ class View:
 
 
 # noinspection PyUnresolvedReferences
-## \todo Add an option to show bounding boxes of objects
-# \todo Add an option for toggling between fixed/independent axis value diffs
 @Decorators.makeImmutable
 class Grid:
     """Class for rendering 3D object(s) from a specified direction
