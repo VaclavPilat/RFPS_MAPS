@@ -1,45 +1,52 @@
 ## \file
-# Functionality for bridging own mesh classes with Blender.
+# Functionality for bridging own data representation with Blender.
 from . import Mesh, Vector
 # noinspection PyUnresolvedReferences
 import bpy, bmesh, math
 
 
-def create(self):
-    """Creating a blender mesh from face vertices
-
-    Returns:
-        Created mesh object
+class Objects:
+    """Static methods for constructing Blender objects
     """
-    mesh = bpy.data.meshes.new(self.name)
-    bm = bmesh.new()
-    vertices = {}
-    for face in self.faces:
-        for vert in face.points:
-            if vert not in vertices:
-                vertices[vert] = bm.verts.new(tuple(vert))
-        bm.faces.new([vertices[vert] for vert in face.points])
-    bm.to_mesh(mesh)
-    return mesh
 
+    @staticmethod
+    def create(obj: Mesh.Object):
+        """Creating a blender mesh from face vertices
 
-def build(self):
-    """Building a blender object from an Object instance
+        Args:
+            obj (Mesh.Object): Object whose mesh is being created
 
-    Returns:
-        Built blender object
-    """
-    obj = bpy.data.objects.new(self.name, self.create() if len(self.faces) else None)
-    obj.location = list(self.position)
-    obj.rotation_euler = [math.radians(value) for value in Vector.V3.UP * self.rotation]
-    bpy.context.scene.collection.objects.link(obj)
-    for child in self.objects:
-        child.build().parent = obj
-    return obj
+        Returns:
+            Created mesh object
+        """
+        data = bpy.data.meshes.new(obj.name)
+        mesh = bmesh.new()
+        vertices = {}
+        for face in obj.faces:
+            for vert in face.points:
+                if vert not in vertices:
+                    vertices[vert] = mesh.verts.new(tuple(vert))
+            mesh.faces.new([vertices[vert] for vert in face.points])
+        mesh.to_mesh(data)
+        return data
 
+    @staticmethod
+    def build(obj: Mesh.Object):
+        """Building a blender object from an Object instance
 
-Mesh.Object.create = create
-Mesh.Object.build = build
+        Args:
+            obj (Mesh.Object): Object being built
+
+        Returns:
+            Built blender object
+        """
+        data = bpy.data.objects.new(obj.name, Objects.create(obj) if len(obj.faces) else None)
+        data.location = list(obj.position)
+        data.rotation_euler = [math.radians(value) for value in Vector.V3.UP * obj.rotation]
+        bpy.context.scene.collection.objects.link(data)
+        for child in obj.objects:
+            Objects.build(child).parent = data
+        return data
 
 
 class Setup:
@@ -47,7 +54,7 @@ class Setup:
     """
 
     @staticmethod
-    def setupForDevelopment() -> None:
+    def development() -> None:
         """Setting up Blender for easier development
         """
         # Hiding splash screen
@@ -65,7 +72,7 @@ class Setup:
                         return
 
     @staticmethod
-    def purgeExistingObjects() -> None:
+    def purge() -> None:
         """Clearing all objects and collections in scene
         """
         for collection in bpy.context.scene.collection.children:

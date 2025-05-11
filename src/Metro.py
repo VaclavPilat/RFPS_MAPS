@@ -140,17 +140,15 @@ def Metro(self) -> None:
 
 
 if __name__ == "__main__":
-    # noinspection PyUnboundLocalVariable
-    if BLENDER:
-        from Utils import Blender
-
-        Blender.Setup.setupForDevelopment()
-        Blender.Setup.purgeExistingObjects()
     # noinspection PyTypeChecker
     metro = Metro("Metro station")
-    print(Grids.Grid.all(metro, 2))
-    # noinspection PyUnresolvedReferences
-    metro.printHierarchy()
+    # noinspection PyUnboundLocalVariable,IncorrectFormatting
     if BLENDER:
-        # noinspection PyUnresolvedReferences
-        metro.build()
+        from Utils import Blender
+        Blender.Setup.purge()
+        Blender.Setup.development()
+        # noinspection PyTypeChecker
+        Blender.Objects.build(metro)
+    else:
+        print(Grids.Grid.all(metro, 2))
+        metro.printHierarchy()
