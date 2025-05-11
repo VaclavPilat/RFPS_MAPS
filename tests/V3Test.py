@@ -85,3 +85,10 @@ class V3Test(unittest.TestCase):
         self.assertEqual(V3(1, 2, 3) @ V3(1, 2, 3), V3.ZERO)
         self.assertEqual(V3(1, 2, 3) @ V3(-1, -2, -3), V3.ZERO)
         self.assertNotEqual(V3(1, 2, 3) @ V3(4, 5, 6), V3.ZERO)
+
+    def test_bool(self) -> None:
+        """Testing __bool__ implementation
+        """
+        self.assertFalse(V3.ZERO)
+        for v in (V3.LEFT, V3.FORWARD, V3.UP, V3.ONE):
+            self.assertTrue(v)

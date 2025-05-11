@@ -1,7 +1,7 @@
 ## \file
 # Functionality for rendering Object structure in console
-# \todo Refactor and add tests
-from . import Decorators, Colors, Mesh, Vector, Helpers
+# \todo Add tests
+from . import Decorators, Colors, Mesh, Vector
 import enum
 
 

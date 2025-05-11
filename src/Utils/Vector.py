@@ -272,23 +272,6 @@ class V3:
         """
         return self.x != 0 or self.y != 0 or self.z != 0
 
-    def __pow__(self, other: "V3") -> float:
-        """Calculating the dot product of two vectors
-
-        Args:
-            other (V3): Other vector
-
-        Returns:
-            float: Dot product of two vectors
-
-        Examples:
-            >>> V3(1, 2, 3) ** V3(4, 5, 6)
-            32
-        """
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return self.x * other.x + self.y * other.y + self.z * other.z
-
 
 ## Zero-filled vector, equals to V3(0, 0, 0)
 V3.ZERO = V3()
