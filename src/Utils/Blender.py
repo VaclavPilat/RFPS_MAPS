@@ -57,18 +57,14 @@ class Setup:
     def development() -> None:
         """Setting up Blender for easier development
         """
-        # Hiding splash screen
-        bpy.context.preferences.view.show_splash = False
+        bpy.context.preferences.view.show_splash = False  # Hiding splash screen
         for area in bpy.context.screen.areas:
             if area.type == "VIEW_3D":
                 for space in area.spaces:
                     if space.type == "VIEW_3D":
-                        # Showing mesh sizes (vertice/edge/face counts)
-                        space.overlay.show_stats = True
-                        # Setting colors of faces based on their orientation
-                        space.overlay.show_face_orientation = True
-                        # Showing textures
-                        space.shading.type = "MATERIAL"
+                        space.overlay.show_stats = True  # Showing mesh sizes (vertice/edge/face counts)
+                        space.overlay.show_face_orientation = True  # Setting colors of faces based on their orientation
+                        space.shading.type = "MATERIAL"  # Showing textures
                         return
 
     @staticmethod

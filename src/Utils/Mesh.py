@@ -154,12 +154,11 @@ class Line:
 # noinspection PyCallingNonCallable
 @Decorators.makeImmutable
 @Decorators.addInitRepr
-@Decorators.addCopyCall("points")
 class Face:
     """Class for representing a face
     """
 
-    def __init__(self, points: tuple) -> None:
+    def __init__(self, *points) -> None:
         """Initializing a Face instance
         """
         ## Vertices making up the face
@@ -171,6 +170,10 @@ class Face:
 
     def __iter__(self):
         """Iterating over face edges
+
+        Examples:
+            >>> tuple(Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP))
+            (Line(V3(z=1), V3()), Line(V3(), V3(1, 1, 1)), Line(V3(1, 1, 1), V3(z=1)))
         """
         for i in range(len(self.points)):
             yield Line(self.points[i - 1], self.points[i])
@@ -183,6 +186,14 @@ class Face:
 
         Returns:
             bool: True if the two faces are equal
+
+        Examples:
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) == Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP)
+            True
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) == Face(Vector.V3.ONE, Vector.V3.UP, Vector.V3.ZERO)
+            True
+            >>> Face(Vector.V3.ZERO, Vector.V3.UP, Vector.V3.ONE) == Face(Vector.V3.ZERO, Vector.V3.UP, Vector.V3.DOWN)
+            False
         """
         if not isinstance(other, self.__class__):
             return False
@@ -193,6 +204,14 @@ class Face:
 
         Returns:
             int: Hash code
+
+        Examples:
+            >>> hash(Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP))
+            -3451376545942966460
+            >>> hash(Face(Vector.V3.ONE, Vector.V3.UP, Vector.V3.ZERO))
+            -3451376545942966460
+            >>> hash(Face(Vector.V3.ZERO, Vector.V3.UP, Vector.V3.DOWN))
+            -489577695494605327
         """
         return hash(frozenset(self))
 
@@ -204,8 +223,16 @@ class Face:
 
         Returns:
             Face: Incremented face
+
+        Examples:
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) + Vector.V3.ZERO
+            Face(V3(0, 0, 0), V3(1, 1, 1), V3(0, 0, 1))
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) + Vector.V3.DOWN
+            Face(V3(0, 0, -1), V3(1, 1, 0), V3(0, 0, 0))
         """
-        return self(tuple(point + other for point in self.points))
+        if not isinstance(other, Vector.V3):
+            return NotImplemented
+        return Face(*(point + other for point in self.points))
 
     def __rshift__(self, other: float) -> "Face":
         """Rotating a face by an amount of degrees
@@ -215,8 +242,16 @@ class Face:
 
         Returns:
             Face: Rotated face
+
+        Examples:
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) >> 0
+            Face(V3(), V3(1, 1, 1), V3(z=1))
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) >> 90
+            Face(V3(0, 0, 0), V3(1, -1, 1), V3(0, 0, 1))
         """
-        return self(tuple(point >> other for point in self.points))
+        if not isinstance(other, (float, int)):
+            return NotImplemented
+        return Face(*(point >> other for point in self.points))
 
 
 @Decorators.addInitRepr
@@ -291,7 +326,7 @@ class Object(metaclass=Helpers.Repr):
     def face(self, *points, **kwargs) -> None:
         """Creating a new face
         """
-        self.faces.add(Face(points, **kwargs))
+        self.faces.add(Face(*points, **kwargs))
 
     def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
         """Printing string representation of object hierarchy
