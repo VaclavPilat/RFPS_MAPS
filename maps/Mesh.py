@@ -26,7 +26,7 @@ class Line:
             Line(V3(), V3(y=-1))
             >>> Line(Vector.V3.FORWARD, Vector.V3.FORWARD)
             Traceback (most recent call last):
-            ...
+                ...
             ValueError: Points must be different
         """
         if a == b:
@@ -364,3 +364,9 @@ def createObjectSubclass(cls: type = Object):
         return Wrapped
 
     return decorator
+
+
+# noinspection IncorrectFormatting
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

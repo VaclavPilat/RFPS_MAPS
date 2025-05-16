@@ -13,8 +13,8 @@ if __name__ == "__main__":
     except ImportError:
         BLENDER = False
 
-from Utils import Mesh, Tiles, Helpers, Grids
-from Utils.Vector import V3
+from maps import Mesh, Tiles, Helpers, Grids
+from maps.Vector import V3
 
 
 ## Setting constants used in the Metro map
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     metro = Metro("Metro station")
     # noinspection PyUnboundLocalVariable,IncorrectFormatting
     if BLENDER:
-        from Utils import Blender
+        from maps import Blender
         Blender.Setup.purge()
         Blender.Setup.development()
         # noinspection PyTypeChecker

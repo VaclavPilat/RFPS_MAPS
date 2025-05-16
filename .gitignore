@@ -1,7 +1,6 @@
 *.blend?
 __pycache__
 html
-_*
 *.png
 *.jpg
 !docs/Icon.png

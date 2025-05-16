@@ -60,6 +60,7 @@ def makeImmutable(cls: type) -> type:
         >>> Number(5).value
         5
         >>> Number(10).value = 20
+        Traceback (most recent call last):
             ...
         AttributeError: Attempting to modify Number.value
     """
@@ -152,3 +153,9 @@ def addOperators(cls: type) -> type:
         if hasattr(cls, positive) and not hasattr(cls, negative):
             setattr(cls, negative, createOperator(positive))
     return cls
+
+
+# noinspection IncorrectFormatting
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

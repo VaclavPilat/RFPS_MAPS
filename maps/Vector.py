@@ -118,7 +118,7 @@ class V3:
         
         Examples:
             >>> V3(1, 2, 3) + V3(-5, 8, 14)
-            V3(-4, 10, 17) 
+            V3(-4, 10, 17)
         """
         if not isinstance(other, self.__class__):
             return NotImplemented
@@ -291,3 +291,9 @@ V3.RIGHT = V3(y=-1)
 V3.UP = V3(z=1)
 ## Down direction vector, equals to V3(0, 0, -1)
 V3.DOWN = V3(z=-1)
+
+
+# noinspection IncorrectFormatting
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
