@@ -15,6 +15,12 @@ class V3:
 
     It is similar to a Unity3D implementation of Vector3.
     The X axis is for forward/backward values, Y is for left/right and Z is for vertical values.
+
+    Examples:
+        >>> V3(1, 2, 3)
+        V3(1, 2, 3)
+        >>> V3(z=3)
+        V3(z=3)
     """
 
     def __init__(self, x: float = 0, y: float = 0, z: float = 0) -> None:
@@ -24,12 +30,6 @@ class V3:
             x (float, optional): X value. Defaults to 0.
             y (float, optional): Y value. Defaults to 0.
             z (float, optional): Z value. Defaults to 0.
-        
-        Examples:
-            >>> V3(1, 2, 3)
-            V3(1, 2, 3)
-            >>> V3(z=3)
-            V3(z=3)
         """
         ## Value of the X axis
         self.x = x
@@ -293,7 +293,6 @@ V3.UP = V3(z=1)
 V3.DOWN = V3(z=-1)
 
 
-# noinspection IncorrectFormatting
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    from . import Helpers
+    Helpers.doctests()

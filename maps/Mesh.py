@@ -12,6 +12,14 @@ class Line:
     """A line between two points.
 
     It is defined as a set of 2 vertices (since it does not have a direction).
+
+    Examples:
+        >>> Line(Vector.V3.ZERO, Vector.V3.RIGHT)
+        Line(V3(), V3(y=-1))
+        >>> Line(Vector.V3.FORWARD, Vector.V3.FORWARD)
+        Traceback (most recent call last):
+            ...
+        ValueError: Points must be different
     """
 
     def __init__(self, a: Vector.V3, b: Vector.V3) -> None:
@@ -20,14 +28,6 @@ class Line:
         Args:
             a (Vector.V3): First point of the line.
             b (Vector.V3): Second point of the line.
-
-        Examples:
-            >>> Line(Vector.V3.ZERO, Vector.V3.RIGHT)
-            Line(V3(), V3(y=-1))
-            >>> Line(Vector.V3.FORWARD, Vector.V3.FORWARD)
-            Traceback (most recent call last):
-                ...
-            ValueError: Points must be different
         """
         if a == b:
             raise ValueError("Points must be different")
@@ -366,7 +366,6 @@ def createObjectSubclass(cls: type = Object):
     return decorator
 
 
-# noinspection IncorrectFormatting
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    from . import Helpers
+    Helpers.doctests()

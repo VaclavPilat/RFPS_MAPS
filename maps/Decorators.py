@@ -155,7 +155,6 @@ def addOperators(cls: type) -> type:
     return cls
 
 
-# noinspection IncorrectFormatting
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    from . import Helpers
+    Helpers.doctests()
