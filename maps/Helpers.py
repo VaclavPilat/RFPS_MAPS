@@ -7,6 +7,13 @@ import time
 
 class Repr(type):
     """Custom type for having a __repr__ method that returns type name
+
+    Examples:
+        >>> class Foo(metaclass=Repr):
+        ...     pass
+        ...
+        >>> repr(Foo)
+        'Foo'
     """
 
     def __repr__(cls) -> str:
@@ -21,6 +28,18 @@ class Repr(type):
 @Decorators.makeImmutable
 class Settings:
     """Class for containing readonly object settings
+
+    Examples:
+        >>> Settings(VALUE=10).VALUE
+        10
+        >>> Settings().VALUE
+        Traceback (most recent call last):
+            ...
+        AttributeError: 'Settings' object has no attribute 'VALUE'
+        >>> Settings(VALUE=10).VALUE = 15
+        Traceback (most recent call last):
+            ...
+        AttributeError: Attempting to modify Settings.VALUE
     """
 
     def __init__(self, **kwargs) -> None:
@@ -30,7 +49,7 @@ class Settings:
             setattr(self, key, value)
 
 
-def elapsedTime(function):
+def stopwatch(function):
     """Decorator for measuring time spent on a function call and printing it out
 
     Args:
@@ -45,3 +64,9 @@ def elapsedTime(function):
         return output
 
     return wrapped
+
+
+# noinspection IncorrectFormatting
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
