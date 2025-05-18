@@ -15,6 +15,7 @@ cloc:
 
 clean:
 	@rm -rf docs/html/
+	@find . -type d -name "__pycache__" -exec rm -rf {} +
 
 run:
 	@COLOR=1 PYTHONPATH=$(CURDIR) find scripts -name $(FILE) -exec \
