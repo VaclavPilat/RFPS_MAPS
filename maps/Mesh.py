@@ -2,9 +2,12 @@
 # Classes for representing mesh data.
 # Mesh data is stored in Objects (a recursive tree-like structure) that contain Faces that consist of Lines.
 # \todo Refactor and add tests (Face, Object)
+import decimal
+
 from . import Decorators, Helpers, Colors, Vector
 
 
+# noinspection PyTypeChecker
 @Decorators.addOperators
 @Decorators.makeImmutable
 @Decorators.addInitRepr
@@ -14,8 +17,8 @@ class Line:
     It is defined as a set of 2 vertices (since it does not have a direction).
 
     Examples:
-        >>> Line(Vector.V3.ZERO, Vector.V3.RIGHT)
-        Line(V3(), V3(y=-1))
+        >>> Line(Vector.V3.ZERO, Vector.V3.RIGHT) == Line(Vector.V3.ZERO, Vector.V3.RIGHT)
+        True
         >>> Line(Vector.V3.FORWARD, Vector.V3.FORWARD)
         Traceback (most recent call last):
             ...
@@ -77,10 +80,10 @@ class Line:
             Line: A copy of the line with altered params.
 
         Examples:
-            >>> Line(Vector.V3.LEFT, Vector.V3.RIGHT)()
-            Line(V3(x=0, y=1, z=0), V3(x=0, y=-1, z=0))
-            >>> Line(Vector.V3.ONE, Vector.V3.UP)(z=0)
-            Line(V3(x=1, y=1, z=0), V3(x=0, y=0, z=0))
+            >>> Line(Vector.V3.LEFT, Vector.V3.RIGHT)() == Line(Vector.V3.LEFT, Vector.V3.RIGHT)
+            True
+            >>> Line(Vector.V3.ONE, Vector.V3.UP)(z=0) == Line(Vector.V3(x=1, y=1, z=0), Vector.V3(x=0, y=0, z=0))
+            True
         """
         # noinspection PyCallingNonCallable
         return Line(self.a(*args, **kwargs), self.b(*args, **kwargs))
@@ -89,8 +92,8 @@ class Line:
         """Iterating over line bounds
 
         Examples:
-            >>> list(Line(Vector.V3.LEFT, Vector.V3.RIGHT))
-            [V3(y=1), V3(y=-1)]
+            >>> list(Line(Vector.V3.LEFT, Vector.V3.RIGHT)) == [Vector.V3.LEFT, Vector.V3.RIGHT]
+            True
         """
         yield self.a
         yield self.b
@@ -105,28 +108,26 @@ class Line:
             Line: A copy of the line with offset line bounds.
 
         Examples:
-            >>> Line(Vector.V3.ONE, Vector.V3.UP) + Vector.V3.UP
-            Line(V3(1, 1, 2), V3(0, 0, 2))
+            >>> Line(Vector.V3.ONE, Vector.V3.UP) + Vector.V3.UP == Line(Vector.V3(1, 1, 2), Vector.V3(0, 0, 2))
+            True
         """
         if not isinstance(other, Vector.V3):
             return NotImplemented
         return Line(*(point + other for point in self))
 
-    def __rshift__(self, other: float | int) -> "Line":
+    def __rshift__(self, other: decimal.Decimal) -> "Line":
         """Rotating a line by a vector
 
         Args:
-            other (float | int): Angle to rotate by
+            other (decimal.Decimal): Angle to rotate by
 
         Returns:
             Line: A copy of the line with rotated line bounds.
 
         Examples:
-            >>> Line(Vector.V3.ONE, Vector.V3.LEFT) >> 90
-            Line(V3(1, -1, 1), V3(1, 0, 0))
+            >>> Line(Vector.V3.FORWARD, Vector.V3.LEFT) >> 90 == Line(Vector.V3.RIGHT, Vector.V3.FORWARD)
+            True
         """
-        if not isinstance(other, (float, int)):
-            return NotImplemented
         return Line(*(point >> other for point in self))
 
     def __or__(self, other: "Line") -> bool:
@@ -225,32 +226,30 @@ class Face:
             Face: Incremented face
 
         Examples:
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) + Vector.V3.ZERO
-            Face(V3(0, 0, 0), V3(1, 1, 1), V3(0, 0, 1))
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) + Vector.V3.DOWN
-            Face(V3(0, 0, -1), V3(1, 1, 0), V3(0, 0, 0))
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) + Vector.V3.ZERO == Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP)
+            True
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) + Vector.V3.DOWN == Face(Vector.V3.DOWN, Vector.V3.ONE + Vector.V3.DOWN, Vector.V3.ZERO)
+            True
         """
         if not isinstance(other, Vector.V3):
             return NotImplemented
         return Face(*(point + other for point in self.points))
 
-    def __rshift__(self, other: float) -> "Face":
+    def __rshift__(self, other: decimal.Decimal) -> "Face":
         """Rotating a face by an amount of degrees
 
         Args:
-            other (float): Angle to rotate face by
+            other (decimal.Decimal): Angle to rotate face by
 
         Returns:
             Face: Rotated face
 
         Examples:
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) >> 0
-            Face(V3(), V3(1, 1, 1), V3(z=1))
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) >> 90
-            Face(V3(0, 0, 0), V3(1, -1, 1), V3(0, 0, 1))
+            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) >> 0 == Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP)
+            True
+            >>> Face(Vector.V3.ZERO, Vector.V3.FORWARD, Vector.V3.RIGHT) >> 90 == Face(Vector.V3.ZERO, Vector.V3.RIGHT, Vector.V3.BACKWARD)
+            True
         """
-        if not isinstance(other, (float, int)):
-            return NotImplemented
         return Face(*(point >> other for point in self.points))
 
 
@@ -260,13 +259,13 @@ class Object(metaclass=Helpers.Repr):
     """Class for containing own mesh and/or other objects
     """
 
-    def __init__(self, name: str = "New object", position: Vector.V3 = Vector.V3.ZERO, rotation: float = 0, *args, **kwargs) -> None:
+    def __init__(self, name: str = "New object", position: Vector.V3 = Vector.V3.ZERO, rotation: decimal.Decimal = 0, *args, **kwargs) -> None:
         """Creating a new object
 
         Args:
             name (str, optional): Object name. Defaults to "New object".
             position (Vector.V3, optional): Object location. Defaults to V3.ZERO.
-            rotation (float, optional): Object rotation in degrees (Z-value only). Defaults to 0.
+            rotation (decimal.Decimal, optional): Object rotation in degrees (Z-value only). Defaults to 0.
         """
         ## Object name
         self.name = name
