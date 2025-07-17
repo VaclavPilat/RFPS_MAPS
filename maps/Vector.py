@@ -6,6 +6,10 @@ from . import Decorators
 import math, decimal
 
 
+# Preventing floats from being passed to the Decimal constructor
+#decimal.getcontext().traps[decimal.FloatOperation] = True
+
+
 @Decorators.addOperators
 @Decorators.addInitRepr
 @Decorators.makeImmutable
@@ -128,6 +132,7 @@ class V3:
             return NotImplemented
         return V3(*(a + b for a, b in zip(self, other)))
 
+    @Decorators.convertTypes
     def __mul__(self, other: decimal.Decimal) -> "V3":
         """Multiplication of a vector by a number
 
@@ -147,6 +152,7 @@ class V3:
         """
         return V3(*(other * a for a in self))
 
+    @Decorators.convertTypes
     def __rmul__(self, other: decimal.Decimal) -> "V3":
         """Multiplication of a vector by a number
 
@@ -166,6 +172,7 @@ class V3:
         """
         return self.__mul__(other)
 
+    @Decorators.convertTypes
     def __truediv__(self, other: decimal.Decimal) -> "V3":
         """Division of a vector by a number
 
@@ -181,10 +188,9 @@ class V3:
             >>> V3(1, 2, 3) / 2 == V3(0.5, 1.0, 1.5)
             True
         """
-        if not isinstance(other, (int, float)):
-            return NotImplemented
         return V3(*(a / other for a in self))
 
+    @Decorators.convertTypes
     def __rshift__(self, other: decimal.Decimal) -> "V3":
         """Rotating the vector on Z axis, clockwise
 
