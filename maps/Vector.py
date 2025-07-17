@@ -3,7 +3,7 @@
 # \todo Use Decimal everywhere with float trap set to True
 # \todo Add multiple axis rotation: `V3 >> V3`
 from . import Decorators
-import math
+import math, decimal
 
 
 @Decorators.addOperators
@@ -23,13 +23,15 @@ class V3:
         V3(z=3)
     """
 
-    def __init__(self, x: float = 0, y: float = 0, z: float = 0) -> None:
+    @Decorators.convertTypes
+    def __init__(self, x: decimal.Decimal = decimal.Decimal(0), y: decimal.Decimal = decimal.Decimal(0),
+                 z: decimal.Decimal = decimal.Decimal(0)) -> None:
         """Initializing a 3D vector
 
         Args:
-            x (float, optional): X value. Defaults to 0.
-            y (float, optional): Y value. Defaults to 0.
-            z (float, optional): Z value. Defaults to 0.
+            x (decimal.Decimal, optional): X value. Defaults to decimal.Decimal(0).
+            y (decimal.Decimal, optional): Y value. Defaults to decimal.Decimal(0).
+            z (decimal.Decimal, optional): Z value. Defaults to decimal.Decimal(0).
         """
         ## Value of the X axis
         self.x = x
@@ -45,8 +47,10 @@ class V3:
             Iterator representing vector values
 
         Examples:
-            >>> list(V3(1, 2, 3))
-            [1, 2, 3]
+            >>> list(V3(1, 2, 3)) == list(V3(1, 2, 3))
+            True
+            >>> list(V3(1, 2, 3)) == list(V3(1, 2, 2))
+            False
         """
         yield self.x
         yield self.y
@@ -102,8 +106,8 @@ class V3:
             V3: Vector with negated axis values
 
         Examples:
-            >>> -V3(3, -5, 8)
-            V3(-3, 5, -8)
+            >>> -V3(3, -5, 8) == V3(-3, 5, -8)
+            True
         """
         return V3(-self.x, -self.y, -self.z)
 
@@ -117,54 +121,52 @@ class V3:
             V3: Sum of this and the other vector
         
         Examples:
-            >>> V3(1, 2, 3) + V3(-5, 8, 14)
-            V3(-4, 10, 17)
+            >>> V3(1, 2, 3) + V3(-5, 8, 14) == V3(-4, 10, 17)
+            True
         """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return V3(*(a + b for a, b in zip(self, other)))
 
-    def __mul__(self, other: float) -> "V3":
+    def __mul__(self, other: decimal.Decimal) -> "V3":
         """Multiplication of a vector by a number
 
         Args:
-            other (float): Number to multiply by
+            other (decimal.Decimal): Number to multiply by
 
         Returns:
             V3: Product of this vector and the number
         
         Examples:
-            >>> V3(1, 2, 3) * 0
-            V3(0, 0, 0)
-            >>> V3(1, 2, 3) * 1
-            V3(1, 2, 3)
-            >>> V3(1, 2, 3) * 2
-            V3(2, 4, 6)
+            >>> V3(1, 2, 3) * 0 == V3(0, 0, 0)
+            True
+            >>> V3(1, 2, 3) * 1 == V3(1, 2, 3)
+            True
+            >>> V3(1, 2, 3) * 2 == V3(2, 4, 6)
+            True
         """
-        if not isinstance(other, (int, float)):
-            return NotImplemented
         return V3(*(other * a for a in self))
 
-    def __rmul__(self, other: float) -> "V3":
+    def __rmul__(self, other: decimal.Decimal) -> "V3":
         """Multiplication of a vector by a number
 
         Args:
-            other (float): Number to multiply by
+            other (decimal.Decimal): Number to multiply by
 
         Returns:
             V3: Product of this vector and the number
         
         Examples:
-            >>> 0 * V3(1, 2, 3)
-            V3(0, 0, 0)
-            >>> 1 * V3(1, 2, 3)
-            V3(1, 2, 3)
-            >>> 2 * V3(1, 2, 3)
-            V3(2, 4, 6)
+            >>> 0 * V3(1, 2, 3) == V3(0, 0, 0)
+            True
+            >>> 1 * V3(1, 2, 3) == V3(1, 2, 3)
+            True
+            >>> 2 * V3(1, 2, 3) == V3(2, 4, 6)
+            True
         """
         return self.__mul__(other)
 
-    def __truediv__(self, other: float) -> "V3":
+    def __truediv__(self, other: decimal.Decimal) -> "V3":
         """Division of a vector by a number
 
         Args:
@@ -174,36 +176,34 @@ class V3:
             V3: Quotient of this vector and the number
         
         Examples:
-            >>> V3(1, 2, 3) / 1
-            V3(1.0, 2.0, 3.0)
-            >>> V3(1, 2, 3) / 2
-            V3(0.5, 1.0, 1.5)
+            >>> V3(1, 2, 3) / 1 == V3(1.0, 2.0, 3.0)
+            True
+            >>> V3(1, 2, 3) / 2 == V3(0.5, 1.0, 1.5)
+            True
         """
         if not isinstance(other, (int, float)):
             return NotImplemented
         return V3(*(a / other for a in self))
 
-    def __rshift__(self, other: float) -> "V3":
+    def __rshift__(self, other: decimal.Decimal) -> "V3":
         """Rotating the vector on Z axis, clockwise
 
         Args:
-            other (float): Rotation angle in degrees
+            other (decimal.Decimal): Rotation angle in degrees
 
         Returns:
             V3: Rotated vector
         
         Examples:
-            >>> V3(1, 2, 3) >> 0
-            V3(1, 2, 3)
-            >>> V3(1, 2, 3) >> 90
-            V3(2, -1, 3)
-            >>> V3(1, 2, 3) >> 180
-            V3(-1, -2, 3)
-            >>> V3(1, 2, 3) >> 270
-            V3(-2, 1, 3)
+            >>> V3(1, 2, 3) >> 0 == V3(1, 2, 3)
+            True
+            >>> V3(1, 2, 3) >> 90 == V3(2, -1, 3)
+            True
+            >>> V3(1, 2, 3) >> 180 == V3(-1, -2, 3)
+            True
+            >>> V3(1, 2, 3) >> 270 == V3(-2, 1, 3)
+            True
         """
-        if not isinstance(other, int):
-            return NotImplemented
         if other % 90 != 0:
             return NotImplemented
         other %= 360
@@ -243,12 +243,12 @@ class V3:
             V3: Cross product of two vectors
 
         Examples:
-            >>> V3(1, 2, 3) @ V3(1, 2, 3)
-            V3(0, 0, 0)
-            >>> V3(1, 2, 3) @ V3(4, 5, 6)
-            V3(-3, 6, -3)
-            >>> V3(1, 2, 3) @ V3(-1, -2, -3)
-            V3(0, 0, 0)
+            >>> V3(1, 2, 3) @ V3(1, 2, 3) == V3(0, 0, 0)
+            True
+            >>> V3(1, 2, 3) @ V3(4, 5, 6) == V3(-3, 6, -3)
+            True
+            >>> V3(1, 2, 3) @ V3(-1, -2, -3) == V3(0, 0, 0)
+            True
         """
         if not isinstance(other, self.__class__):
             return NotImplemented
