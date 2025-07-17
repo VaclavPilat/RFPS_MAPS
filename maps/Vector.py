@@ -153,26 +153,6 @@ class V3:
         return V3(*(other * a for a in self))
 
     @Decorators.convertTypes
-    def __rmul__(self, other: decimal.Decimal) -> "V3":
-        """Multiplication of a vector by a number
-
-        Args:
-            other (decimal.Decimal): Number to multiply by
-
-        Returns:
-            V3: Product of this vector and the number
-        
-        Examples:
-            >>> 0 * V3(1, 2, 3) == V3(0, 0, 0)
-            True
-            >>> 1 * V3(1, 2, 3) == V3(1, 2, 3)
-            True
-            >>> 2 * V3(1, 2, 3) == V3(2, 4, 6)
-            True
-        """
-        return self.__mul__(other)
-
-    @Decorators.convertTypes
     def __truediv__(self, other: decimal.Decimal) -> "V3":
         """Division of a vector by a number
 
