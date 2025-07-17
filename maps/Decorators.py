@@ -43,7 +43,8 @@ def addInitRepr(cls: type) -> type:
 
 
 def makeImmutable(cls: type) -> type:
-    """Class decorator that turns the class into an immutable one
+    """Class decorator that turns the class into an immutable one.
+    Fields cannot be assigned after constructor is finished.
 
     Args:
         cls (type): Data class type to wrap
@@ -121,7 +122,8 @@ def addCopyCall(*fields):
 
 # noinspection PyUnresolvedReferences
 def addOperators(cls: type) -> type:
-    """A class decorator for adding counterparts of already defined math operators
+    """A class decorator for adding counterparts of already defined math operators.
+    Some predefined "mirror operations" will be added.
 
     Args:
         cls (type): Data class type to add operators to
@@ -153,6 +155,44 @@ def addOperators(cls: type) -> type:
         if hasattr(cls, positive) and not hasattr(cls, negative):
             setattr(cls, negative, createOperator(positive))
     return cls
+
+
+# noinspection PyTypeChecker
+def convertTypes(function):
+    """Function decorator for providing implicit conversions of arguments.
+    Type hints of arguments are used for conversions on values with unexpected types.
+
+    Args:
+        function: Function being decorated
+
+    Returns:
+        Wrapped function with implicit type conversions
+
+    Examples:
+        >>> @convertTypes
+        ... def calculate(a: int = 5, b: bool = False) -> int:
+        ...     return a*2 if b else a // 2
+        ...
+        >>> calculate(10, True)
+        20
+        >>> calculate(a="10", b=0)
+        5
+        >>> calculate(a="foo")
+        Traceback (most recent call last):
+            ...
+        ValueError: invalid literal for int() with base 10: 'foo'
+    """
+    def wrapper(*args, **kwargs):
+        args = list(args)
+        for name, (index, value) in zip(function.__code__.co_varnames, enumerate(args)):
+            if name in function.__annotations__ and function.__annotations__[name] is not type(value):
+                args[index] = function.__annotations__[name](value)
+        for name, value in kwargs.items():
+            if name in function.__annotations__ and function.__annotations__[name] is not type(value):
+                kwargs[name] = function.__annotations__[name](value)
+        return function(*args, **kwargs)
+
+    return wrapper
 
 
 if __name__ == '__main__':
