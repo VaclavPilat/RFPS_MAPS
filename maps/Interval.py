@@ -3,6 +3,76 @@
 from . import Decorators
 
 
+class Union:
+    """Class for representing a union of intervals.
+    """
+
+    def __init__(self, *intervals) -> None:
+        """Initialising a union of intervals.
+
+        Args:
+            *intervals: Interval arguments.
+        """
+        ## Tuple of interval arguments
+        self.intervals = intervals
+
+    def __contains__(self, item: int) -> bool:
+        """Checking whether an item is contained in this Union.
+
+        Args:
+            item (int): Item to check.
+
+        Returns:
+            bool: True if ANY interval contains this item.
+
+        Examples:
+            >>> 300 in Union(I360(0, 180), I360(90, 270))
+            False
+            >>> 60 in Union(I360(0, 180), I360(90, 270))
+            True
+            >>> 200 in Union(I360(0, 180), I360(90, 270))
+            True
+            >>> 120 in Union(I360(0, 180), I360(90, 270))
+            True
+        """
+        return any(item in interval for interval in self.intervals)
+
+
+class Intersection:
+    """Class for representing an intersection of intervals.
+    """
+
+    def __init__(self, *intervals) -> None:
+        """Initialising an intersection of intervals.
+
+        Args:
+            *intervals: Interval arguments.
+        """
+        ## Tuple of interval arguments
+        self.intervals = intervals
+
+    def __contains__(self, item: int) -> bool:
+        """Checking whether an item is contained in this Intersection.
+
+        Args:
+            item (int): Item to check.
+
+        Returns:
+            bool: True if ALL intervals contains this item.
+
+        Examples:
+            >>> 300 in Intersection(I360(0, 180), I360(90, 270))
+            False
+            >>> 60 in Intersection(I360(0, 180), I360(90, 270))
+            False
+            >>> 200 in Intersection(I360(0, 180), I360(90, 270))
+            False
+            >>> 120 in Intersection(I360(0, 180), I360(90, 270))
+            True
+        """
+        return all(item in interval for interval in self.intervals)
+
+
 @Decorators.makeImmutable
 @Decorators.addInitRepr
 @Decorators.addCopyCall()
@@ -10,7 +80,7 @@ class I360:
     """Class for generating values from within an interval.
     """
 
-    def __init__(self, start: int = 0, end: int = 360, includeStart: bool = True, includeEnd: bool = True):
+    def __init__(self, start: int = 0, end: int = 360, includeStart: bool = True, includeEnd: bool = True) -> None:
         """Initialising a circular interval.
 
         Args:
