@@ -106,9 +106,19 @@ class Intersection(Interval):
 
 @Decorators.makeImmutable
 @Decorators.addInitRepr
-@Decorators.addCopyCall()
+@Decorators.addCopyCall("start", "end", "includeStart", "includeEnd")
 class I360(Interval):
     """Class for generating values from within an interval.
+
+    Examples:
+        >>> I360()
+        I360()
+        >>> I360()(end=180)
+        I360(start=0, end=180, includeStart=True, includeEnd=True)
+        >>> I360(-30, 60)
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid angle bound values.
     """
 
     def __init__(self, start: int = 0, end: int = 360, includeStart: bool = True, includeEnd: bool = True) -> None:
@@ -120,8 +130,8 @@ class I360(Interval):
             includeStart (bool, optional): If True, include the start of the interval. Defaults to True.
             includeEnd (bool, optional): If True, include the end of the interval. Defaults to True.
         """
-        if start > end:
-            raise ValueError("Start angle cannot be greater than end angle.")
+        if not (0 <= start <= end <= 360):
+            raise ValueError("Invalid angle bound values.")
         ## Start value of the interval
         self.start = start
         ## End value of the interval
@@ -152,6 +162,41 @@ class I360(Interval):
         """
         return (self.start <= item if self.includeStart else self.start < item) \
             and (item <= self.end if self.includeEnd else item < self.end)
+
+    def __getitem__(self, points: int):
+        """Generating angle values that belong to the interval.
+
+        This is done by generating regular points on a WHOLE CIRCLE and yielding them if they belong to the interval.
+        0 or 360 will be yielded only once regardless whether the interval represents a full circle.
+
+        Args:
+            points (int): Number of points on the WHOLE CIRCLE
+
+        Yields:
+            float: Angle value in degrees belonging to the interval
+
+        Examples:
+            >>> list(I360()[0])
+            Traceback (most recent call last):
+                ...
+            ValueError: Invalid point count.
+            >>> list(I360()[1])
+            [0.0]
+            >>> list(I360()[2])
+            [0.0, 180.0]
+            >>> list(I360()[3])
+            [0.0, 120.0, 240.0]
+            >>> list(I360()[4])
+            [0.0, 90.0, 180.0, 270.0]
+        """
+        if points <= 0:
+            raise ValueError("Invalid point count.")
+        for i in range(points + 1):
+            angle = 360 * i / points
+            if angle in self:
+                if angle == 360 and 0 in self:
+                    continue
+                yield angle
 
 
 I360.FULL = I360()
