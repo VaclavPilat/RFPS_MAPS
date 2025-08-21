@@ -21,7 +21,6 @@ class Line:
         True
         >>> Line(Vector.V3.FORWARD, Vector.V3.FORWARD)
         Traceback (most recent call last):
-            ...
         ValueError: Points must be different
     """
 

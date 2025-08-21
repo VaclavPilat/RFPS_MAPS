@@ -117,7 +117,6 @@ class I360(Interval):
         I360(start=0, end=180, includeStart=True, includeEnd=True)
         >>> I360(-30, 60)
         Traceback (most recent call last):
-            ...
         ValueError: Invalid angle bound values.
     """
 
@@ -178,16 +177,13 @@ class I360(Interval):
         Examples:
             >>> list(I360()[0])
             Traceback (most recent call last):
-                ...
             ValueError: Invalid point count.
             >>> list(I360()[1])
             [0.0]
-            >>> list(I360()[2])
-            [0.0, 180.0]
             >>> list(I360()[3])
             [0.0, 120.0, 240.0]
-            >>> list(I360()[4])
-            [0.0, 90.0, 180.0, 270.0]
+            >>> list(I360(includeStart=False)[3])
+            [120.0, 240.0, 360.0]
         """
         if points <= 0:
             raise ValueError("Invalid point count.")

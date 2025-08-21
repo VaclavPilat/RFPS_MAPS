@@ -34,7 +34,6 @@ class Settings:
         10
         >>> Settings().VALUE
         Traceback (most recent call last):
-            ...
         AttributeError: 'Settings' object has no attribute 'VALUE'
         >>> Settings(VALUE=10).VALUE = 15
         Traceback (most recent call last):

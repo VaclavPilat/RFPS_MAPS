@@ -62,7 +62,6 @@ def makeImmutable(cls: type) -> type:
         5
         >>> Number(10).value = 20
         Traceback (most recent call last):
-            ...
         AttributeError: Attempting to modify Number.value
     """
     oldInit = cls.__init__
@@ -179,7 +178,6 @@ def convertTypes(function):
         5
         >>> calculate(a="foo")
         Traceback (most recent call last):
-            ...
         ValueError: invalid literal for int() with base 10: 'foo'
     """
     def wrapper(*args, **kwargs):
