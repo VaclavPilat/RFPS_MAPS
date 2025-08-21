@@ -3,7 +3,36 @@
 from . import Decorators
 
 
-class Union:
+class Interval:
+    """Base inteval class with common operations.
+    """
+
+    def __and__(self, other: "Interval") -> "Intersection":
+        """Creating an intersetion of intervals
+
+        Args:
+            other (Interval): The other interval
+
+        Returns:
+            Intersection: Created interval intersection
+        """
+        return Intersection(self, other)
+
+    def __or__(self, other: "Interval") -> "Union":
+        """Creating a union of intervals
+
+        Args:
+            other (Interval): The other interval
+
+        Returns:
+            Union: Created interval union
+        """
+        return Union(self, other)
+
+
+@Decorators.makeImmutable
+@Decorators.addInitRepr
+class Union(Interval):
     """Class for representing a union of intervals.
     """
 
@@ -16,11 +45,11 @@ class Union:
         ## Tuple of interval arguments
         self.intervals = intervals
 
-    def __contains__(self, item: int) -> bool:
+    def __contains__(self, item: int|float) -> bool:
         """Checking whether an item is contained in this Union.
 
         Args:
-            item (int): Item to check.
+            item (int | float): Item to check.
 
         Returns:
             bool: True if ANY interval contains this item.
@@ -38,7 +67,9 @@ class Union:
         return any(item in interval for interval in self.intervals)
 
 
-class Intersection:
+@Decorators.makeImmutable
+@Decorators.addInitRepr
+class Intersection(Interval):
     """Class for representing an intersection of intervals.
     """
 
@@ -51,11 +82,11 @@ class Intersection:
         ## Tuple of interval arguments
         self.intervals = intervals
 
-    def __contains__(self, item: int) -> bool:
+    def __contains__(self, item: int|float) -> bool:
         """Checking whether an item is contained in this Intersection.
 
         Args:
-            item (int): Item to check.
+            item (int | float): Item to check.
 
         Returns:
             bool: True if ALL intervals contains this item.
@@ -76,7 +107,7 @@ class Intersection:
 @Decorators.makeImmutable
 @Decorators.addInitRepr
 @Decorators.addCopyCall()
-class I360:
+class I360(Interval):
     """Class for generating values from within an interval.
     """
 
@@ -100,11 +131,11 @@ class I360:
         ## Include the ending value?
         self.includeEnd = includeEnd
 
-    def __contains__(self, item: int) -> bool:
+    def __contains__(self, item: int|float) -> bool:
         """Checking whether a number is a part of the interval.
 
         Args:
-            item (int): The number to check.
+            item (int | float): The number to check.
 
         Returns:
             bool: Whether the number is a part of the interval.
