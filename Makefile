@@ -1,14 +1,12 @@
-PYTHON = python3
-BLENDER = blender
 FILE = *.py
 
 all: test doc
 
 test:
-	@find maps -name "*.py" -not -name "Blender.py" | sed -e 's/\//./g' -e 's/\.py$$//' | xargs -n 1 $(PYTHON) -m
+	@find maps -name "*.py" -not -name "Blender.py" | sed -e 's/\//./g' -e 's/\.py$$//' | xargs -n 1 python3 -m
 
 doc:
-	@doxygen Doxyfile
+	@doxygen docs/Doxyfile
 
 cloc:
 	@cloc maps/ --include-lang=Python --by-file
@@ -19,8 +17,8 @@ clean:
 
 run:
 	@COLOR=1 PYTHONPATH=$(CURDIR) find scripts -name $(FILE) -exec \
-		$(PYTHON) {} \; | less -FRS~# 4
+		python3 {} \; | less -FRS~# 4
 
 show:
 	@PYTHONPATH=$(CURDIR) find scripts -name $(FILE) -exec \
-		$(BLENDER) --python-exit-code 2 --disable-abort-handler -P {} >/dev/null \;
+		blender --python-exit-code 2 --disable-abort-handler -P {} >/dev/null \;
