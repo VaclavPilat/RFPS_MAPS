@@ -3,13 +3,13 @@ FILE = *.py
 all: test doc
 
 test:
-	@find maps -name "*.py" -not -name "Blender.py" | sed -e 's/\//./g' -e 's/\.py$$//' | xargs -n 1 python3 -m
+	@find src -name "*.py" -not -name "Blender.py" | sed -e 's/\//./g' -e 's/\.py$$//' | xargs -n 1 python3 -m
 
 doc:
 	@doxygen docs/Doxyfile
 
 cloc:
-	@cloc maps/ --include-lang=Python --by-file
+	@cloc src/ --include-lang=Python --by-file
 
 clean:
 	@rm -rf docs/html/

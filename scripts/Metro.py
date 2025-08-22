@@ -13,8 +13,8 @@ if __name__ == "__main__":
     except ImportError:
         BLENDER = False
 
-from maps import Mesh, Tiles, Helpers, Grids
-from maps.Vector import V3
+from src import Mesh, Tiles, Helpers, Grids
+from src.Vector import V3
 
 
 ## Setting constants used in the Metro map
