@@ -197,8 +197,3 @@ class I360(Interval):
 
 I360.FULL = I360()
 I360.EMPTY = I360(0, 0, False, False)
-
-
-if __name__ == '__main__':
-    from . import Helpers
-    Helpers.doctests()

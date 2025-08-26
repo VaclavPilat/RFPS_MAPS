@@ -3,7 +3,7 @@ FILE = *.py
 all: test doc
 
 test:
-	@find src -name "*.py" -not -name "Blender.py" | sed -e 's/\//./g' -e 's/\.py$$//' | xargs -n 1 python3 -m
+	@PYTHONPATH=$(CURDIR) python3 tests/doctests.py
 
 doc:
 	@doxygen docs/Doxyfile

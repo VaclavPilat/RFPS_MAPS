@@ -2,7 +2,7 @@
 # Small helpful constructs that don't fit anywhere else.
 # \todo Add tests and better docstrings
 from . import Decorators
-import time, doctest, os, sys
+import time
 
 
 class Repr(type):
@@ -63,14 +63,3 @@ def stopwatch(function):
         return output
 
     return wrapped
-
-
-def doctests() -> None:
-    """Function for printing out information about doctest results
-    """
-    results = doctest.testmod()
-    print(f"{os.path.relpath(sys.modules['__main__'].__file__)} - {results.attempted - results.failed}/{results.attempted}")
-
-
-if __name__ == '__main__':
-    doctests()

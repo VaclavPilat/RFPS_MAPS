@@ -277,8 +277,3 @@ V3.RIGHT = V3(y=-1)
 V3.UP = V3(z=1)
 ## Down direction vector, equals to V3(0, 0, -1)
 V3.DOWN = V3(z=-1)
-
-
-if __name__ == '__main__':
-    from . import Helpers
-    Helpers.doctests()

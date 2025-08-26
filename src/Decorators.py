@@ -191,8 +191,3 @@ def convertTypes(function):
         return function(*args, **kwargs)
 
     return wrapper
-
-
-if __name__ == '__main__':
-    from . import Helpers
-    Helpers.doctests()

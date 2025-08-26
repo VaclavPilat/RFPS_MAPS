@@ -362,8 +362,3 @@ def createObjectSubclass(cls: type = Object):
         return Wrapped
 
     return decorator
-
-
-if __name__ == '__main__':
-    from . import Helpers
-    Helpers.doctests()

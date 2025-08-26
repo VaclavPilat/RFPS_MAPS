@@ -144,7 +144,7 @@ if __name__ == "__main__":
     metro = Metro("Metro station")
     # noinspection PyUnboundLocalVariable,IncorrectFormatting
     if BLENDER:
-        from maps import Blender
+        from src import Blender
         Blender.Setup.purge()
         Blender.Setup.development()
         # noinspection PyTypeChecker
