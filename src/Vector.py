@@ -27,7 +27,6 @@ class V3:
         V3(z=3)
     """
 
-    @Decorators.convertTypes
     def __init__(self, x: decimal.Decimal = decimal.Decimal(0), y: decimal.Decimal = decimal.Decimal(0),
                  z: decimal.Decimal = decimal.Decimal(0)) -> None:
         """Initializing a 3D vector
@@ -132,7 +131,6 @@ class V3:
             return NotImplemented
         return V3(*(a + b for a, b in zip(self, other)))
 
-    @Decorators.convertTypes
     def __mul__(self, other: decimal.Decimal) -> "V3":
         """Multiplication of a vector by a number
 
@@ -152,7 +150,6 @@ class V3:
         """
         return V3(*(other * a for a in self))
 
-    @Decorators.convertTypes
     def __truediv__(self, other: decimal.Decimal) -> "V3":
         """Division of a vector by a number
 
@@ -170,7 +167,6 @@ class V3:
         """
         return V3(*(a / other for a in self))
 
-    @Decorators.convertTypes
     def __rshift__(self, other: decimal.Decimal) -> "V3":
         """Rotating the vector on Z axis, clockwise
 
