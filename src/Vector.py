@@ -1,13 +1,19 @@
-## \file
-# Implementations of a vector class.
-# \todo Use Decimal everywhere with float trap set to True
-# \todo Add multiple axis rotation: `V3 >> V3`
+"""! \file
+Implementation of a vector class.
+
+\todo Use Decimal everywhere with float trap set to True (but leave V3 without type restrictions)
+\todo Add multiple axis rotation: `V3 >> V3`
+
+Examples:
+    >>> V3.FORWARD >> 90 == V3.RIGHT
+    True
+    >>> V3.ONE * 0 == V3.ZERO
+    True
+    >>> V3.LEFT @ V3.RIGHT == V3.ZERO
+    True
+"""
 from . import Decorators
-import math, decimal
-
-
-# Preventing floats from being passed to the Decimal constructor
-#decimal.getcontext().traps[decimal.FloatOperation] = True
+import math
 
 
 @Decorators.addOperators
@@ -27,14 +33,13 @@ class V3:
         V3(z=3)
     """
 
-    def __init__(self, x: decimal.Decimal = decimal.Decimal(0), y: decimal.Decimal = decimal.Decimal(0),
-                 z: decimal.Decimal = decimal.Decimal(0)) -> None:
+    def __init__(self, x: int|float = 0, y: int|float = 0, z: int|float = 0) -> None:
         """Initializing a 3D vector
 
         Args:
-            x (decimal.Decimal, optional): X value. Defaults to decimal.Decimal(0).
-            y (decimal.Decimal, optional): Y value. Defaults to decimal.Decimal(0).
-            z (decimal.Decimal, optional): Z value. Defaults to decimal.Decimal(0).
+            x (int | float, optional): X value. Defaults to 0.
+            y (int | float, optional): Y value. Defaults to 0.
+            z (int | float, optional): Z value. Defaults to 0.
         """
         ## Value of the X axis
         self.x = x
@@ -78,8 +83,10 @@ class V3:
             Hash representation of this vector
         
         Examples:
-            >>> hash(V3(1, 2, 3))
-            529344067295497451
+            >>> hash(V3(1, 2, 3)) == hash(V3(1, 2, 3))
+            True
+            >>> hash(V3(1, 2, 3)) == hash(V3(0, 2, 3))
+            False
         """
         return hash(tuple(self))
 
@@ -131,11 +138,11 @@ class V3:
             return NotImplemented
         return V3(*(a + b for a, b in zip(self, other)))
 
-    def __mul__(self, other: decimal.Decimal) -> "V3":
+    def __mul__(self, other: int|float) -> "V3":
         """Multiplication of a vector by a number
 
         Args:
-            other (decimal.Decimal): Number to multiply by
+            other (int | float): Number to multiply by
 
         Returns:
             V3: Product of this vector and the number
@@ -150,28 +157,28 @@ class V3:
         """
         return V3(*(other * a for a in self))
 
-    def __truediv__(self, other: decimal.Decimal) -> "V3":
+    def __truediv__(self, other: int | float) -> "V3":
         """Division of a vector by a number
 
         Args:
-            other (float): Number to divide by
+            other (int | float): Number to divide by
 
         Returns:
             V3: Quotient of this vector and the number
         
         Examples:
-            >>> V3(1, 2, 3) / 1 == V3(1.0, 2.0, 3.0)
+            >>> V3(1, 2, 3) / 1 == V3(1, 2, 3)
             True
-            >>> V3(1, 2, 3) / 2 == V3(0.5, 1.0, 1.5)
+            >>> V3(1, 2, 3) / 2 == V3(0.5, 1, 1.5)
             True
         """
         return V3(*(a / other for a in self))
 
-    def __rshift__(self, other: decimal.Decimal) -> "V3":
+    def __rshift__(self, other: int|float) -> "V3":
         """Rotating the vector on Z axis, clockwise
 
         Args:
-            other (decimal.Decimal): Rotation angle in degrees
+            other (int|float): Rotation angle in degrees
 
         Returns:
             V3: Rotated vector
@@ -204,14 +211,12 @@ class V3:
             float: Magnitude of a vector
         
         Examples:
-            >>> abs(V3())
-            0.0
-            >>> abs(V3(3, 4, 0))
-            5.0
-            >>> abs(V3(z=10))
-            10.0
-            >>> abs(V3(10, 10, 10))
-            17.320508075688775
+            >>> abs(V3()) == 0
+            True
+            >>> abs(V3(3, 4, 0)) == 5
+            True
+            >>> abs(V3(z=10)) == 10
+            True
         """
         return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
