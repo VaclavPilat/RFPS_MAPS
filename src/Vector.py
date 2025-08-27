@@ -1,9 +1,12 @@
 """! \file
-Implementation of a vector class.
+Implementation of a 3D vector.
+
+The X axis is for forward/backward values, Y is for left/right and Z is for vertical values.
 
 \todo Use Decimal everywhere with float trap set to True (but leave V3 without type restrictions)
 \todo Add multiple axis rotation: `V3 >> V3`
 
+\internal
 Examples:
     >>> V3.FORWARD >> 90 == V3.RIGHT
     True
@@ -22,9 +25,6 @@ import math
 @Decorators.addCopyCall("x", "y", "z")
 class V3:
     """Class for representing a 3D vector.
-
-    It is similar to a Unity3D implementation of Vector3.
-    The X axis is for forward/backward values, Y is for left/right and Z is for vertical values.
 
     Examples:
         >>> V3(1, 2, 3)
@@ -63,18 +63,6 @@ class V3:
         yield self.x
         yield self.y
         yield self.z
-
-    def __str__(self) -> str:
-        """Converting a V3 object to a string
-
-        Returns:
-            str: String representation of a vector
-        
-        Examples:
-            >>> str(V3(1, 2, 3))
-            '(1, 2, 3)'
-        """
-        return f"({', '.join(map(str, self))})"
 
     def __hash__(self) -> int:
         """Getting the hash of this vector
