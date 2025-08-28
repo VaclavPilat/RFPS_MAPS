@@ -50,6 +50,11 @@ class Interval:
 @Decorators.addInitRepr
 class Union(Interval):
     """Class for representing a union of intervals.
+
+    Examples:
+        >>> Union(I360())
+        Traceback (most recent call last):
+        ValueError: Union must contain at least 2 intervals
     """
 
     def __init__(self, *intervals) -> None:
@@ -58,6 +63,8 @@ class Union(Interval):
         Args:
             *intervals: Interval arguments.
         """
+        if len(intervals) < 2:
+            raise ValueError("Union must contain at least 2 intervals")
         ## Tuple of interval arguments
         self.intervals = intervals
 
@@ -94,13 +101,20 @@ class Union(Interval):
         Examples:
 
         """
-        pass
+        for angle in I360.FULL[points]:
+            if any(angle in interval[points] for interval in self.intervals):
+                yield angle
 
 
 @Decorators.makeImmutable
 @Decorators.addInitRepr
 class Intersection(Interval):
     """Class for representing an intersection of intervals.
+
+    Examples:
+        >>> Intersection(I360())
+        Traceback (most recent call last):
+        ValueError: Intersection must contain at least 2 intervals
     """
 
     def __init__(self, *intervals) -> None:
@@ -109,6 +123,8 @@ class Intersection(Interval):
         Args:
             *intervals: Interval arguments.
         """
+        if len(intervals) < 2:
+            raise ValueError("Intersection must contain at least 2 intervals")
         ## Tuple of interval arguments
         self.intervals = intervals
 
@@ -145,7 +161,9 @@ class Intersection(Interval):
         Examples:
 
         """
-        pass
+        for angle in I360.FULL[points]:
+            if all(angle in interval[points] for interval in self.intervals):
+                yield angle
 
 
 @Decorators.makeImmutable
