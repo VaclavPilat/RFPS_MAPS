@@ -1,5 +1,13 @@
-## \file
-# Implementation of circular intervals
+"""! \file
+Implementation of circular intervals
+
+\internal
+Examples:
+    >>> list(I360.EMPTY[8])
+    []
+    >>> list((I360.HALF1 | I360.HALF2)[8]) == list(I360.FULL[8])
+    True
+"""
 from . import Decorators
 
 
@@ -15,6 +23,10 @@ class Interval:
 
         Returns:
             Intersection: Created interval intersection
+
+        Examples:
+            >>> list((I360(0, 180) & I360(90, 270))[8])
+            [90.0, 135.0, 180.0]
         """
         return Intersection(self, other)
 
@@ -26,6 +38,10 @@ class Interval:
 
         Returns:
             Union: Created interval union
+
+        Examples:
+            >>> list((I360(0, 180) | I360(90, 270))[8])
+            [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0]
         """
         return Union(self, other)
 
@@ -66,6 +82,20 @@ class Union(Interval):
         """
         return any(item in interval for interval in self.intervals)
 
+    def __getitem__(self, points: int):
+        """Generating angle values that belong to an interval Union.
+
+        Args:
+            points (int): Number of points on the WHOLE CIRCLE
+
+        Yields:
+            float: Angle value in degrees belonging to the interval
+
+        Examples:
+
+        """
+        pass
+
 
 @Decorators.makeImmutable
 @Decorators.addInitRepr
@@ -102,6 +132,20 @@ class Intersection(Interval):
             True
         """
         return all(item in interval for interval in self.intervals)
+
+    def __getitem__(self, points: int):
+        """Generating angle values that belong to an interval Intersection.
+
+        Args:
+            points (int): Number of points on the WHOLE CIRCLE
+
+        Yields:
+            float: Angle value in degrees belonging to the interval
+
+        Examples:
+
+        """
+        pass
 
 
 @Decorators.makeImmutable
@@ -197,3 +241,5 @@ class I360(Interval):
 
 I360.FULL = I360()
 I360.EMPTY = I360(0, 0, False, False)
+I360.HALF1 = I360(0, 180)
+I360.HALF2 = I360(180, 360)

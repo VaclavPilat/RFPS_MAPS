@@ -1,7 +1,9 @@
 ## \file
 # Script for testing usage examples from the source code
-import os, importlib, doctest
+import os, importlib, doctest, sys
 
+
+code = 0
 
 for name in os.listdir("src"):
     path = os.path.join("src", name)
@@ -10,8 +12,14 @@ for name in os.listdir("src"):
 
         # Testing doctests in modules
         module = path.replace("/", ".").replace(".py", "")
-        results = doctest.testmod(importlib.import_module(module), raise_on_error=True)
+        results = doctest.testmod(importlib.import_module(module))
+        if results.failed > 0:
+            code = 1
 
         # Comparing expected doctest count
         count = open(path).read().count(">>>")
-        assert results.attempted == count, f"Testing of {path} skipped {count-results.attempted} doctests."
+        if results.attempted != count:
+            print(f"Testing of {path} skipped {count-results.attempted} doctests.")
+            code = 1
+
+sys.exit(code)
