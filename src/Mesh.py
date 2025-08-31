@@ -11,11 +11,11 @@ Each Line is represented by 2 V3 points.
 
 \internal
 Examples:
-    >>> V3.FORWARD >> 90 == V3.RIGHT
+    >>> FORWARD >> 90 == RIGHT
     True
-    >>> V3.ONE * 0 == V3.ZERO
+    >>> ONE * 0 == ZERO
     True
-    >>> V3.LEFT @ V3.RIGHT == V3.ZERO
+    >>> LEFT @ RIGHT == ZERO
     True
 """
 from .Decorators import makeImmutable, addOperators, addInitRepr, addCopyCall
@@ -255,24 +255,6 @@ class V3:
         return self.x != 0 or self.y != 0 or self.z != 0
 
 
-## Zero-filled vector, equals to V3(0, 0, 0)
-V3.ZERO = V3()
-## One-filled vector, equals to V3(1, 1, 1)
-V3.ONE = V3(1, 1, 1)
-## Forward direction vector, equals to V3(1, 0, 0)
-V3.FORWARD = V3(x=1)
-## Backward direction vector, equals to V3(-1, 0, 0)
-V3.BACKWARD = V3(x=-1)
-## Left direction vector, equals to V3(0, 1, 0)
-V3.LEFT = V3(y=1)
-## Right direction vector, equals to V3(0, -1, 0)
-V3.RIGHT = V3(y=-1)
-## Up direction vector, equals to V3(0, 0, 1)
-V3.UP = V3(z=1)
-## Down direction vector, equals to V3(0, 0, -1)
-V3.DOWN = V3(z=-1)
-
-
 @addOperators
 @makeImmutable
 @addInitRepr
@@ -282,7 +264,7 @@ class Line:
     It is defined as a set of 2 vertices (since it does not have a direction).
 
     Examples:
-        >>> Line(V3.ZERO, V3.ZERO)
+        >>> Line(ZERO, ZERO)
         Traceback (most recent call last):
         ValueError: Points must be different
     """
@@ -308,11 +290,11 @@ class Line:
             bool: True if the line is equal to the other line.
 
         Examples:
-            >>> Line(V3.ZERO, V3.ONE) == Line(V3.ZERO, V3.ONE)
+            >>> Line(ZERO, ONE) == Line(ZERO, ONE)
             True
-            >>> Line(V3.ZERO, V3.ONE) == Line(V3.ONE, V3.ZERO)
+            >>> Line(ZERO, ONE) == Line(ONE, ZERO)
             True
-            >>> Line(V3.ZERO, V3.ONE) == Line(V3.ONE, V3.LEFT)
+            >>> Line(ZERO, ONE) == Line(ONE, LEFT)
             False
         """
         if not isinstance(other, self.__class__):
@@ -326,9 +308,9 @@ class Line:
             int: The hash value of the instance.
 
         Examples:
-            >>> hash(Line(V3.ZERO, V3.ONE)) == hash(Line(V3.ONE, V3.ZERO))
+            >>> hash(Line(ZERO, ONE)) == hash(Line(ONE, ZERO))
             True
-            >>> hash(Line(V3.ZERO, V3.ONE)) == hash(Line(V3.ONE, V3.LEFT))
+            >>> hash(Line(ZERO, ONE)) == hash(Line(ONE, LEFT))
             False
         """
         return hash(frozenset((self.a, self.b)))
@@ -340,9 +322,9 @@ class Line:
             Line: A copy of the line with altered params.
 
         Examples:
-            >>> Line(V3.LEFT, V3.RIGHT)() == Line(V3.LEFT, V3.RIGHT)
+            >>> Line(LEFT, RIGHT)() == Line(LEFT, RIGHT)
             True
-            >>> Line(V3.ONE, V3.UP)(z=0) == Line(V3(x=1, y=1, z=0), V3(x=0, y=0, z=0))
+            >>> Line(ONE, UP)(z=0) == Line(V3(x=1, y=1, z=0), V3(x=0, y=0, z=0))
             True
         """
         # noinspection PyCallingNonCallable
@@ -352,7 +334,7 @@ class Line:
         """Iterating over line bounds
 
         Examples:
-            >>> list(Line(V3.LEFT, V3.RIGHT)) == [V3.LEFT, V3.RIGHT]
+            >>> list(Line(LEFT, RIGHT)) == [LEFT, RIGHT]
             True
         """
         yield self.a
@@ -368,7 +350,7 @@ class Line:
             Line: A copy of the line with offset line bounds.
 
         Examples:
-            >>> Line(V3.ONE, V3.UP) + V3.UP == Line(V3(1, 1, 2), V3(0, 0, 2))
+            >>> Line(ONE, UP) + UP == Line(V3(1, 1, 2), V3(0, 0, 2))
             True
         """
         if not isinstance(other, V3):
@@ -385,7 +367,7 @@ class Line:
             Line: A copy of the line with rotated line bounds.
 
         Examples:
-            >>> Line(V3.FORWARD, V3.LEFT) >> 90 == Line(V3.RIGHT, V3.FORWARD)
+            >>> Line(FORWARD, LEFT) >> 90 == Line(RIGHT, FORWARD)
             True
         """
         return Line(*(point >> other for point in self))
@@ -400,11 +382,11 @@ class Line:
             bool: True if both lines are in parallel
 
         Examples:
-            >>> Line(V3.ZERO, V3.ONE) | Line(V3.ZERO, V3.ONE)
+            >>> Line(ZERO, ONE) | Line(ZERO, ONE)
             True
-            >>> Line(V3.ZERO, V3.ONE) | Line(V3.UP, V3.ONE + V3.UP)
+            >>> Line(ZERO, ONE) | Line(UP, ONE + UP)
             True
-            >>> Line(V3.ZERO, V3.ONE) | Line(V3.UP, V3.RIGHT)
+            >>> Line(ZERO, ONE) | Line(UP, RIGHT)
             False
         """
         if not isinstance(other, self.__class__):
@@ -418,10 +400,10 @@ class Face:
     """Class for representing a face
 
     Examples:
-        >>> Face(V3.ZERO, V3.RIGHT)
+        >>> Face(ZERO, RIGHT)
         Traceback (most recent call last):
         ValueError: Face must have at least 3 vertices
-        >>> Face(V3.ZERO, V3.LEFT, V3.ZERO)
+        >>> Face(ZERO, LEFT, ZERO)
         Traceback (most recent call last):
         ValueError: Face cannot have duplicate vertices
     """
@@ -440,7 +422,7 @@ class Face:
         """Iterating over face edges (lines)
 
         Examples:
-            >>> tuple(Face(V3.ZERO, V3.ONE, V3.UP)) == (Line(V3.UP, V3.ZERO), Line(V3.ZERO, V3.ONE), Line(V3.ONE, V3.UP))
+            >>> tuple(Face(ZERO, ONE, UP)) == (Line(UP, ZERO), Line(ZERO, ONE), Line(ONE, UP))
             True
         """
         for i in range(len(self.points)):
@@ -467,13 +449,13 @@ class Face:
             bool: True if the two faces are equal
 
         Examples:
-            >>> Face(V3.ZERO, V3.ONE, V3.UP) == Face(V3.ZERO, V3.ONE, V3.UP)
+            >>> Face(ZERO, ONE, UP) == Face(ZERO, ONE, UP)
             True
-            >>> Face(V3.ZERO, V3.ONE, V3.UP) == Face(V3.ONE, V3.UP, V3.ZERO)
+            >>> Face(ZERO, ONE, UP) == Face(ONE, UP, ZERO)
             True
-            >>> Face(V3.ZERO, V3.ONE, V3.UP) == Face(V3.ZERO, V3.UP, V3.ONE)
+            >>> Face(ZERO, ONE, UP) == Face(ZERO, UP, ONE)
             False
-            >>> Face(V3.ZERO, V3.UP, V3.ONE) == Face(V3.ZERO, V3.UP, V3.DOWN)
+            >>> Face(ZERO, UP, ONE) == Face(ZERO, UP, DOWN)
             False
         """
         if not isinstance(other, self.__class__) or len(self) != len(other):
@@ -492,13 +474,13 @@ class Face:
             int: Hash code
 
         Examples:
-            >>> hash(Face(V3.ZERO, V3.ONE, V3.UP)) == hash(Face(V3.ZERO, V3.ONE, V3.UP))
+            >>> hash(Face(ZERO, ONE, UP)) == hash(Face(ZERO, ONE, UP))
             True
-            >>> hash(Face(V3.ZERO, V3.ONE, V3.UP)) == hash(Face(V3.ONE, V3.UP, V3.ZERO))
+            >>> hash(Face(ZERO, ONE, UP)) == hash(Face(ONE, UP, ZERO))
             True
-            >>> hash(Face(V3.ZERO, V3.ONE, V3.UP)) == hash(Face(V3.ZERO, V3.UP, V3.ONE))
+            >>> hash(Face(ZERO, ONE, UP)) == hash(Face(ZERO, UP, ONE))
             False
-            >>> hash(Face(V3.ZERO, V3.UP, V3.ONE)) == hash(Face(V3.ZERO, V3.UP, V3.DOWN))
+            >>> hash(Face(ZERO, UP, ONE)) == hash(Face(ZERO, UP, DOWN))
             False
         """
         hashes = tuple(hash(point) for point in self.points)
@@ -515,9 +497,9 @@ class Face:
             Face: Incremented face
 
         Examples:
-            >>> Face(V3.ZERO, V3.ONE, V3.UP) + V3.ZERO == Face(V3.ZERO, V3.ONE, V3.UP)
+            >>> Face(ZERO, ONE, UP) + ZERO == Face(ZERO, ONE, UP)
             True
-            >>> Face(V3.ZERO, V3.ONE, V3.UP) + V3.DOWN == Face(V3.DOWN, V3.ONE + V3.DOWN, V3.ZERO)
+            >>> Face(ZERO, ONE, UP) + DOWN == Face(DOWN, ONE + DOWN, ZERO)
             True
         """
         if not isinstance(other, V3):
@@ -534,9 +516,27 @@ class Face:
             Face: Rotated face
 
         Examples:
-            >>> Face(V3.ZERO, V3.ONE, V3.UP) >> 0 == Face(V3.ZERO, V3.ONE, V3.UP)
+            >>> Face(ZERO, ONE, UP) >> 0 == Face(ZERO, ONE, UP)
             True
-            >>> Face(V3.ZERO, V3.FORWARD, V3.RIGHT) >> 90 == Face(V3.ZERO, V3.RIGHT, V3.BACKWARD)
+            >>> Face(ZERO, FORWARD, RIGHT) >> 90 == Face(ZERO, RIGHT, BACKWARD)
             True
         """
         return Face(*(point >> other for point in self.points))
+
+
+## Zero-filled vector, equals to V3(0, 0, 0)
+ZERO = V3()
+## One-filled vector, equals to V3(1, 1, 1)
+ONE = V3(1, 1, 1)
+## Forward direction vector, equals to V3(1, 0, 0)
+FORWARD = V3(x=1)
+## Backward direction vector, equals to V3(-1, 0, 0)
+BACKWARD = V3(x=-1)
+## Left direction vector, equals to V3(0, 1, 0)
+LEFT = V3(y=1)
+## Right direction vector, equals to V3(0, -1, 0)
+RIGHT = V3(y=-1)
+## Up direction vector, equals to V3(0, 0, 1)
+UP = V3(z=1)
+## Down direction vector, equals to V3(0, 0, -1)
+DOWN = V3(z=-1)

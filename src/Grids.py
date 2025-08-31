@@ -4,7 +4,7 @@
 # \todo Refactor, add tests and better docstrings
 # \todo Add an option to show bounding boxes of objects
 # \todo Add an option for toggling between fixed/independent axis value diffs
-from .Mesh import V3, Line
+from .Mesh import *
 from .Objects import Object
 from . import Decorators, Colors
 import enum
@@ -55,7 +55,7 @@ class Axis(enum.Enum):
         """Initialising an Axis instance
         """
         ## Line representing axis direction
-        self.line = Line(V3.ZERO, V3(**{str(self): value}))
+        self.line = Line(ZERO, V3(**{str(self): value}))
 
     def __bool__(self) -> bool:
         """Checking whether the axis is positive or negative

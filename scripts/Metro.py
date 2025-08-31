@@ -14,7 +14,7 @@ if __name__ == "__main__":
         BLENDER = False
 
 from src import Tiles, Helpers, Grids
-from src.Mesh import V3
+from src.Mesh import *
 from src.Objects import createObjectSubclass
 
 
@@ -60,10 +60,10 @@ def Stairs(self, D: float, G: int, H: float, L: float) -> None:
             self.face(self.bounds.TR(z=TL.z), TL, BL, self.bounds.BR(z=BL.z))
             break
         # Making a horizontal face
-        TL1, BL1 = map(lambda v: v + V3.RIGHT * (R if i in I else L), (TL, BL))
+        TL1, BL1 = map(lambda v: v + RIGHT * (R if i in I else L), (TL, BL))
         self.face(TL1, TL, BL, BL1)
         # Making a vertical face
-        z = (self.bounds.TL + V3.DOWN * D * (i + 1) / VF).z
+        z = (self.bounds.TL + DOWN * D * (i + 1) / VF).z
         TL2, BL2 = map(lambda v: v(z=z), (TL1, BL1))
         self.face(TL2, TL1, BL1, BL2)
         TL, BL = (TL2, BL2)
@@ -87,13 +87,13 @@ def Slopes(self, D: float, S: int, R: float) -> None:
     C = 1 if S == 1 else S - 1  # Resting place count
     for i in range(S + C):
         if i > 0 and i == S + C - 1:  # Final face, whatever it might be
-            self.face(TL, BL, *map(lambda v: v + V3.DOWN * D, (self.bounds.BR, self.bounds.TR)))
+            self.face(TL, BL, *map(lambda v: v + DOWN * D, (self.bounds.BR, self.bounds.TR)))
             break
         if i % 2 == 0:  # Making a slope face
-            z = (self.bounds.TL + V3.DOWN * D * (i // 2 + 1) / S).z
-            TL1, BL1 = map(lambda v: (v + V3.RIGHT * (TL.z - z) * R)(z=z), (TL, BL))
+            z = (self.bounds.TL + DOWN * D * (i // 2 + 1) / S).z
+            TL1, BL1 = map(lambda v: (v + RIGHT * (TL.z - z) * R)(z=z), (TL, BL))
         else:  # Making a horizontal face
-            TL1, BL1 = map(lambda v: v + V3.RIGHT * G, (TL, BL))
+            TL1, BL1 = map(lambda v: v + RIGHT * G, (TL, BL))
         self.face(TL1, TL, BL, BL1)
         TL, BL = (TL1, BL1)
 
@@ -106,12 +106,12 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     Args:
         C (type, optional): Class for generating descent. Defaults to None.
     """
-    TLI, TRI = map(lambda v: v + V3.BACKWARD * METRO.UECW, (self.bounds.TL, self.bounds.TR))
-    BLI, BRI = map(lambda v: v + V3.FORWARD * METRO.UECW, (self.bounds.BL, self.bounds.BR))
-    TRI, BRI = map(lambda v: v + V3.LEFT * METRO.UECW, (TRI, BRI))
-    TL1, TR1, BL1, BR1 = map(lambda v: v + V3.UP * METRO.UECH,
+    TLI, TRI = map(lambda v: v + BACKWARD * METRO.UECW, (self.bounds.TL, self.bounds.TR))
+    BLI, BRI = map(lambda v: v + FORWARD * METRO.UECW, (self.bounds.BL, self.bounds.BR))
+    TRI, BRI = map(lambda v: v + LEFT * METRO.UECW, (TRI, BRI))
+    TL1, TR1, BL1, BR1 = map(lambda v: v + UP * METRO.UECH,
                              (self.bounds.TL, self.bounds.TR, self.bounds.BL, self.bounds.BR))
-    TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + V3.UP * METRO.UECH, (TLI, TRI, BLI, BRI))
+    TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + UP * METRO.UECH, (TLI, TRI, BLI, BRI))
     self.face(TR1, TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1)  # Top face
     # Outer faces
     self.face(TR1, BR1, self.bounds.BR, self.bounds.TR)
@@ -133,9 +133,9 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(UnderpassEntrance, "Underpass stair entrance", Tiles.Box(V3.ZERO, METRO.USCL, METRO.UEWD),
+    self.load(UnderpassEntrance, "Underpass stair entrance", Tiles.Box(ZERO, METRO.USCL, METRO.UEWD),
               C=Stairs, G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
-    #self.load(UnderpassEntrance, "Underpass slope entrance", Tiles.Box(V3.BACKWARD * METRO.UEWD + V3.RIGHT *
+    #self.load(UnderpassEntrance, "Underpass slope entrance", Tiles.Box(BACKWARD * METRO.UEWD + RIGHT *
     #    (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD, rotation=180),
     #    C=Slopes, S=METRO.USLC, R=METRO.USLR)
 

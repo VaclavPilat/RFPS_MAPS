@@ -2,7 +2,7 @@
 # Implementation of a Tile mesh object.
 # Tiles are Objects that are rectangle-shaped (without specifying height).
 # \todo Refactor and add tests
-from .Mesh import V3
+from .Mesh import *
 from .Objects import Object
 from . import Decorators
 import enum
@@ -90,7 +90,7 @@ class Box(Bounds):
         """
         if pivot == Pivot.TOP_LEFT:
             TL = origin
-            BR = TL + V3.RIGHT * width + V3.BACKWARD * height
+            BR = TL + RIGHT * width + BACKWARD * height
         else:
             raise ValueError("Unexpected Pivot value")
         # noinspection PyArgumentList
