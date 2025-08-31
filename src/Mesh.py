@@ -1,35 +1,37 @@
-## \file
-# Classes for representing mesh data.
-# Mesh data is stored in Objects (a recursive tree-like structure) that contain Faces that consist of Lines.
-# \todo Refactor and add tests (Face, Object)
-import decimal
+"""! \file
+Classes for representing mesh structure.
 
-from . import Decorators, Helpers, Colors, Vector
+Mesh data is stored in Object instances (a recursive tree-like structures).
+Each Object may contain multiple Face objects which are represented by Line objects.
+
+\internal
+Examples:
+"""
+from .Vector import V3
+from .Decorators import makeImmutable, addOperators, addInitRepr
+from . import Helpers, Colors
 
 
-# noinspection PyTypeChecker
-@Decorators.addOperators
-@Decorators.makeImmutable
-@Decorators.addInitRepr
+@addOperators
+@makeImmutable
+@addInitRepr
 class Line:
     """A line between two points.
 
     It is defined as a set of 2 vertices (since it does not have a direction).
 
     Examples:
-        >>> Line(Vector.V3.ZERO, Vector.V3.RIGHT) == Line(Vector.V3.ZERO, Vector.V3.RIGHT)
-        True
-        >>> Line(Vector.V3.FORWARD, Vector.V3.FORWARD)
+        >>> Line(V3.ZERO, V3.ZERO)
         Traceback (most recent call last):
         ValueError: Points must be different
     """
 
-    def __init__(self, a: Vector.V3, b: Vector.V3) -> None:
+    def __init__(self, a: V3, b: V3) -> None:
         """Initialize a line.
 
         Args:
-            a (Vector.V3): First point of the line.
-            b (Vector.V3): Second point of the line.
+            a (V3): First point of the line.
+            b (V3): Second point of the line.
         """
         if a == b:
             raise ValueError("Points must be different")
@@ -45,11 +47,11 @@ class Line:
             bool: True if the line is equal to the other line.
 
         Examples:
-            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) == Line(Vector.V3.ZERO, Vector.V3.ONE)
+            >>> Line(V3.ZERO, V3.ONE) == Line(V3.ZERO, V3.ONE)
             True
-            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) == Line(Vector.V3.ONE, Vector.V3.ZERO)
+            >>> Line(V3.ZERO, V3.ONE) == Line(V3.ONE, V3.ZERO)
             True
-            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) == Line(Vector.V3.ONE, Vector.V3.LEFT)
+            >>> Line(V3.ZERO, V3.ONE) == Line(V3.ONE, V3.LEFT)
             False
         """
         if not isinstance(other, self.__class__):
@@ -63,12 +65,10 @@ class Line:
             int: The hash value of the instance.
 
         Examples:
-            >>> hash(Line(Vector.V3.ZERO, Vector.V3.ONE))
-            6806318608114759100
-            >>> hash(Line(Vector.V3.ONE, Vector.V3.ZERO))
-            6806318608114759100
-            >>> hash(Line(Vector.V3.ONE, Vector.V3.LEFT))
-            4011719437145138455
+            >>> hash(Line(V3.ZERO, V3.ONE)) == hash(Line(V3.ONE, V3.ZERO))
+            True
+            >>> hash(Line(V3.ZERO, V3.ONE)) == hash(Line(V3.ONE, V3.LEFT))
+            False
         """
         return hash(frozenset((self.a, self.b)))
 
@@ -79,9 +79,9 @@ class Line:
             Line: A copy of the line with altered params.
 
         Examples:
-            >>> Line(Vector.V3.LEFT, Vector.V3.RIGHT)() == Line(Vector.V3.LEFT, Vector.V3.RIGHT)
+            >>> Line(V3.LEFT, V3.RIGHT)() == Line(V3.LEFT, V3.RIGHT)
             True
-            >>> Line(Vector.V3.ONE, Vector.V3.UP)(z=0) == Line(Vector.V3(x=1, y=1, z=0), Vector.V3(x=0, y=0, z=0))
+            >>> Line(V3.ONE, V3.UP)(z=0) == Line(V3(x=1, y=1, z=0), V3(x=0, y=0, z=0))
             True
         """
         # noinspection PyCallingNonCallable
@@ -91,40 +91,40 @@ class Line:
         """Iterating over line bounds
 
         Examples:
-            >>> list(Line(Vector.V3.LEFT, Vector.V3.RIGHT)) == [Vector.V3.LEFT, Vector.V3.RIGHT]
+            >>> list(Line(V3.LEFT, V3.RIGHT)) == [V3.LEFT, V3.RIGHT]
             True
         """
         yield self.a
         yield self.b
 
-    def __add__(self, other: Vector.V3) -> "Line":
+    def __add__(self, other: V3) -> "Line":
         """Incrementing line bounds by a vector
 
         Args:
-            other (Vector.V3): Vector to add
+            other (V3): Vector to add
 
         Returns:
             Line: A copy of the line with offset line bounds.
 
         Examples:
-            >>> Line(Vector.V3.ONE, Vector.V3.UP) + Vector.V3.UP == Line(Vector.V3(1, 1, 2), Vector.V3(0, 0, 2))
+            >>> Line(V3.ONE, V3.UP) + V3.UP == Line(V3(1, 1, 2), V3(0, 0, 2))
             True
         """
-        if not isinstance(other, Vector.V3):
+        if not isinstance(other, V3):
             return NotImplemented
         return Line(*(point + other for point in self))
 
-    def __rshift__(self, other: decimal.Decimal) -> "Line":
+    def __rshift__(self, other: int|float) -> "Line":
         """Rotating a line by a vector
 
         Args:
-            other (decimal.Decimal): Angle to rotate by
+            other (int | float): Angle to rotate by
 
         Returns:
             Line: A copy of the line with rotated line bounds.
 
         Examples:
-            >>> Line(Vector.V3.FORWARD, Vector.V3.LEFT) >> 90 == Line(Vector.V3.RIGHT, Vector.V3.FORWARD)
+            >>> Line(V3.FORWARD, V3.LEFT) >> 90 == Line(V3.RIGHT, V3.FORWARD)
             True
         """
         return Line(*(point >> other for point in self))
@@ -139,11 +139,11 @@ class Line:
             bool: True if both lines are in parallel
 
         Examples:
-            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) | Line(Vector.V3.ZERO, Vector.V3.ONE)
+            >>> Line(V3.ZERO, V3.ONE) | Line(V3.ZERO, V3.ONE)
             True
-            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) | Line(Vector.V3.UP, Vector.V3.ONE + Vector.V3.UP)
+            >>> Line(V3.ZERO, V3.ONE) | Line(V3.UP, V3.ONE + V3.UP)
             True
-            >>> Line(Vector.V3.ZERO, Vector.V3.ONE) | Line(Vector.V3.UP, Vector.V3.RIGHT)
+            >>> Line(V3.ZERO, V3.ONE) | Line(V3.UP, V3.RIGHT)
             False
         """
         if not isinstance(other, self.__class__):
@@ -151,11 +151,18 @@ class Line:
         return not (self.a - self.b) @ (other.a - other.b)
 
 
-# noinspection PyCallingNonCallable
-@Decorators.makeImmutable
-@Decorators.addInitRepr
+@makeImmutable
+@addInitRepr
 class Face:
     """Class for representing a face
+
+    Examples:
+        >>> Face(V3.ZERO, V3.RIGHT)
+        Traceback (most recent call last):
+        ValueError: Face must have at least 3 vertices
+        >>> Face(V3.ZERO, V3.LEFT, V3.ZERO)
+        Traceback (most recent call last):
+        ValueError: Face cannot have duplicate vertices
     """
 
     def __init__(self, *points) -> None:
@@ -169,17 +176,28 @@ class Face:
         self.points = points
 
     def __iter__(self):
-        """Iterating over face edges
+        """Iterating over face edges (lines)
 
         Examples:
-            >>> tuple(Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP))
-            (Line(V3(z=1), V3()), Line(V3(), V3(1, 1, 1)), Line(V3(1, 1, 1), V3(z=1)))
+            >>> tuple(Face(V3.ZERO, V3.ONE, V3.UP)) == (Line(V3.UP, V3.ZERO), Line(V3.ZERO, V3.ONE), Line(V3.ONE, V3.UP))
+            True
         """
         for i in range(len(self.points)):
             yield Line(self.points[i - 1], self.points[i])
 
+    def __len__(self) -> int:
+        """Getting vertex count
+
+        Returns:
+            int: Number of vertices that define this face
+        """
+        return len(self.points)
+
     def __eq__(self, other: "Face") -> bool:
-        """Comparing two faces
+        """Comparing the vertices that make up the face and its direction.
+
+        Comparison is done by "rotating" the sequence of vertices until it matches the other Face.
+        The "order" of face vertices matters - clockwise or counterclockwise affect the face direction.
 
         Args:
             other (Face): The other face
@@ -188,83 +206,94 @@ class Face:
             bool: True if the two faces are equal
 
         Examples:
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) == Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP)
+            >>> Face(V3.ZERO, V3.ONE, V3.UP) == Face(V3.ZERO, V3.ONE, V3.UP)
             True
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) == Face(Vector.V3.ONE, Vector.V3.UP, Vector.V3.ZERO)
+            >>> Face(V3.ZERO, V3.ONE, V3.UP) == Face(V3.ONE, V3.UP, V3.ZERO)
             True
-            >>> Face(Vector.V3.ZERO, Vector.V3.UP, Vector.V3.ONE) == Face(Vector.V3.ZERO, Vector.V3.UP, Vector.V3.DOWN)
+            >>> Face(V3.ZERO, V3.ONE, V3.UP) == Face(V3.ZERO, V3.UP, V3.ONE)
+            False
+            >>> Face(V3.ZERO, V3.UP, V3.ONE) == Face(V3.ZERO, V3.UP, V3.DOWN)
             False
         """
-        if not isinstance(other, self.__class__):
+        if not isinstance(other, self.__class__) or len(self) != len(other):
             return False
-        return set(self) == set(other)
+        for i in range(len(self)):
+            if self.points[i:] + self.points[:i] == other.points:
+                return True
+        return False
 
     def __hash__(self) -> int:
-        """Hashing lines making up the face
+        """Hashing lines making up the face.
+
+        Return value is a hash of the rotated (normalized) sequnce of points.
 
         Returns:
             int: Hash code
 
         Examples:
-            >>> hash(Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP))
-            -3451376545942966460
-            >>> hash(Face(Vector.V3.ONE, Vector.V3.UP, Vector.V3.ZERO))
-            -3451376545942966460
-            >>> hash(Face(Vector.V3.ZERO, Vector.V3.UP, Vector.V3.DOWN))
-            -489577695494605327
+            >>> hash(Face(V3.ZERO, V3.ONE, V3.UP)) == hash(Face(V3.ZERO, V3.ONE, V3.UP))
+            True
+            >>> hash(Face(V3.ZERO, V3.ONE, V3.UP)) == hash(Face(V3.ONE, V3.UP, V3.ZERO))
+            True
+            >>> hash(Face(V3.ZERO, V3.ONE, V3.UP)) == hash(Face(V3.ZERO, V3.UP, V3.ONE))
+            False
+            >>> hash(Face(V3.ZERO, V3.UP, V3.ONE)) == hash(Face(V3.ZERO, V3.UP, V3.DOWN))
+            False
         """
-        return hash(frozenset(self))
+        hashes = tuple(hash(point) for point in self.points)
+        index = hashes.index(min(hashes))
+        return hash(hashes[index:] + hashes[:index])
 
-    def __add__(self, other: Vector.V3) -> "Face":
+    def __add__(self, other: V3) -> "Face":
         """Incrementing face bounds by a vector
 
         Args:
-            other (Vector.V3): Vector to increment face bounds by
+            other (V3): Vector to increment face bounds by
 
         Returns:
             Face: Incremented face
 
         Examples:
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) + Vector.V3.ZERO == Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP)
+            >>> Face(V3.ZERO, V3.ONE, V3.UP) + V3.ZERO == Face(V3.ZERO, V3.ONE, V3.UP)
             True
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) + Vector.V3.DOWN == Face(Vector.V3.DOWN, Vector.V3.ONE + Vector.V3.DOWN, Vector.V3.ZERO)
+            >>> Face(V3.ZERO, V3.ONE, V3.UP) + V3.DOWN == Face(V3.DOWN, V3.ONE + V3.DOWN, V3.ZERO)
             True
         """
-        if not isinstance(other, Vector.V3):
+        if not isinstance(other, V3):
             return NotImplemented
         return Face(*(point + other for point in self.points))
 
-    def __rshift__(self, other: decimal.Decimal) -> "Face":
+    def __rshift__(self, other: int|float) -> "Face":
         """Rotating a face by an amount of degrees
 
         Args:
-            other (decimal.Decimal): Angle to rotate face by
+            other (int | float): Angle to rotate face by
 
         Returns:
             Face: Rotated face
 
         Examples:
-            >>> Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP) >> 0 == Face(Vector.V3.ZERO, Vector.V3.ONE, Vector.V3.UP)
+            >>> Face(V3.ZERO, V3.ONE, V3.UP) >> 0 == Face(V3.ZERO, V3.ONE, V3.UP)
             True
-            >>> Face(Vector.V3.ZERO, Vector.V3.FORWARD, Vector.V3.RIGHT) >> 90 == Face(Vector.V3.ZERO, Vector.V3.RIGHT, Vector.V3.BACKWARD)
+            >>> Face(V3.ZERO, V3.FORWARD, V3.RIGHT) >> 90 == Face(V3.ZERO, V3.RIGHT, V3.BACKWARD)
             True
         """
         return Face(*(point >> other for point in self.points))
 
 
-@Decorators.addInitRepr
-@Decorators.makeImmutable
+@addInitRepr
+@makeImmutable
 class Object(metaclass=Helpers.Repr):
     """Class for containing own mesh and/or other objects
     """
 
-    def __init__(self, name: str = "New object", position: Vector.V3 = Vector.V3.ZERO, rotation: decimal.Decimal = 0, *args, **kwargs) -> None:
+    def __init__(self, name: str = "New object", position: V3 = V3.ZERO, rotation: int|float = 0, *args, **kwargs) -> None:
         """Creating a new object
 
         Args:
             name (str, optional): Object name. Defaults to "New object".
-            position (Vector.V3, optional): Object location. Defaults to V3.ZERO.
-            rotation (decimal.Decimal, optional): Object rotation in degrees (Z-value only). Defaults to 0.
+            position (V3, optional): Object location. Defaults to V3.ZERO.
+            rotation (int | float, optional): Object rotation in degrees (Z-value only). Defaults to 0.
         """
         ## Object name
         self.name = name
@@ -289,14 +318,14 @@ class Object(metaclass=Helpers.Repr):
         for obj in self.objects:
             yield from obj
 
-    def __matmul__(self, structure: Vector.V3 | Line | Face) -> Face:
+    def __matmul__(self, structure: V3 | Line | Face) -> Face:
         """Transforming structure positions to be relative to parent
 
         Args:
-            structure (Vector.V3 | Line | Face): 3D structure (relative to self position)
+            structure (V3 | Line | Face): 3D structure (relative to self position)
 
         Returns:
-            Vector.V3 | Line | Face: Vertex position (relative to parent's position)
+            V3 | Line | Face: Vertex position (relative to parent's position)
         """
         return (structure >> self.rotation) + self.position
 
