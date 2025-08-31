@@ -9,12 +9,12 @@ class Object(metaclass=Helpers.Repr):
     """Class for containing own mesh and/or other objects
     """
 
-    def __init__(self, name: str = "New object", position: V3 = ZERO, rotation: int|float = 0, *args, **kwargs) -> None:
+    def __init__(self, name: str = "New object", position: Vector = ZERO, rotation: int|float = 0, *args, **kwargs) -> None:
         """Creating a new object
 
         Args:
             name (str, optional): Object name. Defaults to "New object".
-            position (V3, optional): Object location. Defaults to ZERO.
+            position (Vector, optional): Object location. Defaults to ZERO.
             rotation (int | float, optional): Object rotation in degrees (Z-value only). Defaults to 0.
         """
         ## Object name
@@ -40,14 +40,14 @@ class Object(metaclass=Helpers.Repr):
         for obj in self.objects:
             yield from obj
 
-    def __matmul__(self, structure: V3 | Line | Face) -> Face:
+    def __matmul__(self, structure: Vector | Line | Face) -> Face:
         """Transforming structure positions to be relative to parent
 
         Args:
-            structure (V3 | Line | Face): 3D structure (relative to self position)
+            structure (Vector | Line | Face): 3D structure (relative to self position)
 
         Returns:
-            V3 | Line | Face: Vertex position (relative to parent's position)
+            Vector | Line | Face: Vertex position (relative to parent's position)
         """
         return (structure >> self.rotation) + self.position
 

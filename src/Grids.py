@@ -55,7 +55,7 @@ class Axis(enum.Enum):
         """Initialising an Axis instance
         """
         ## Line representing axis direction
-        self.line = Line(ZERO, V3(**{str(self): value}))
+        self.line = Line(ZERO, Vector(**{str(self): value}))
 
     def __bool__(self) -> bool:
         """Checking whether the axis is positive or negative
@@ -81,11 +81,11 @@ class Axis(enum.Enum):
         """
         return self.name[-1].lower()
 
-    def __call__(self, vector: V3) -> float:
+    def __call__(self, vector: Vector) -> float:
         """Getting the value of a vector that corresponds to self axis
 
         Args:
-            vector (V3): Vector to get the axis value of
+            vector (Vector): Vector to get the axis value of
 
         Returns:
             float: Axis value

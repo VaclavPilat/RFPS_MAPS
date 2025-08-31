@@ -1,24 +1,20 @@
 """! \file
 Classes for representing mesh structure.
 
-Mesh data is stored in Object instances (a recursive tree-like structures).
+Mesh data is stored in Object instances (recursive tree-like structures).
 Each Object may contain multiple Face objects.
 Face instances are represented by Line objects.
-Each Line is represented by 2 V3 points.
+Each Line is represented by 2 Vector points.
 
-\todo Use Decimal everywhere with float trap set to True (but leave V3 without type restrictions)
-\todo Add multiple axis rotation: `V3 >> V3`
+\todo Use Decimal everywhere with float trap set to True (but leave Vector without type restrictions)
+\todo Add multiple axis rotation: `Vector >> Vector`
 
 \internal
 Examples:
-    >>> FORWARD >> 90 == RIGHT
-    True
-    >>> ONE * 0 == ZERO
-    True
-    >>> LEFT @ RIGHT == ZERO
+    >>> Line(ZERO, UP) | Line(RIGHT, RIGHT+DOWN)
     True
 """
-from .Decorators import makeImmutable, addOperators, addInitRepr, addCopyCall
+from .Decorators import *
 import math
 
 
@@ -26,16 +22,16 @@ import math
 @addInitRepr
 @makeImmutable
 @addCopyCall("x", "y", "z")
-class V3:
+class Vector:
     """Class for representing a 3D vector.
 
     The X axis is for forward/backward values, Y is for left/right and Z is for vertical values.
 
     Examples:
-        >>> V3(1, 2, 3)
-        V3(1, 2, 3)
-        >>> V3(z=3)
-        V3(z=3)
+        >>> Vector(1, 2, 3)
+        Vector(1, 2, 3)
+        >>> Vector(z=3)
+        Vector(z=3)
     """
 
     def __init__(self, x: int|float = 0, y: int|float = 0, z: int|float = 0) -> None:
@@ -60,9 +56,9 @@ class V3:
             Iterator representing vector values
 
         Examples:
-            >>> list(V3(1, 2, 3)) == list(V3(1, 2, 3))
+            >>> list(Vector(1, 2, 3)) == list(Vector(1, 2, 3))
             True
-            >>> list(V3(1, 2, 3)) == list(V3(1, 2, 2))
+            >>> list(Vector(1, 2, 3)) == list(Vector(1, 2, 2))
             False
         """
         yield self.x
@@ -76,125 +72,125 @@ class V3:
             Hash representation of this vector
 
         Examples:
-            >>> hash(V3(1, 2, 3)) == hash(V3(1, 2, 3))
+            >>> hash(Vector(1, 2, 3)) == hash(Vector(1, 2, 3))
             True
-            >>> hash(V3(1, 2, 3)) == hash(V3(0, 2, 3))
+            >>> hash(Vector(1, 2, 3)) == hash(Vector(0, 2, 3))
             False
         """
         return hash(tuple(self))
 
-    def __eq__(self, other: "V3") -> bool:
+    def __eq__(self, other: "Vector") -> bool:
         """Comparing this vector to another one
 
         Args:
-            other (V3): Other vector
+            other (Vector): Other vector
 
         Returns:
             bool: True if both have the same values
 
         Examples:
-            >>> V3(1, 2, 3) == V3(1, 2, 3)
+            >>> Vector(1, 2, 3) == Vector(1, 2, 3)
             True
-            >>> V3(1, 2, 3) == V3(1, 3, 2)
+            >>> Vector(1, 2, 3) == Vector(1, 3, 2)
             False
         """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self.x == other.x and self.y == other.y and self.z == other.z
 
-    def __neg__(self) -> "V3":
+    def __neg__(self) -> "Vector":
         """Negating this vector
 
         Returns:
-            V3: Vector with negated axis values
+            Vector: Vector with negated axis values
 
         Examples:
-            >>> -V3(3, -5, 8) == V3(-3, 5, -8)
+            >>> -Vector(3, -5, 8) == Vector(-3, 5, -8)
             True
         """
-        return V3(-self.x, -self.y, -self.z)
+        return Vector(-self.x, -self.y, -self.z)
 
-    def __add__(self, other: "V3") -> "V3":
+    def __add__(self, other: "Vector") -> "Vector":
         """Adding two vectors together
 
         Args:
-            other (V3): Other vector
+            other (Vector): Other vector
 
         Returns:
-            V3: Sum of this and the other vector
+            Vector: Sum of this and the other vector
 
         Examples:
-            >>> V3(1, 2, 3) + V3(-5, 8, 14) == V3(-4, 10, 17)
+            >>> Vector(1, 2, 3) + Vector(-5, 8, 14) == Vector(-4, 10, 17)
             True
         """
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return V3(*(a + b for a, b in zip(self, other)))
+        return Vector(*(a + b for a, b in zip(self, other)))
 
-    def __mul__(self, other: int|float) -> "V3":
+    def __mul__(self, other: int|float) -> "Vector":
         """Multiplication of a vector by a number
 
         Args:
             other (int | float): Number to multiply by
 
         Returns:
-            V3: Product of this vector and the number
+            Vector: Product of this vector and the number
 
         Examples:
-            >>> V3(1, 2, 3) * 0 == V3(0, 0, 0)
+            >>> Vector(1, 2, 3) * 0 == Vector(0, 0, 0)
             True
-            >>> V3(1, 2, 3) * 1 == V3(1, 2, 3)
+            >>> Vector(1, 2, 3) * 1 == Vector(1, 2, 3)
             True
-            >>> V3(1, 2, 3) * 2 == V3(2, 4, 6)
+            >>> Vector(1, 2, 3) * 2 == Vector(2, 4, 6)
             True
         """
-        return V3(*(other * a for a in self))
+        return Vector(*(other * a for a in self))
 
-    def __truediv__(self, other: int | float) -> "V3":
+    def __truediv__(self, other: int | float) -> "Vector":
         """Division of a vector by a number
 
         Args:
             other (int | float): Number to divide by
 
         Returns:
-            V3: Quotient of this vector and the number
+            Vector: Quotient of this vector and the number
 
         Examples:
-            >>> V3(1, 2, 3) / 1 == V3(1, 2, 3)
+            >>> Vector(1, 2, 3) / 1 == Vector(1, 2, 3)
             True
-            >>> V3(1, 2, 3) / 2 == V3(0.5, 1, 1.5)
+            >>> Vector(1, 2, 3) / 2 == Vector(0.5, 1, 1.5)
             True
         """
-        return V3(*(a / other for a in self))
+        return Vector(*(a / other for a in self))
 
-    def __rshift__(self, other: int|float) -> "V3":
+    def __rshift__(self, other: int|float) -> "Vector":
         """Rotating the vector on Z axis, clockwise
 
         Args:
             other (int|float): Rotation angle in degrees
 
         Returns:
-            V3: Rotated vector
+            Vector: Rotated vector
 
         Examples:
-            >>> V3(1, 2, 3) >> 0 == V3(1, 2, 3)
+            >>> Vector(1, 2, 3) >> 0 == Vector(1, 2, 3)
             True
-            >>> V3(1, 2, 3) >> 90 == V3(2, -1, 3)
+            >>> Vector(1, 2, 3) >> 90 == Vector(2, -1, 3)
             True
-            >>> V3(1, 2, 3) >> 180 == V3(-1, -2, 3)
+            >>> Vector(1, 2, 3) >> 180 == Vector(-1, -2, 3)
             True
-            >>> V3(1, 2, 3) >> 270 == V3(-2, 1, 3)
+            >>> Vector(1, 2, 3) >> 270 == Vector(-2, 1, 3)
             True
         """
         if other % 90 != 0:
             return NotImplemented
         other %= 360
         if other == 90:
-            return V3(self.y, -self.x, self.z)
+            return Vector(self.y, -self.x, self.z)
         if other == 180:
-            return V3(-self.x, -self.y, self.z)
+            return Vector(-self.x, -self.y, self.z)
         if other == 270:
-            return V3(-self.y, self.x, self.z)
+            return Vector(-self.y, self.x, self.z)
         return self
 
     def __abs__(self) -> float:
@@ -204,35 +200,35 @@ class V3:
             float: Magnitude of a vector
 
         Examples:
-            >>> abs(V3()) == 0
+            >>> abs(Vector()) == 0
             True
-            >>> abs(V3(3, 4, 0)) == 5
+            >>> abs(Vector(3, 4, 0)) == 5
             True
-            >>> abs(V3(z=10)) == 10
+            >>> abs(Vector(z=10)) == 10
             True
         """
         return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
-    def __matmul__(self, other: "V3") -> "V3":
+    def __matmul__(self, other: "Vector") -> "Vector":
         """Calculating the cross product of two vectors
 
         Args:
-            other (V3): Other vector
+            other (Vector): Other vector
 
         Returns:
-            V3: Cross product of two vectors
+            Vector: Cross product of two vectors
 
         Examples:
-            >>> V3(1, 2, 3) @ V3(1, 2, 3) == V3(0, 0, 0)
+            >>> Vector(1, 2, 3) @ Vector(1, 2, 3) == Vector(0, 0, 0)
             True
-            >>> V3(1, 2, 3) @ V3(4, 5, 6) == V3(-3, 6, -3)
+            >>> Vector(1, 2, 3) @ Vector(4, 5, 6) == Vector(-3, 6, -3)
             True
-            >>> V3(1, 2, 3) @ V3(-1, -2, -3) == V3(0, 0, 0)
+            >>> Vector(1, 2, 3) @ Vector(-1, -2, -3) == Vector(0, 0, 0)
             True
         """
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return V3(
+        return Vector(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x
@@ -242,14 +238,14 @@ class V3:
         """Checking whether the vector is non-zero
 
         Returns:
-            bool: True if the vector is not equal to V3(0, 0, 0)
+            bool: True if the vector is not equal to Vector(0, 0, 0)
 
         Examples:
-            >>> bool(V3(1, 2, 3))
+            >>> bool(Vector(1, 2, 3))
             True
-            >>> bool(V3(0, 1, 0))
+            >>> bool(Vector(0, 1, 0))
             True
-            >>> bool(V3(0, 0, 0))
+            >>> bool(Vector(0, 0, 0))
             False
         """
         return self.x != 0 or self.y != 0 or self.z != 0
@@ -269,12 +265,12 @@ class Line:
         ValueError: Points must be different
     """
 
-    def __init__(self, a: V3, b: V3) -> None:
+    def __init__(self, a: Vector, b: Vector) -> None:
         """Initialize a line.
 
         Args:
-            a (V3): First point of the line.
-            b (V3): Second point of the line.
+            a (Vector): First point of the line.
+            b (Vector): Second point of the line.
         """
         if a == b:
             raise ValueError("Points must be different")
@@ -324,7 +320,7 @@ class Line:
         Examples:
             >>> Line(LEFT, RIGHT)() == Line(LEFT, RIGHT)
             True
-            >>> Line(ONE, UP)(z=0) == Line(V3(x=1, y=1, z=0), V3(x=0, y=0, z=0))
+            >>> Line(ONE, UP)(z=0) == Line(Vector(x=1, y=1, z=0), Vector(x=0, y=0, z=0))
             True
         """
         # noinspection PyCallingNonCallable
@@ -340,20 +336,20 @@ class Line:
         yield self.a
         yield self.b
 
-    def __add__(self, other: V3) -> "Line":
+    def __add__(self, other: Vector) -> "Line":
         """Incrementing line bounds by a vector
 
         Args:
-            other (V3): Vector to add
+            other (Vector): Vector to add
 
         Returns:
             Line: A copy of the line with offset line bounds.
 
         Examples:
-            >>> Line(ONE, UP) + UP == Line(V3(1, 1, 2), V3(0, 0, 2))
+            >>> Line(ONE, UP) + UP == Line(Vector(1, 1, 2), Vector(0, 0, 2))
             True
         """
-        if not isinstance(other, V3):
+        if not isinstance(other, Vector):
             return NotImplemented
         return Line(*(point + other for point in self))
 
@@ -391,6 +387,7 @@ class Line:
         """
         if not isinstance(other, self.__class__):
             return NotImplemented
+        # noinspection PyUnresolvedReferences
         return not (self.a - self.b) @ (other.a - other.b)
 
 
@@ -487,11 +484,11 @@ class Face:
         index = hashes.index(min(hashes))
         return hash(hashes[index:] + hashes[:index])
 
-    def __add__(self, other: V3) -> "Face":
+    def __add__(self, other: Vector) -> "Face":
         """Incrementing face bounds by a vector
 
         Args:
-            other (V3): Vector to increment face bounds by
+            other (Vector): Vector to increment face bounds by
 
         Returns:
             Face: Incremented face
@@ -502,7 +499,7 @@ class Face:
             >>> Face(ZERO, ONE, UP) + DOWN == Face(DOWN, ONE + DOWN, ZERO)
             True
         """
-        if not isinstance(other, V3):
+        if not isinstance(other, Vector):
             return NotImplemented
         return Face(*(point + other for point in self.points))
 
@@ -524,19 +521,19 @@ class Face:
         return Face(*(point >> other for point in self.points))
 
 
-## Zero-filled vector, equals to V3(0, 0, 0)
-ZERO = V3()
-## One-filled vector, equals to V3(1, 1, 1)
-ONE = V3(1, 1, 1)
-## Forward direction vector, equals to V3(1, 0, 0)
-FORWARD = V3(x=1)
-## Backward direction vector, equals to V3(-1, 0, 0)
-BACKWARD = V3(x=-1)
-## Left direction vector, equals to V3(0, 1, 0)
-LEFT = V3(y=1)
-## Right direction vector, equals to V3(0, -1, 0)
-RIGHT = V3(y=-1)
-## Up direction vector, equals to V3(0, 0, 1)
-UP = V3(z=1)
-## Down direction vector, equals to V3(0, 0, -1)
-DOWN = V3(z=-1)
+## Zero-filled vector, equals to Vector(0, 0, 0)
+ZERO = Vector()
+## One-filled vector, equals to Vector(1, 1, 1)
+ONE = Vector(1, 1, 1)
+## Forward direction vector, equals to Vector(1, 0, 0)
+FORWARD = Vector(x=1)
+## Backward direction vector, equals to Vector(-1, 0, 0)
+BACKWARD = Vector(x=-1)
+## Left direction vector, equals to Vector(0, 1, 0)
+LEFT = Vector(y=1)
+## Right direction vector, equals to Vector(0, -1, 0)
+RIGHT = Vector(y=-1)
+## Up direction vector, equals to Vector(0, 0, 1)
+UP = Vector(z=1)
+## Down direction vector, equals to Vector(0, 0, -1)
+DOWN = Vector(z=-1)
