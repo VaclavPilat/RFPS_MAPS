@@ -1,6 +1,7 @@
 ## \file
 # Functionality for bridging own data representation with Blender.
-from . import Mesh, Vector
+from .Mesh import V3
+from .Objects import Object
 # noinspection PyUnresolvedReferences
 import bpy, bmesh, math
 
@@ -10,7 +11,7 @@ class Objects:
     """
 
     @staticmethod
-    def create(obj: Mesh.Object):
+    def create(obj: Object):
         """Creating a blender mesh from face vertices
 
         Args:
@@ -31,7 +32,7 @@ class Objects:
         return data
 
     @staticmethod
-    def build(obj: Mesh.Object):
+    def build(obj: Object):
         """Building a blender object from an Object instance
 
         Args:
@@ -42,7 +43,7 @@ class Objects:
         """
         data = bpy.data.objects.new(obj.name, Objects.create(obj) if len(obj.faces) else None)
         data.location = list(obj.position)
-        data.rotation_euler = [math.radians(value) for value in Vector.V3.UP * obj.rotation]
+        data.rotation_euler = [math.radians(value) for value in V3.UP * obj.rotation]
         bpy.context.scene.collection.objects.link(data)
         for child in obj.objects:
             Objects.build(child).parent = data

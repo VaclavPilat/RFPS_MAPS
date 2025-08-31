@@ -2,14 +2,275 @@
 Classes for representing mesh structure.
 
 Mesh data is stored in Object instances (a recursive tree-like structures).
-Each Object may contain multiple Face objects which are represented by Line objects.
+Each Object may contain multiple Face objects.
+Face instances are represented by Line objects.
+Each Line is represented by 2 V3 points.
+
+\todo Use Decimal everywhere with float trap set to True (but leave V3 without type restrictions)
+\todo Add multiple axis rotation: `V3 >> V3`
 
 \internal
 Examples:
+    >>> V3.FORWARD >> 90 == V3.RIGHT
+    True
+    >>> V3.ONE * 0 == V3.ZERO
+    True
+    >>> V3.LEFT @ V3.RIGHT == V3.ZERO
+    True
 """
-from .Vector import V3
-from .Decorators import makeImmutable, addOperators, addInitRepr
-from . import Helpers, Colors
+from .Decorators import makeImmutable, addOperators, addInitRepr, addCopyCall
+import math
+
+
+@addOperators
+@addInitRepr
+@makeImmutable
+@addCopyCall("x", "y", "z")
+class V3:
+    """Class for representing a 3D vector.
+
+    The X axis is for forward/backward values, Y is for left/right and Z is for vertical values.
+
+    Examples:
+        >>> V3(1, 2, 3)
+        V3(1, 2, 3)
+        >>> V3(z=3)
+        V3(z=3)
+    """
+
+    def __init__(self, x: int|float = 0, y: int|float = 0, z: int|float = 0) -> None:
+        """Initializing a 3D vector
+
+        Args:
+            x (int | float, optional): X value. Defaults to 0.
+            y (int | float, optional): Y value. Defaults to 0.
+            z (int | float, optional): Z value. Defaults to 0.
+        """
+        ## Value of the X axis
+        self.x = x
+        ## Value of the Y axis
+        self.y = y
+        ## Value of the Z axis
+        self.z = z
+
+    def __iter__(self):
+        """Iterating over values
+
+        Returns:
+            Iterator representing vector values
+
+        Examples:
+            >>> list(V3(1, 2, 3)) == list(V3(1, 2, 3))
+            True
+            >>> list(V3(1, 2, 3)) == list(V3(1, 2, 2))
+            False
+        """
+        yield self.x
+        yield self.y
+        yield self.z
+
+    def __hash__(self) -> int:
+        """Getting the hash of this vector
+
+        Returns:
+            Hash representation of this vector
+
+        Examples:
+            >>> hash(V3(1, 2, 3)) == hash(V3(1, 2, 3))
+            True
+            >>> hash(V3(1, 2, 3)) == hash(V3(0, 2, 3))
+            False
+        """
+        return hash(tuple(self))
+
+    def __eq__(self, other: "V3") -> bool:
+        """Comparing this vector to another one
+
+        Args:
+            other (V3): Other vector
+
+        Returns:
+            bool: True if both have the same values
+
+        Examples:
+            >>> V3(1, 2, 3) == V3(1, 2, 3)
+            True
+            >>> V3(1, 2, 3) == V3(1, 3, 2)
+            False
+        """
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.x == other.x and self.y == other.y and self.z == other.z
+
+    def __neg__(self) -> "V3":
+        """Negating this vector
+
+        Returns:
+            V3: Vector with negated axis values
+
+        Examples:
+            >>> -V3(3, -5, 8) == V3(-3, 5, -8)
+            True
+        """
+        return V3(-self.x, -self.y, -self.z)
+
+    def __add__(self, other: "V3") -> "V3":
+        """Adding two vectors together
+
+        Args:
+            other (V3): Other vector
+
+        Returns:
+            V3: Sum of this and the other vector
+
+        Examples:
+            >>> V3(1, 2, 3) + V3(-5, 8, 14) == V3(-4, 10, 17)
+            True
+        """
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return V3(*(a + b for a, b in zip(self, other)))
+
+    def __mul__(self, other: int|float) -> "V3":
+        """Multiplication of a vector by a number
+
+        Args:
+            other (int | float): Number to multiply by
+
+        Returns:
+            V3: Product of this vector and the number
+
+        Examples:
+            >>> V3(1, 2, 3) * 0 == V3(0, 0, 0)
+            True
+            >>> V3(1, 2, 3) * 1 == V3(1, 2, 3)
+            True
+            >>> V3(1, 2, 3) * 2 == V3(2, 4, 6)
+            True
+        """
+        return V3(*(other * a for a in self))
+
+    def __truediv__(self, other: int | float) -> "V3":
+        """Division of a vector by a number
+
+        Args:
+            other (int | float): Number to divide by
+
+        Returns:
+            V3: Quotient of this vector and the number
+
+        Examples:
+            >>> V3(1, 2, 3) / 1 == V3(1, 2, 3)
+            True
+            >>> V3(1, 2, 3) / 2 == V3(0.5, 1, 1.5)
+            True
+        """
+        return V3(*(a / other for a in self))
+
+    def __rshift__(self, other: int|float) -> "V3":
+        """Rotating the vector on Z axis, clockwise
+
+        Args:
+            other (int|float): Rotation angle in degrees
+
+        Returns:
+            V3: Rotated vector
+
+        Examples:
+            >>> V3(1, 2, 3) >> 0 == V3(1, 2, 3)
+            True
+            >>> V3(1, 2, 3) >> 90 == V3(2, -1, 3)
+            True
+            >>> V3(1, 2, 3) >> 180 == V3(-1, -2, 3)
+            True
+            >>> V3(1, 2, 3) >> 270 == V3(-2, 1, 3)
+            True
+        """
+        if other % 90 != 0:
+            return NotImplemented
+        other %= 360
+        if other == 90:
+            return V3(self.y, -self.x, self.z)
+        if other == 180:
+            return V3(-self.x, -self.y, self.z)
+        if other == 270:
+            return V3(-self.y, self.x, self.z)
+        return self
+
+    def __abs__(self) -> float:
+        """Calculating the magnitude of the vector
+
+        Returns:
+            float: Magnitude of a vector
+
+        Examples:
+            >>> abs(V3()) == 0
+            True
+            >>> abs(V3(3, 4, 0)) == 5
+            True
+            >>> abs(V3(z=10)) == 10
+            True
+        """
+        return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+
+    def __matmul__(self, other: "V3") -> "V3":
+        """Calculating the cross product of two vectors
+
+        Args:
+            other (V3): Other vector
+
+        Returns:
+            V3: Cross product of two vectors
+
+        Examples:
+            >>> V3(1, 2, 3) @ V3(1, 2, 3) == V3(0, 0, 0)
+            True
+            >>> V3(1, 2, 3) @ V3(4, 5, 6) == V3(-3, 6, -3)
+            True
+            >>> V3(1, 2, 3) @ V3(-1, -2, -3) == V3(0, 0, 0)
+            True
+        """
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return V3(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x
+        )
+
+    def __bool__(self) -> bool:
+        """Checking whether the vector is non-zero
+
+        Returns:
+            bool: True if the vector is not equal to V3(0, 0, 0)
+
+        Examples:
+            >>> bool(V3(1, 2, 3))
+            True
+            >>> bool(V3(0, 1, 0))
+            True
+            >>> bool(V3(0, 0, 0))
+            False
+        """
+        return self.x != 0 or self.y != 0 or self.z != 0
+
+
+## Zero-filled vector, equals to V3(0, 0, 0)
+V3.ZERO = V3()
+## One-filled vector, equals to V3(1, 1, 1)
+V3.ONE = V3(1, 1, 1)
+## Forward direction vector, equals to V3(1, 0, 0)
+V3.FORWARD = V3(x=1)
+## Backward direction vector, equals to V3(-1, 0, 0)
+V3.BACKWARD = V3(x=-1)
+## Left direction vector, equals to V3(0, 1, 0)
+V3.LEFT = V3(y=1)
+## Right direction vector, equals to V3(0, -1, 0)
+V3.RIGHT = V3(y=-1)
+## Up direction vector, equals to V3(0, 0, 1)
+V3.UP = V3(z=1)
+## Down direction vector, equals to V3(0, 0, -1)
+V3.DOWN = V3(z=-1)
 
 
 @addOperators
@@ -279,115 +540,3 @@ class Face:
             True
         """
         return Face(*(point >> other for point in self.points))
-
-
-@addInitRepr
-@makeImmutable
-class Object(metaclass=Helpers.Repr):
-    """Class for containing own mesh and/or other objects
-    """
-
-    def __init__(self, name: str = "New object", position: V3 = V3.ZERO, rotation: int|float = 0, *args, **kwargs) -> None:
-        """Creating a new object
-
-        Args:
-            name (str, optional): Object name. Defaults to "New object".
-            position (V3, optional): Object location. Defaults to V3.ZERO.
-            rotation (int | float, optional): Object rotation in degrees (Z-value only). Defaults to 0.
-        """
-        ## Object name
-        self.name = name
-        ## Object location
-        self.position = position
-        ## Object rotation (in degrees)
-        self.rotation = rotation
-        ## List of child objects
-        self.objects = []
-        ## List of mesh faces
-        self.faces = set()
-        # noinspection PyArgumentList
-        self.generate(*args, **kwargs)
-
-    def __iter__(self):
-        """Iterating over objects
-
-        Returns:
-            Iterator representing object objects
-        """
-        yield self
-        for obj in self.objects:
-            yield from obj
-
-    def __matmul__(self, structure: V3 | Line | Face) -> Face:
-        """Transforming structure positions to be relative to parent
-
-        Args:
-            structure (V3 | Line | Face): 3D structure (relative to self position)
-
-        Returns:
-            V3 | Line | Face: Vertex position (relative to parent's position)
-        """
-        return (structure >> self.rotation) + self.position
-
-    def load(self, obj: type, *args, **kwargs) -> "Object":
-        """Creating an object instance using Object type and its constructor arguments
-
-        Args:
-            obj (type): Object type to create
-
-        Returns:
-            Object: Created object instance
-        """
-        instance = obj(*args, **kwargs)
-        self.objects.append(instance)
-        return instance
-
-    def generate(self) -> None:
-        """Generating the object
-
-        Raises:
-            NotImplementedError: Thrown when not overridden
-        """
-        raise NotImplementedError("Object generation method was not overridden")
-
-    def face(self, *points, **kwargs) -> None:
-        """Creating a new face
-        """
-        self.faces.add(Face(*points, **kwargs))
-
-    def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
-        """Printing string representation of object hierarchy
-
-        Args:
-            current (str, optional): Current line indent. Defaults to "".
-            children (str, optional): Line indent for child items. Defaults to "".
-            layer (int, optional): Current layer index. Defaults to 0.
-        """
-        print(f"{current}{Colors.NONE}{repr(self)}")
-        for index, child in enumerate(self.objects):
-            color = Colors.HIERARCHY[layer % len(Colors.HIERARCHY)]
-            last = index < len(self.objects) - 1
-            newCurrent = f"{children}{color}{'┣' if last else '┗'}━━ "
-            newChildren = f"{children}{color}{'┃' if last else ' '}   "
-            child.printHierarchy(newCurrent, newChildren, layer + 1)
-
-
-def createObjectSubclass(cls: type = Object):
-    """Decorator for creating an Object subclass from a generator function
-
-    Args:
-        cls (type, optional): Object or its subclass type. Defaults to Object.
-
-    Returns:
-        Decorator for making a subclass of the provided class type
-    """
-
-    def decorator(func) -> type:
-        class Wrapped(cls):
-            pass
-
-        Wrapped.generate = func
-        Wrapped.__name__ = func.__name__
-        return Wrapped
-
-    return decorator

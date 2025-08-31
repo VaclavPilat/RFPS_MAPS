@@ -4,7 +4,9 @@
 # \todo Refactor, add tests and better docstrings
 # \todo Add an option to show bounding boxes of objects
 # \todo Add an option for toggling between fixed/independent axis value diffs
-from . import Decorators, Colors, Mesh, Vector
+from .Mesh import V3, Line
+from .Objects import Object
+from . import Decorators, Colors
 import enum
 
 
@@ -53,7 +55,7 @@ class Axis(enum.Enum):
         """Initialising an Axis instance
         """
         ## Line representing axis direction
-        self.line = Mesh.Line(Vector.V3.ZERO, Vector.V3(**{str(self): value}))
+        self.line = Line(V3.ZERO, V3(**{str(self): value}))
 
     def __bool__(self) -> bool:
         """Checking whether the axis is positive or negative
@@ -79,11 +81,11 @@ class Axis(enum.Enum):
         """
         return self.name[-1].lower()
 
-    def __call__(self, vector: Vector.V3) -> float:
+    def __call__(self, vector: V3) -> float:
         """Getting the value of a vector that corresponds to self axis
 
         Args:
-            vector (Vector.V3): Vector to get the axis value of
+            vector (V3): Vector to get the axis value of
 
         Returns:
             float: Axis value
@@ -176,11 +178,11 @@ class Header:
             " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
         )
 
-    def count(self, obj: Mesh.Object, depth: int) -> dict:
+    def count(self, obj: Object, depth: int) -> dict:
         """Counting faces, edges and vertices of a specified object (recursively)
 
         Args:
-            obj (Mesh.Object): Object whose mesh is being counted
+            obj (Object): Object whose mesh is being counted
             depth (int): Remaining recursion depth
 
         Returns:
@@ -342,11 +344,11 @@ class View:
         count = self.verticalCounts[vertical][horizontal]
         return f"{Colors.temperature(self.grid.show.line(count))}{'┃' if count else '┆'}{Colors.NONE}"
 
-    def transform(self, obj: Mesh.Object, depth: int) -> dict:
+    def transform(self, obj: Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
 
         Args:
-            obj (Mesh.Object): Object whose mesh is being transformed
+            obj (Object): Object whose mesh is being transformed
             depth (int): Remaining recursion depth
 
         Returns:
@@ -460,11 +462,11 @@ class Grid:
     """Class for rendering 3D object(s) from a specified direction
     """
 
-    def __init__(self, obj: Mesh.Object, depth: int = 0, direction: Direction = Direction.TOP, show: Show = Show.EDGES) -> None:
+    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.TOP, show: Show = Show.EDGES) -> None:
         """Initialising a Grid instance
 
         Args:
-            obj (Mesh.Object): Object whose mesh will be rendered
+            obj (Object): Object whose mesh will be rendered
             depth (int, optional): Depth from which mesh data will be gathered. Defaults to 0.
             direction (Direction, optional): Direction from which the object is viewed. Defaults to Direction.TOP.
             show (Show, optional): Selection of how colors do get shown. Defaults to Show.EDGES.

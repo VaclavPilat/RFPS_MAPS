@@ -13,8 +13,9 @@ if __name__ == "__main__":
     except ImportError:
         BLENDER = False
 
-from src import Mesh, Tiles, Helpers, Grids
-from src.Vector import V3
+from src import Tiles, Helpers, Grids
+from src.Mesh import V3
+from src.Objects import createObjectSubclass
 
 
 ## Setting constants used in the Metro map
@@ -36,7 +37,7 @@ METRO = Helpers.Settings(
 
 
 # noinspection PyIncorrectDocstring,PyPep8Naming
-@Mesh.createObjectSubclass(Tiles.Tile)
+@createObjectSubclass(Tiles.Tile)
 def Stairs(self, D: float, G: int, H: float, L: float) -> None:
     """Generating multiple flights of stairs with resting places in between
 
@@ -69,7 +70,7 @@ def Stairs(self, D: float, G: int, H: float, L: float) -> None:
 
 
 # noinspection PyIncorrectDocstring,PyPep8Naming
-@Mesh.createObjectSubclass(Tiles.Tile)
+@createObjectSubclass(Tiles.Tile)
 def Slopes(self, D: float, S: int, R: float) -> None:
     """Generating multiple (wheelchair accessible) slopes with resting places in between
 
@@ -98,7 +99,7 @@ def Slopes(self, D: float, S: int, R: float) -> None:
 
 
 # noinspection PyIncorrectDocstring,PyPep8Naming
-@Mesh.createObjectSubclass(Tiles.Tile)
+@createObjectSubclass(Tiles.Tile)
 def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     """Generating an underpass entrance
 
@@ -128,7 +129,7 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
 
 
 # noinspection PyUnresolvedReferences
-@Mesh.createObjectSubclass()
+@createObjectSubclass()
 def Metro(self) -> None:
     """Generating the Metro station
     """
