@@ -1,6 +1,11 @@
-## \file
-# Custom decorator functions for data classes.
-# Method injection is preferred over subclassing.
+"""! \file
+Custom decorator functions for data classes.
+
+These decorators either add additional functionality to existing classes or alter their behaviour.
+Method injection is preferred over subclassing.
+
+\todo Find a way to remove mentions of these decorators being called from exception tracebacks.
+"""
 
 
 def addInitRepr(cls: type) -> type:
@@ -120,7 +125,7 @@ def addCopyCall(*fields):
 
 
 # noinspection PyUnresolvedReferences
-def addOperators(cls: type) -> type:
+def mirrorOperators(cls: type) -> type:
     """A class decorator for adding counterparts of already defined math operators.
     Some predefined "mirror operations" will be added.
 
@@ -131,7 +136,7 @@ def addOperators(cls: type) -> type:
         type: The same class type with added operators
 
     Examples:
-        >>> @addOperators
+        >>> @mirrorOperators
         ... class Number:
         ...     def __init__(self, value):
         ...         self.value = value

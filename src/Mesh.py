@@ -18,7 +18,7 @@ from .Decorators import *
 import math
 
 
-@addOperators
+@mirrorOperators
 @addInitRepr
 @makeImmutable
 @addCopyCall("x", "y", "z")
@@ -251,7 +251,7 @@ class Vector:
         return self.x != 0 or self.y != 0 or self.z != 0
 
 
-@addOperators
+@mirrorOperators
 @makeImmutable
 @addInitRepr
 class Line:
