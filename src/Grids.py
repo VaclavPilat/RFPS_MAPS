@@ -1,17 +1,24 @@
-## \file
-# Functionality for rendering Object structure in console.
-# Logic for presenting 3D objects as 2D renders from preset directions and other customizable settings.
-# \todo Refactor, add tests and better docstrings
-# \todo Add an option to show bounding boxes of objects
-# \todo Add an option for toggling between fixed/independent axis value diffs
-from .Mesh import *
+"""! \file
+Functionality for rendering Object meshes in console.
+
+Logic for presenting 3D objects as 2D renders from preset directions and other customizable settings.
+
+\todo Add an option to show bounding boxes of objects
+\todo Add an option for toggling between fixed/independent axis value diffs
+"""
+from .Decorators import makeImmutable
+from .Mesh import Vector, Line, ZERO
 from .Objects import Object
-from . import Decorators, Colors
+from . import Colors ###
 import enum
 
 
-class Shape(enum.IntFlag):
+class Shape (enum.IntFlag):
     """Flags for the shape of a vertex character shown in View
+
+    Examples:
+        >>> str(Shape.TOP | Shape.BOTTOM | Shape.LEFT)
+        '┫'
     """
 
     ## Contains no lines
@@ -30,11 +37,15 @@ class Shape(enum.IntFlag):
 
         Returns:
             str: String representation of vertex point
+
+        Examples:
+            >>> str(Shape.NONE)
+            '┼'
         """
         return "┼╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"[self]
 
 
-class Axis(enum.Enum):
+class Axis (enum.Enum):
     """Enum for representing either positive or negative axis
     """
 
@@ -62,6 +73,12 @@ class Axis(enum.Enum):
 
         Returns:
             bool: True if the axis is positive
+
+        Examples:
+            >>> bool(Axis.X)
+            True
+            >>> bool(Axis._X)
+            False
         """
         return self.value > 0
 
@@ -70,6 +87,10 @@ class Axis(enum.Enum):
 
         Returns:
             Axis: Negated axis
+
+        Examples:
+            >>> -Axis.X == Axis._X
+            True
         """
         return Axis(-self.value)
 
@@ -78,9 +99,14 @@ class Axis(enum.Enum):
 
         Returns:
             str: Character representing axis name
+
+        Examples:
+            >>> str(Axis.Y) == str(Axis._Y)
+            True
         """
         return self.name[-1].lower()
 
+    # noinspection PyCallingNonCallable
     def __call__(self, vector: Vector) -> float:
         """Getting the value of a vector that corresponds to self axis
 
@@ -89,31 +115,34 @@ class Axis(enum.Enum):
 
         Returns:
             float: Axis value
+
+        Examples:
+            >>> Axis.Z(Vector(1, 2, 3))
+            3
+            >>> Axis._Y(Vector(1, 2, 3))
+            2
         """
         return getattr(vector, str(self))
 
 
-class Direction(enum.Enum):
-    """Enums representing the directions a 3D object can be rendered from
+class Direction (enum.Enum):
+    """Enum representing the directions an Object can be rendered from
     """
 
     ## Top view direction
-    TOP = ("TOP VIEW", -Axis.X, -Axis.Y)
+    TOP = (-Axis.X, -Axis.Y)
     ## Front view direction
-    FRONT = ("FRONT VIEW", -Axis.Z, -Axis.Y)
+    FRONT = (-Axis.Z, -Axis.Y)
     ## Side view direction
-    SIDE = ("SIDE VIEW", -Axis.Z, Axis.X)
+    SIDE = (-Axis.Z, Axis.X)
 
-    def __init__(self, title: str, vertical: Axis, horizontal: Axis) -> None:
+    def __init__(self, vertical: Axis, horizontal: Axis) -> None:
         """Initializing a Direction instance
 
         Args:
-            title (str): Direction title
             vertical (Axis): Vertical axis
             horizontal (Axis): Horizontal axis
         """
-        ## Direction title
-        self.title = title
         ## Vertical axis
         self.vertical = vertical
         ## Horizontal axis
@@ -153,7 +182,7 @@ class Show(enum.Enum):
         self.line = line
 
 
-@Decorators.makeImmutable
+@makeImmutable
 class Header:
     """Class for displaying basic information about a grid
     """
@@ -174,7 +203,7 @@ class Header:
             f"{Colors.BOLD}{self.grid.obj.name}{Colors.NONE}" + f" (+{self.grid.depth} layers deep)",
             ", ".join(f"{value} {key}" for key, value in self.counts.items()),
             # Second column
-            f"{self.grid.direction.title} of {self.grid.show.name}",
+            f"{self.grid.direction.name} view of {self.grid.show.name}",
             " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
         )
 
@@ -222,7 +251,7 @@ class Header:
         return "\n".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] for i, line in enumerate(lines))
 
 
-@Decorators.makeImmutable
+@makeImmutable
 class Values:
     """Class for containing detailed information on axis values
     """
@@ -254,7 +283,7 @@ class Values:
             self.offsets = tuple(map(lambda d: round(d / minimum) * multiplier - 1, differences))
 
 
-@Decorators.makeImmutable
+@makeImmutable
 class View:
     """Class for rendering a 3D mesh as text
     """
@@ -457,7 +486,7 @@ class View:
 
 
 # noinspection PyUnresolvedReferences
-@Decorators.makeImmutable
+@makeImmutable
 class Grid:
     """Class for rendering 3D object(s) from a specified direction
     """

@@ -3,18 +3,13 @@ Classes for representing mesh structure.
 
 Mesh data is stored in Object instances (recursive tree-like structures).
 Each Object may contain multiple Face objects.
-Face instances are represented by Line objects.
-Each Line is represented by 2 Vector points.
+Face objects are represented by Vector points.
+Iterating over a Face instance yields Line objects.
 
 \todo Use Decimal everywhere with float trap set to True (but leave Vector without type restrictions)
 \todo Add multiple axis rotation: `Vector >> Vector`
-
-\internal
-Examples:
-    >>> Line(ZERO, UP) | Line(RIGHT, RIGHT+DOWN)
-    True
 """
-from .Decorators import *
+from .Decorators import addCopyCall, addInitRepr, makeImmutable, mirrorOperators
 import math
 
 
