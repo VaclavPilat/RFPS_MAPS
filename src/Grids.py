@@ -159,18 +159,23 @@ class Direction (enum.Enum):
             yield "".join(line[::1 if self.horizontal else -1])
 
 
-class Show(enum.Enum):
-    """Enums for adjusting vertex and line colors
+class Highlight (enum.Enum):
+    """Enums for adjusting vertex and line colors indexes
     """
 
     ## Colorizing vertices based on their counts and disregarding line counts
-    VERTICES = (lambda vertex, top, right, bottom, left: vertex, lambda line: 0)
+    VERTICES = (
+        lambda vertex, top, right, bottom, left: vertex,
+        lambda line: 0
+    )
     ## Colorizing vertices based on neighbouring line counts
-    EDGES = (lambda vertex, top, right, bottom, left: next((x for x in (top, bottom, left, right) if x), 0),
-             lambda line: line)
+    EDGES = (
+        lambda vertex, top, right, bottom, left: next((x for x in (top, bottom, left, right) if x), 0),
+        lambda line: line
+    )
 
     def __init__(self, point, line) -> None:
-        """Initialising a Show instance
+        """Initialising a Highlight instance
 
         Args:
             point: Function for updating color index for points
@@ -184,34 +189,32 @@ class Show(enum.Enum):
 
 @makeImmutable
 class Header:
-    """Class for displaying basic information about a grid
+    """Class for providing basic information on an Object that is being rendered
     """
 
     def __init__(self, grid: "Grid") -> None:
-        """Initializing a Header instance
+        """Initializing a Header
 
         Args:
             grid (Grid): Grid instance to describe
         """
-        ## Source grid
-        self.grid = grid
-        ## Data counts
-        self.counts = self.count(self.grid.obj, self.grid.depth)
+        ## Render direction lines
+        self.direction = list(grid.direction)
         ## Info strings
         self.info = (
             # First column
-            f"{Colors.BOLD}{self.grid.obj.name}{Colors.NONE}" + f" (+{self.grid.depth} layers deep)",
-            ", ".join(f"{value} {key}" for key, value in self.counts.items()),
+            f"{Colors.BOLD}{grid.obj.name}{Colors.NONE}" + f" (+{grid.depth} layers deep)",
+            ", ".join(f"{value} {key}" for key, value in self(grid.obj, grid.depth).items()),
             # Second column
-            f"{self.grid.direction.name} view of {self.grid.show.name}",
+            f"{grid.direction.name} view of {grid.highlight.name}",
             " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
         )
 
-    def count(self, obj: Object, depth: int) -> dict:
+    def __call__(self, obj: Object, depth: int) -> dict:
         """Counting faces, edges and vertices of a specified object (recursively)
 
         Args:
-            obj (Object): Object whose mesh is being counted
+            obj (Object): Object whose mesh structure is being counted
             depth (int): Remaining recursion depth
 
         Returns:
@@ -222,11 +225,11 @@ class Header:
             "vertices": len(set(vertex for face in obj.faces for vertex in face.points)),
             "edges": len(set(line for face in obj.faces for line in face)),
             "faces": len(obj.faces),
-            "triangles": sum(len(face.points) - 2 for face in obj.faces),
+            "triangles": sum(len(face) - 2 for face in obj.faces),
         }
         if depth > 0:
             for child in obj.objects:
-                for key, value in self.count(child, depth - 1).items():
+                for key, value in self(child, depth - 1).items():
                     counts[key] += value
         return counts
 
@@ -236,7 +239,7 @@ class Header:
         Returns:
              str: ANSI colored string representation of a grid header
         """
-        lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.grid.direction), f"╰{'─' * 7}"]
+        lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.direction), f"╰{'─' * 7}"]
         for i in range((len(self.info) + 1) // 2):
             just = max(map(Colors.alen, self.info[i * 2:i * 2 + 2]))
             for j in range(5):
@@ -248,7 +251,7 @@ class Header:
                     lines[j] += f" {self.info[index]}{' ' * (just - Colors.alen(self.info[index]) + 1)}"
                 else:
                     lines[j] += " " * (just + 2)
-        return "\n".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] for i, line in enumerate(lines))
+        return "".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] + "\n" for i, line in enumerate(lines))
 
 
 @makeImmutable
@@ -343,7 +346,7 @@ class View:
         top = 0 if vertical == 0 else self.verticalCounts[vertical - 1][horizontal]
         right = 0 if horizontal >= len(self.horizontal.values) - 1 else self.horizontalCounts[vertical][horizontal]
         bottom = 0 if vertical >= len(self.vertical.values) - 1 else self.verticalCounts[vertical][horizontal]
-        count = self.grid.show.point(vertices, top, right, bottom, left)
+        count = self.grid.highlight.point(vertices, top, right, bottom, left)
         return f"{Colors.temperature(count)}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
 
     def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
@@ -358,7 +361,7 @@ class View:
         """
         count = self.horizontalCounts[vertical][horizontal]
         chars = self.horizontal.offsets[horizontal]
-        return f"{Colors.temperature(self.grid.show.line(count))}{('━' if count else '╌') * chars}{Colors.NONE}"
+        return f"{Colors.temperature(self.grid.highlight.line(count))}{('━' if count else '╌') * chars}{Colors.NONE}"
 
     def colorizeVertical(self, vertical: int, horizontal: int) -> str:
         """Colorizing a vertical line based on the number of edges behind it
@@ -371,7 +374,7 @@ class View:
             str: ANSI colored character representing the line
         """
         count = self.verticalCounts[vertical][horizontal]
-        return f"{Colors.temperature(self.grid.show.line(count))}{'┃' if count else '┆'}{Colors.NONE}"
+        return f"{Colors.temperature(self.grid.highlight.line(count))}{'┃' if count else '┆'}{Colors.NONE}"
 
     def transform(self, obj: Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
@@ -491,14 +494,14 @@ class Grid:
     """Class for rendering 3D object(s) from a specified direction
     """
 
-    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.TOP, show: Show = Show.EDGES) -> None:
+    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.TOP, highlight: Highlight = Highlight.EDGES) -> None:
         """Initialising a Grid instance
 
         Args:
             obj (Object): Object whose mesh will be rendered
             depth (int, optional): Depth from which mesh data will be gathered. Defaults to 0.
             direction (Direction, optional): Direction from which the object is viewed. Defaults to Direction.TOP.
-            show (Show, optional): Selection of how colors do get shown. Defaults to Show.EDGES.
+            highlight (Highlight, optional): Color highlight setting. Defaults to Highlight.EDGES.
         """
         ## Object to visualise
         self.obj = obj
@@ -506,8 +509,8 @@ class Grid:
         self.depth = depth
         ## View direction
         self.direction = direction
-        ## Show settings
-        self.show = show
+        ## Highlight settings
+        self.highlight = highlight
 
     def __str__(self) -> str:
         """Getting string representation of the grid
@@ -515,7 +518,7 @@ class Grid:
         Returns:
              str: String representation of the grid
         """
-        return f"{Header(self)}\n{View(self)}"
+        return f"{Header(self)}{View(self)}"
 
     @staticmethod
     def all(*args, **kwargs) -> str:

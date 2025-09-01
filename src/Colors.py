@@ -9,7 +9,7 @@ if sys.stdout.isatty() or os.getenv('COLOR'):
     ## Reset color string
     NONE = "\033[0m"
     ## Grid colors, sorted from coldest to hottest
-    TEMPERATURE = ("\033[90;1m", "\033[94;1m", "\033[96;1m", "\033[92;1m", "\033[93;1m", "\033[91;1m", "\033[95;1m")
+    TEMPERATURE = ("\033[90m", "\033[94;1m", "\033[96;1m", "\033[92;1m", "\033[93;1m", "\033[91;1m", "\033[95;1m")
     ## Axis colors
     AXIS = {"x": "\033[91;1m", "y": "\033[92;1m", "z": "\033[94;1m"}
     ## Hierarchy colors
