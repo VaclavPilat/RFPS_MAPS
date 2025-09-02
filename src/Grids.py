@@ -1,7 +1,7 @@
 """! \file
 Functionality for rendering Object meshes in console.
 
-Logic for presenting 3D objects as 2D renders from preset directions and other customizable settings.
+Presenting 3D objects as 2D renders from specified directions and with other customizable settings.
 
 \todo Add an option to show bounding boxes of objects
 \todo Add an option for toggling between fixed/independent axis value diffs
@@ -125,31 +125,35 @@ class Axis (enum.Enum):
         return getattr(vector, str(self))
 
 
-class Direction (enum.Enum):
-    """Enum representing the directions an Object can be rendered from
+class Direction (enum.IntFlag):
+    """Flag representing the directions an Object can be rendered from
     """
 
     ## Top view direction
-    TOP = (-Axis.X, -Axis.Y)
+    TOP = 1, -Axis.X, -Axis.Y
     ## Front view direction
-    FRONT = (-Axis.Z, -Axis.Y)
+    FRONT = 2, -Axis.Z, -Axis.Y
     ## Side view direction
-    SIDE = (-Axis.Z, Axis.X)
+    SIDE = 4, -Axis.Z, Axis.X
 
-    def __init__(self, vertical: Axis, horizontal: Axis) -> None:
-        """Initializing a Direction instance
+    def __new__(cls, value: int, vertical: Axis, horizontal: Axis) -> "Direction":
+        """Creating a new instance of Direction
 
         Args:
+            value (int): Direction value
             vertical (Axis): Vertical axis
             horizontal (Axis): Horizontal axis
         """
-        ## Vertical axis
-        self.vertical = vertical
-        ## Horizontal axis
-        self.horizontal = horizontal
+        member = int.__new__(cls, value)
+        member._value_ = value
+        member.vertical = vertical
+        member.horizontal = horizontal
+        return member
 
     def __iter__(self):
-        """Getting strings representing the direction
+        """Getting strings representing the direction.
+
+        Works only when the value is "canonical" (single bit).
         """
         top = (f"╺{'╋━━'[::1 if self.horizontal else -1]}╸",
                f"{Colors.AXIS[str(self.horizontal)]}{self.horizontal.name[-1]}{Colors.NONE}", " ")
@@ -192,25 +196,25 @@ class Header:
     """Class for providing basic information on an Object that is being rendered
     """
 
-    def __init__(self, grid: "Grid") -> None:
+    def __init__(self, grid: "Grid", direction: Direction, highlight: Highlight) -> None:
         """Initializing a Header
 
         Args:
             grid (Grid): Grid instance to describe
         """
         ## Render direction lines
-        self.direction = list(grid.direction)
+        self.direction = list(direction)
         ## Info strings
         self.info = (
             # First column
             f"{Colors.BOLD}{grid.obj.name}{Colors.NONE}" + f" (+{grid.depth} layers deep)",
-            ", ".join(f"{value} {key}" for key, value in self(grid.obj, grid.depth).items()),
+            ", ".join(f"{value} {key}" for key, value in self.count(grid.obj, grid.depth).items()),
             # Second column
-            f"{grid.direction.name} view of {grid.highlight.name}",
+            f"{direction.name} view of {highlight.name}",
             " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
         )
 
-    def __call__(self, obj: Object, depth: int) -> dict:
+    def count(self, obj: Object, depth: int) -> dict:
         """Counting faces, edges and vertices of a specified object (recursively)
 
         Args:
@@ -229,7 +233,7 @@ class Header:
         }
         if depth > 0:
             for child in obj.objects:
-                for key, value in self(child, depth - 1).items():
+                for key, value in self.count(child, depth - 1).items():
                     counts[key] += value
         return counts
 
@@ -254,6 +258,8 @@ class Header:
         return "".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] + "\n" for i, line in enumerate(lines))
 
 
+########################################################################
+# \todo Refactor
 @makeImmutable
 class Values:
     """Class for containing detailed information on axis values
@@ -490,7 +496,7 @@ class View:
 
 # noinspection PyUnresolvedReferences
 @makeImmutable
-class Grid:
+class _Grid:
     """Class for rendering 3D object(s) from a specified direction
     """
 
@@ -528,3 +534,31 @@ class Grid:
             str: String with all object renders
         """
         return "\n".join(str(Grid(*args, direction=direction, **kwargs)) for direction in Direction)
+########################################################################
+
+
+class Grid:
+    """Class for rendering 3D object(s) as a 2D text grid into stdout
+    """
+
+    def __init__(self, obj: Object, depth: int = 0) -> None:
+        """Initialising a Grid instance
+
+        Args:
+            obj (Object): 3D object whose mesh will be rendered
+            depth (int, optional): Maximum object depth that will be rendered. Defaults to 0.
+        """
+        self.obj = obj
+        self.depth = depth
+
+    def __call__(self, direction: Direction = Direction(0b111), highlight: Highlight = Highlight.EDGES, header: bool = True) -> None:
+        """Printing the object render into stdout
+
+        Args:
+            direction (Direction, optional): Direction from which to render the object. Defaults to Direction(0b111).
+            highlight (Highlight, optional): Which part of the render to highlight? Defaults to Highlight.EDGES.
+            header (bool, optional): Should render information be included as a header in the print?
+        """
+        for value in Direction:
+            if value in direction:
+                print(Header(self, value, highlight))

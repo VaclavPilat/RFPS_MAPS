@@ -13,8 +13,10 @@ if __name__ == "__main__":
     except ImportError:
         BLENDER = False
 
-from src import Tiles, Helpers, Grids
-from src.Mesh import *
+from src.Mesh import FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN, ZERO
+from src.Grids import Grid
+
+from src import Tiles, Helpers
 from src.Objects import createObjectSubclass
 
 
@@ -151,5 +153,4 @@ if __name__ == "__main__":
         # noinspection PyTypeChecker
         Blender.Objects.build(metro)
     else:
-        print(Grids.Grid.all(metro, 2))
-        metro.printHierarchy()
+        Grid(metro)()
