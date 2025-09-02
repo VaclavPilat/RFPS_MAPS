@@ -7,6 +7,10 @@ This can be overturned by setting a "COLOR" environment variable to any value.
 import enum, sys, os, re
 
 
+## Is color mode enabled?
+ENABLED = sys.stdout.isatty() or os.getenv("COLOR")
+
+
 class Color (enum.Enum):
     """Enum for all defined colors in the form of ANSI codes.
     """
@@ -31,8 +35,8 @@ class Color (enum.Enum):
     PURPLE = "\033[95m"
     ## Cyan color
     CYAN = "\033[96m"
-    ## Grey color
-    GREY = "\033[97m"
+    ## White color
+    WHITE = "\033[97m"
 
     ## X axis color
     X = RED
@@ -60,9 +64,9 @@ class Color (enum.Enum):
         Returns:
             str: String wrapped in ANSI color codes
         """
-        if sys.stdout.isatty() or os.getenv("COLOR"):
-            return f"{self}{text}{Color.NONE}"
-        return text
+        if not ENABLED or self == Color.NONE:
+            return text
+        return f"{self}{text}{Color.NONE}"
 
 
 class Temperature (enum.Enum):
@@ -74,18 +78,20 @@ class Temperature (enum.Enum):
 
     ## Color #0
     BLACK = 0
-    ## Color #1
-    BLUE = 1
-    ## Color #2
-    CYAN = 2
-    ## Color #3
-    GREEN = 3
-    ## Color #4
-    YELLOW = 4
-    ## Color #5
-    RED = 5
-    ## Color #6
-    PURPLE = 6
+
+    if ENABLED:
+        ## Color #1
+        BLUE = 1
+        ## Color #2
+        CYAN = 2
+        ## Color #3
+        GREEN = 3
+        ## Color #4
+        YELLOW = 4
+        ## Color #5
+        RED = 5
+        ## Color #6
+        PURPLE = 6
 
     @classmethod
     def _missing_(cls, index: int) -> "Temperature":

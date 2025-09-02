@@ -135,14 +135,14 @@ class Direction (enum.IntFlag):
     ## Side view direction
     SIDE = 4, -Axis.Z, Axis.X, Color.Y
 
-    def __new__(cls, value: int, vertical: Axis, horizontal: Axis, color: Color = Color.GREY) -> "Direction":
+    def __new__(cls, value: int, vertical: Axis, horizontal: Axis, color: Color = Color.NONE) -> "Direction":
         """Creating a new instance of Direction
 
         Args:
             value (int): Direction value
             vertical (Axis): Vertical axis
             horizontal (Axis): Horizontal axis
-            color (Color, optional): Color representing the direction. Defaults to Color.GREY.
+            color (Color, optional): Color representing the direction. Defaults to Color.NONE.
         """
         member = int.__new__(cls, value)
         member._value_ = value
@@ -180,13 +180,13 @@ class Highlight (enum.Enum):
         Color.CYAN
     )
 
-    def __init__(self, point, line, color: Color = Color.GREY) -> None:
+    def __init__(self, point, line, color: Color = Color.NONE) -> None:
         """Initialising a Highlight instance
 
         Args:
             point: Function for updating color index for points
             line: Function for updating color index for lines
-            color (Color, optional): Color representing the highlight. Defaults to Color.GREY.
+            color (Color, optional): Color representing the highlight. Defaults to Color.NONE.
         """
         ## Function for adjusting point count
         self.point = point
@@ -207,12 +207,12 @@ class Scale (enum.Enum):
     ## Both axis have the same scales
     JOINT = lambda this, other: min(this, other), Color.GREEN
 
-    def __init__(self, increment, color: Color = Color.GREY) -> None:
+    def __init__(self, increment, color: Color = Color.NONE) -> None:
         """Initialising a Scale instance
 
         Args:
             increment: Function for selecting a scale increment
-            color (Color, optional): Color representing the scale. Defaults to Color.GREY.
+            color (Color, optional): Color representing the scale. Defaults to Color.NONE.
         """
         ## Function for selecting a scale increment
         self.increment = increment
