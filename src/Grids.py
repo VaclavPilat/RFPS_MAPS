@@ -196,46 +196,27 @@ class Header:
     """Class for providing basic information on an Object that is being rendered
     """
 
-    def __init__(self, grid: "Grid", direction: Direction, highlight: Highlight) -> None:
+    def __init__(self, obj: Object, depth: int, counts: dict, direction: Direction, highlight: Highlight) -> None:
         """Initializing a Header
 
         Args:
-            grid (Grid): Grid instance to describe
+            obj (Object): Object that is being described
+            depth (int): Maximum rendering depth
+            counts (dict): Dictionary of vertex, line and face counts
+            direction (Direction): Direction from which the object is being rendered
+            highlight (Highlight): What part of the object is to be highlighted
         """
         ## Render direction lines
         self.direction = list(direction)
         ## Info strings
         self.info = (
             # First column
-            f"{Colors.BOLD}{grid.obj.name}{Colors.NONE}" + f" (+{grid.depth} layers deep)",
-            ", ".join(f"{value} {key}" for key, value in self.count(grid.obj, grid.depth).items()),
+            f"{Colors.BOLD}{obj.name}{Colors.NONE}" + f" (+{depth} layers deep)",
+            ", ".join(f"{value} {key}" for key, value in counts.items()),
             # Second column
             f"{direction.name} view of {highlight.name}",
             " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
         )
-
-    def count(self, obj: Object, depth: int) -> dict:
-        """Counting faces, edges and vertices of a specified object (recursively)
-
-        Args:
-            obj (Object): Object whose mesh structure is being counted
-            depth (int): Remaining recursion depth
-
-        Returns:
-            dict: Dictionary of Blender-like vertex, edge and face counts
-        """
-        counts = {
-            "objects": 1,
-            "vertices": len(set(vertex for face in obj.faces for vertex in face.points)),
-            "edges": len(set(line for face in obj.faces for line in face)),
-            "faces": len(obj.faces),
-            "triangles": sum(len(face) - 2 for face in obj.faces),
-        }
-        if depth > 0:
-            for child in obj.objects:
-                for key, value in self.count(child, depth - 1).items():
-                    counts[key] += value
-        return counts
 
     def __str__(self) -> str:
         """Getting a string representation of a grid header
@@ -255,7 +236,7 @@ class Header:
                     lines[j] += f" {self.info[index]}{' ' * (just - Colors.alen(self.info[index]) + 1)}"
                 else:
                     lines[j] += " " * (just + 2)
-        return "".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] + "\n" for i, line in enumerate(lines))
+        return "\n".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] for i, line in enumerate(lines))
 
 
 ########################################################################
@@ -381,28 +362,6 @@ class View:
         """
         count = self.verticalCounts[vertical][horizontal]
         return f"{Colors.temperature(self.grid.highlight.line(count))}{'┃' if count else '┆'}{Colors.NONE}"
-
-    def transform(self, obj: Object, depth: int) -> dict:
-        """Getting transformed mesh data of a specified object (recursively)
-
-        Args:
-            obj (Object): Object whose mesh is being transformed
-            depth (int): Remaining recursion depth
-
-        Returns:
-            dict: Dictionary of transformed Blender-like vertex and edge positions
-        """
-        data = {
-            "vertices": tuple(set(vertex for face in obj.faces for vertex in face.points)),
-            "edges": tuple(set(line for face in obj.faces for line in face)),
-        }
-        if depth > 0:
-            for child in obj.objects:
-                for key, value in self.transform(child, depth - 1).items():
-                    data[key] += value
-        for key, value in data.items():
-            data[key] = tuple(map(obj.__matmul__, value))
-        return data
 
     def countVertices(self) -> list:
         """Counting vertices whose values match axis values
@@ -537,6 +496,13 @@ class _Grid:
 ########################################################################
 
 
+
+class Render:
+
+    def __init__(self):
+        pass
+
+
 class Grid:
     """Class for rendering 3D object(s) as a 2D text grid into stdout
     """
@@ -551,14 +517,65 @@ class Grid:
         self.obj = obj
         self.depth = depth
 
-    def __call__(self, direction: Direction = Direction(0b111), highlight: Highlight = Highlight.EDGES, header: bool = True) -> None:
+        # Precalculated object counts
+        self.counts = self.count(obj, depth)
+        # Pretransformed object mesh
+        self.mesh = self.transform(obj, depth)
+
+    def count(self, obj: Object, depth: int) -> dict:
+        """Counting faces, edges and vertices of a specified object (recursively)
+
+        Args:
+            obj (Object): Object whose mesh structure is being counted
+            depth (int): Remaining recursion depth
+
+        Returns:
+            dict: Dictionary of Blender-like vertex, edge and face counts
+        """
+        counts = {
+            "objects": 1,
+            "vertices": len(set(vertex for face in obj.faces for vertex in face.points)),
+            "edges": len(set(line for face in obj.faces for line in face)),
+            "faces": len(obj.faces),
+            "triangles": sum(len(face) - 2 for face in obj.faces),
+        }
+        if depth > 0:
+            for child in obj.objects:
+                for key, value in self.count(child, depth - 1).items():
+                    counts[key] += value
+        return counts
+
+    def transform(self, obj: Object, depth: int) -> dict:
+        """Getting transformed mesh data of a specified object (recursively)
+
+        Args:
+            obj (Object): Object whose mesh is being transformed
+            depth (int): Remaining recursion depth
+
+        Returns:
+            dict: Dictionary of transformed Blender-like vertex and edge positions
+        """
+        data = {
+            "vertices": tuple(set(vertex for face in obj.faces for vertex in face.points)),
+            "edges": tuple(set(line for face in obj.faces for line in face)),
+        }
+        if depth > 0:
+            for child in obj.objects:
+                for key, value in self.transform(child, depth - 1).items():
+                    data[key] += value
+        for key, value in data.items():
+            data[key] = tuple(map(obj.__matmul__, value))
+        return data
+
+    def __call__(self, directions: Direction = Direction(0b111), highlight: Highlight = Highlight.EDGES, header: bool = True) -> None:
         """Printing the object render into stdout
 
         Args:
-            direction (Direction, optional): Direction from which to render the object. Defaults to Direction(0b111).
+            directions (Direction, optional): Direction(s) from which to render the object. Defaults to Direction(0b111).
             highlight (Highlight, optional): Which part of the render to highlight? Defaults to Highlight.EDGES.
             header (bool, optional): Should render information be included as a header in the print?
         """
-        for value in Direction:
-            if value in direction:
-                print(Header(self, value, highlight))
+        for direction in Direction:
+            if direction in directions:
+                if header:
+                    print(Header(self.obj, self.depth, self.counts, direction, highlight))
