@@ -191,12 +191,34 @@ class Highlight (enum.Enum):
         self.line = line
 
 
+class Scale (enum.Enum):
+    """Enum for the scale of axis values
+    """
+
+    ## Both axis have independent scales
+    INDEPENDENT = lambda this, other: this,
+    ## Both axis have the same scales
+    LINKED = lambda this, other: min(this, other),
+
+    def __call__(self, this: float, other: float) -> float:
+        """Updating the minimal increment (render scale) of the current axis
+
+        Args:
+            this (float): Minimal increment on the current axis
+            other (float): Minimal increment on the other axis
+
+        Returns:
+            Resulting increment on the current axis
+        """
+        return self.value[0](this, other)
+
+
 @makeImmutable
 class Header:
     """Class for providing basic information on an Object that is being rendered
     """
 
-    def __init__(self, obj: Object, depth: int, counts: dict, direction: Direction, highlight: Highlight) -> None:
+    def __init__(self, obj: Object, depth: int, counts: dict, direction: Direction, highlight: Highlight, scale: Scale) -> None:
         """Initializing a Header
 
         Args:
@@ -205,6 +227,7 @@ class Header:
             counts (dict): Dictionary of vertex, line and face counts
             direction (Direction): Direction from which the object is being rendered
             highlight (Highlight): What part of the object is to be highlighted
+            scale (Scale): Render axis scale
         """
         ## Render direction lines
         self.direction = list(direction)
@@ -214,7 +237,7 @@ class Header:
             f"{Colors.BOLD}{obj.name}{Colors.NONE}" + f" (+{depth} layers deep)",
             ", ".join(f"{value} {key}" for key, value in counts.items()),
             # Second column
-            f"{direction.name} view of {highlight.name}",
+            f"{direction.name} view of {highlight.name} with {scale.name} scale",
             " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
         )
 
@@ -451,58 +474,34 @@ class View:
                 output += str(h).ljust(self.horizontal.just)[i]
             output += "\n"
         return output
-
-
-# noinspection PyUnresolvedReferences
-@makeImmutable
-class _Grid:
-    """Class for rendering 3D object(s) from a specified direction
-    """
-
-    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.TOP, highlight: Highlight = Highlight.EDGES) -> None:
-        """Initialising a Grid instance
-
-        Args:
-            obj (Object): Object whose mesh will be rendered
-            depth (int, optional): Depth from which mesh data will be gathered. Defaults to 0.
-            direction (Direction, optional): Direction from which the object is viewed. Defaults to Direction.TOP.
-            highlight (Highlight, optional): Color highlight setting. Defaults to Highlight.EDGES.
-        """
-        ## Object to visualise
-        self.obj = obj
-        ## Render depth
-        self.depth = depth
-        ## View direction
-        self.direction = direction
-        ## Highlight settings
-        self.highlight = highlight
-
-    def __str__(self) -> str:
-        """Getting string representation of the grid
-
-        Returns:
-             str: String representation of the grid
-        """
-        return f"{Header(self)}{View(self)}"
-
-    @staticmethod
-    def all(*args, **kwargs) -> str:
-        """Getting the render of an object from ALL directions
-
-        Returns:
-            str: String with all object renders
-        """
-        return "\n".join(str(Grid(*args, direction=direction, **kwargs)) for direction in Direction)
 ########################################################################
 
 
-
+@makeImmutable
 class Render:
+    """Class for rendering 3D object(s) as a 2D view
+    """
 
-    def __init__(self):
-        pass
+    def __init__(self, mesh: dict, direction: Direction, highlight: Highlight, scale: Scale) -> None:
+        """Initialising a Render instance
+
+        Args:
+            mesh (dict): Transformed mesh vertices and edges
+            direction (Direction): Direction from which to render the mesh
+            highlight (Highlight): What part of the mesh will be highlighted
+            scale (Scale): Render axis scale
+        """
+        ## Transformed object mesh
+        self.mesh = mesh
+        ## Render direction
+        self.direction = direction
+        ## Highlighted part of the render
+        self.highlight = highlight
+        ## Render axis scale
+        self.scale = scale
 
 
+@makeImmutable
 class Grid:
     """Class for rendering 3D object(s) as a 2D text grid into stdout
     """
@@ -514,9 +513,10 @@ class Grid:
             obj (Object): 3D object whose mesh will be rendered
             depth (int, optional): Maximum object depth that will be rendered. Defaults to 0.
         """
+        # Object to be rendered
         self.obj = obj
+        # Maximum rendering depth
         self.depth = depth
-
         # Precalculated object counts
         self.counts = self.count(obj, depth)
         # Pretransformed object mesh
@@ -567,15 +567,19 @@ class Grid:
             data[key] = tuple(map(obj.__matmul__, value))
         return data
 
-    def __call__(self, directions: Direction = Direction(0b111), highlight: Highlight = Highlight.EDGES, header: bool = True) -> None:
+    def __call__(self, directions: Direction = Direction.TOP | Direction.FRONT | Direction.SIDE,
+                 highlight: Highlight = Highlight.EDGES, scale: Scale = Scale.INDEPENDENT, header: bool = True) -> None:
         """Printing the object render into stdout
 
         Args:
-            directions (Direction, optional): Direction(s) from which to render the object. Defaults to Direction(0b111).
+            directions (Direction, optional): Direction(s) from which to render the object.
+                Defaults to Direction.TOP | Direction.FRONT | Direction.SIDE.
             highlight (Highlight, optional): Which part of the render to highlight? Defaults to Highlight.EDGES.
-            header (bool, optional): Should render information be included as a header in the print?
+            scale (Scale, optional): Render axis scale. Defaults to Scale.INDEPENDENT.
+            header (bool, optional): Should basic information about the render be included as a header in the print?
         """
         for direction in Direction:
             if direction in directions:
                 if header:
-                    print(Header(self.obj, self.depth, self.counts, direction, highlight))
+                    print(Header(self.obj, self.depth, self.counts, direction, highlight, scale))
+                print(Render(self.mesh, direction, highlight, scale))
