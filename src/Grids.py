@@ -129,24 +129,26 @@ class Direction (enum.IntFlag):
     """
 
     ## Top view direction
-    TOP = 1, -Axis.X, -Axis.Y
+    TOP = 1, -Axis.X, -Axis.Y, Color.Z
     ## Front view direction
-    FRONT = 2, -Axis.Z, -Axis.Y
+    FRONT = 2, -Axis.Z, -Axis.Y, Color.X
     ## Side view direction
-    SIDE = 4, -Axis.Z, Axis.X
+    SIDE = 4, -Axis.Z, Axis.X, Color.Y
 
-    def __new__(cls, value: int, vertical: Axis, horizontal: Axis) -> "Direction":
+    def __new__(cls, value: int, vertical: Axis, horizontal: Axis, color: Color = Color.GREY) -> "Direction":
         """Creating a new instance of Direction
 
         Args:
             value (int): Direction value
             vertical (Axis): Vertical axis
             horizontal (Axis): Horizontal axis
+            color (Color, optional): Color representing the direction. Defaults to Color.GREY.
         """
         member = int.__new__(cls, value)
         member._value_ = value
         member.vertical = vertical
         member.horizontal = horizontal
+        member.color = color
         return member
 
     def __iter__(self):
@@ -168,25 +170,30 @@ class Highlight (enum.Enum):
     ## Colorizing vertices based on their counts and disregarding line counts
     VERTICES = (
         lambda vertex, top, right, bottom, left: vertex,
-        lambda line: 0
+        lambda line: 0,
+        Color.PURPLE
     )
     ## Colorizing vertices based on neighbouring line counts
     EDGES = (
         lambda vertex, top, right, bottom, left: next((x for x in (top, bottom, left, right) if x), 0),
-        lambda line: line
+        lambda line: line,
+        Color.CYAN
     )
 
-    def __init__(self, point, line) -> None:
+    def __init__(self, point, line, color: Color = Color.GREY) -> None:
         """Initialising a Highlight instance
 
         Args:
             point: Function for updating color index for points
             line: Function for updating color index for lines
+            color (Color, optional): Color representing the highlight. Defaults to Color.GREY.
         """
         ## Function for adjusting point count
         self.point = point
         ## Function for adjusting line count
         self.line = line
+        ## Color representing the highlight
+        self.color = color
 
 
 class Scale (enum.Enum):
@@ -196,9 +203,21 @@ class Scale (enum.Enum):
     """
 
     ## Both axis have independent scales
-    INDEPENDENT = lambda this, other: this,
+    INDEPENDENT = lambda this, other: this, Color.YELLOW
     ## Both axis have the same scales
-    LINKED = lambda this, other: min(this, other),
+    JOINT = lambda this, other: min(this, other), Color.GREEN
+
+    def __init__(self, increment, color: Color = Color.GREY) -> None:
+        """Initialising a Scale instance
+
+        Args:
+            increment: Function for selecting a scale increment
+            color (Color, optional): Color representing the scale. Defaults to Color.GREY.
+        """
+        ## Function for selecting a scale increment
+        self.increment = increment
+        ## Color representing the scale
+        self.color = color
 
     def __call__(self, this: float, other: float) -> float:
         """Updating the minimal increment (render scale) of the current axis
@@ -237,7 +256,7 @@ class Header:
             f"{Color.BOLD(obj.name)}" + (f" (+{Temperature(depth)(depth)} layers deep)" if depth else ""),
             " ".join(f"{temp(i if i != len(Temperature) - 1 else f'{i}+')}" for i, temp in enumerate(Temperature)),
             # Second column
-            f"{Color.BOLD(direction.name)} view of {Color.BOLD(highlight.name)} with {Color.BOLD(scale.name)} scale",
+            f"{direction.color(direction.name)} view of {highlight.color(highlight.name)} with {scale.color(scale.name)} scale",
             ", ".join(f"{Temperature(value)(value)} {key if value != 1 else key[:-1]}" for key, value in counts.items()),
         )
 
@@ -247,7 +266,7 @@ class Header:
         Returns:
              str: ANSI colored string representation of a grid header
         """
-        lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.direction), f"╰{'─' * 7}"]
+        lines = [f"┌{'─' * 7}", *(f"│{line}" for line in self.direction), f"└{'─' * 7}"]
         for i in range((len(self.info) + 1) // 2):
             just = max(map(alen, self.info[i * 2:i * 2 + 2]))
             for j in range(5):
@@ -259,7 +278,7 @@ class Header:
                     lines[j] += f" {self.info[index]}{' ' * (just - alen(self.info[index]) + 1)}"
                 else:
                     lines[j] += " " * (just + 2)
-        return "\n".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] for i, line in enumerate(lines))
+        return "\n".join(line + f"┐│{'┤' if self.info else '│'}│┘"[i] for i, line in enumerate(lines))
 
 
 ########################################################################
