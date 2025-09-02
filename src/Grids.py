@@ -171,7 +171,7 @@ class Highlight (enum.Enum):
     VERTICES = (
         lambda vertex, top, right, bottom, left: vertex,
         lambda line: 0,
-        Color.PURPLE
+        Color.MAGENTA
     )
     ## Colorizing vertices based on neighbouring line counts
     EDGES = (

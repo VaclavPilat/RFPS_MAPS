@@ -3,6 +3,9 @@ Functionality for colorizing text.
 
 Colors will not be used if python detects that stdout is not a tty (console).
 This can be overturned by setting a "COLOR" environment variable to any value.
+
+\todo Possibly add more (RGB) temperature colors
+\todo Update alen() to handle sequences with multiple semicolons
 """
 import enum, sys, os, re
 
@@ -32,7 +35,7 @@ class Color (enum.Enum):
     ## Blue color
     BLUE = "\033[94m"
     ## Purple color
-    PURPLE = "\033[95m"
+    MAGENTA = "\033[95m"
     ## Cyan color
     CYAN = "\033[96m"
     ## White color
@@ -91,7 +94,7 @@ class Temperature (enum.Enum):
         ## Color #5
         RED = 5
         ## Color #6
-        PURPLE = 6
+        MAGENTA = 6
 
     @classmethod
     def _missing_(cls, index: int) -> "Temperature":
@@ -131,7 +134,7 @@ class Hierarchy (enum.Enum):
     ## Color #0
     BLUE = 0
     ## Color #1
-    PURPLE = 1
+    MAGENTA = 1
     ## Color #2
     CYAN = 2
     ## Color #3
