@@ -4,12 +4,11 @@ Functionality for rendering Object meshes in console.
 Presenting 3D objects as 2D renders from specified directions and with other customizable settings.
 
 \todo Add an option to show bounding boxes of objects
-\todo Add an option for toggling between fixed/independent axis value diffs
 """
 from .Decorators import makeImmutable
 from .Mesh import Vector, Line, ZERO
 from .Objects import Object
-from . import Colors ###
+from .Colors import Color, Temperature, alen
 import enum
 
 
@@ -66,7 +65,7 @@ class Axis (enum.Enum):
         """Initialising an Axis instance
         """
         ## Line representing axis direction
-        self.line = Line(ZERO, Vector(**{str(self): value}))
+        self.line = Line(ZERO, Vector(**{str(self).lower(): value}))
 
     def __bool__(self) -> bool:
         """Checking whether the axis is positive or negative
@@ -104,7 +103,7 @@ class Axis (enum.Enum):
             >>> str(Axis.Y) == str(Axis._Y)
             True
         """
-        return self.name[-1].lower()
+        return self.name[-1]
 
     # noinspection PyCallingNonCallable
     def __call__(self, vector: Vector) -> float:
@@ -122,7 +121,7 @@ class Axis (enum.Enum):
             >>> Axis._Y(Vector(1, 2, 3))
             2
         """
-        return getattr(vector, str(self))
+        return getattr(vector, str(self).lower())
 
 
 class Direction (enum.IntFlag):
@@ -155,10 +154,9 @@ class Direction (enum.IntFlag):
 
         Works only when the value is "canonical" (single bit).
         """
-        top = (f"╺{'╋━━'[::1 if self.horizontal else -1]}╸",
-               f"{Colors.AXIS[str(self.horizontal)]}{self.horizontal.name[-1]}{Colors.NONE}", " ")
+        top = (f"╺{'╋━━'[::1 if self.horizontal else -1]}╸", f"{Color[str(self.horizontal)](self.horizontal)}", " ")
         middle = (" ", "┃", "     ")
-        bottom = (" ", f"{Colors.AXIS[str(self.vertical)]}{self.vertical.name[-1]}{Colors.NONE}", "     ")
+        bottom = (" ", f"{Color[str(self.vertical)](self.vertical)}", "     ")
         for line in (top, middle, bottom)[::1 if self.vertical else -1]:
             yield "".join(line[::1 if self.horizontal else -1])
 
@@ -192,7 +190,9 @@ class Highlight (enum.Enum):
 
 
 class Scale (enum.Enum):
-    """Enum for the scale of axis values
+    """Enum for the scale of axis values.
+
+    Members are one-value tuples due to the fact that lambdas as enum values alone don't work.
     """
 
     ## Both axis have independent scales
@@ -234,11 +234,11 @@ class Header:
         ## Info strings
         self.info = (
             # First column
-            f"{Colors.BOLD}{obj.name}{Colors.NONE}" + f" (+{depth} layers deep)",
-            ", ".join(f"{value} {key}" for key, value in counts.items()),
+            f"{Color.BOLD(obj.name)}" + (f" (+{Temperature(depth)(depth)} layers deep)" if depth else ""),
+            " ".join(f"{temp(i if i != len(Temperature) - 1 else f'{i}+')}" for i, temp in enumerate(Temperature)),
             # Second column
-            f"{direction.name} view of {highlight.name} with {scale.name} scale",
-            " ".join(f"{Colors.temperature(i)}{i}" for i in range(len(Colors.TEMPERATURE))) + "+" + Colors.NONE,
+            f"{Color.BOLD(direction.name)} view of {Color.BOLD(highlight.name)} with {Color.BOLD(scale.name)} scale",
+            ", ".join(f"{Temperature(value)(value)} {key if value != 1 else key[:-1]}" for key, value in counts.items()),
         )
 
     def __str__(self) -> str:
@@ -249,14 +249,14 @@ class Header:
         """
         lines = [f"╭{'─' * 7}", *(f"│{line}" for line in self.direction), f"╰{'─' * 7}"]
         for i in range((len(self.info) + 1) // 2):
-            just = max(map(Colors.alen, self.info[i * 2:i * 2 + 2]))
+            just = max(map(alen, self.info[i * 2:i * 2 + 2]))
             for j in range(5):
                 lines[j] += f"┬│{'┼' if i else '├'}│┴"[j]
                 index = i * 2 + j // 2
                 if j % 2 == 0:
                     lines[j] += "─" * (just + 2)
                 elif index < len(self.info):
-                    lines[j] += f" {self.info[index]}{' ' * (just - Colors.alen(self.info[index]) + 1)}"
+                    lines[j] += f" {self.info[index]}{' ' * (just - alen(self.info[index]) + 1)}"
                 else:
                     lines[j] += " " * (just + 2)
         return "\n".join(line + f"╮│{'┤' if self.info else '│'}│╯"[i] for i, line in enumerate(lines))

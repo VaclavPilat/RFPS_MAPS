@@ -1,11 +1,12 @@
 from .Decorators import *
-from .Mesh import *
-from . import Helpers, Colors
+from .Mesh import Vector, Line, Face, ZERO
+from .Colors import Hierarchy
+from .Helpers import Repr
 
 
 @addInitRepr
 @makeImmutable
-class Object(metaclass=Helpers.Repr):
+class Object(metaclass=Repr):
     """Class for containing own mesh and/or other objects
     """
 
@@ -77,21 +78,23 @@ class Object(metaclass=Helpers.Repr):
         """
         self.faces.add(Face(*points, **kwargs))
 
-    def printHierarchy(self, current: str = "", children: str = "", layer: int = 0) -> None:
-        """Printing string representation of object hierarchy
+    def __str__(self, current: str = "", children: str = "", layer: int = 0) -> None:
+        """Getting the string representation of object hierarchy
 
         Args:
             current (str, optional): Current line indent. Defaults to "".
             children (str, optional): Line indent for child items. Defaults to "".
             layer (int, optional): Current layer index. Defaults to 0.
         """
-        print(f"{current}{Colors.NONE}{repr(self)}")
+        output = f"{current}{repr(self)}"
         for index, child in enumerate(self.objects):
-            color = Colors.HIERARCHY[layer % len(Colors.HIERARCHY)]
             last = index < len(self.objects) - 1
-            newCurrent = f"{children}{color}{'┣' if last else '┗'}━━ "
-            newChildren = f"{children}{color}{'┃' if last else ' '}   "
-            child.printHierarchy(newCurrent, newChildren, layer + 1)
+            output += "\n" + child.__str__(
+                f"{children}{Hierarchy(layer)(('┣' if last else '┗') + '━━ ')}",
+                f"{children}{Hierarchy(layer)(('┃' if last else ' ') + '   ')}",
+                layer + 1
+            )
+        return output
 
 
 def createObjectSubclass(cls: type = Object):

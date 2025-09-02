@@ -154,3 +154,4 @@ if __name__ == "__main__":
         Blender.Objects.build(metro)
     else:
         Grid(metro)()
+        print(metro)
