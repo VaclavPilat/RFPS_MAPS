@@ -9,7 +9,7 @@ from .Decorators import makeImmutable
 from .Mesh import Vector, Line, ZERO
 from .Objects import Object
 from .Colors import Color, Temperature, alen
-import enum
+import enum, sys
 
 
 class Shape (enum.IntFlag):
@@ -281,42 +281,51 @@ class Header:
         return "\n".join(line + f"┐│{'┤' if self.info else '│'}│┘"[i] for i, line in enumerate(lines))
 
 
-########################################################################
-# \todo Refactor
-@makeImmutable
 class Values:
     """Class for containing detailed information on axis values
     """
 
-    def __init__(self, axis: Axis, vertices: tuple, multiplier: int) -> None:
-        """Initialising Values instance
+    def __init__(self, axis: Axis, vertices: tuple, multiplier: int = 1) -> None:
+        """Initializing Values instance.
+
+        Multiplier is needed due to the fact that monospaced fonts used in consoles have a size ratio of 1:2.
+        Using a multiplier makes sure that same-size shapes, like squares and circles do not look overtly stretched.
 
         Args:
-            axis (Axis): Axis
-            vertices (tuple): Tuple of transformed vertex positions
-            multiplier (int): Offset size multiplier
+            axis (Axis): Axis that these values belong to
+            vertices (tuple): Transformed vertex positions
+            multiplier (int, optional): Offset size multiplier. Defaults to 1.
         """
         ## Axis
         self.axis = axis
+        ## Value offset multiplier
+        self.multiplier = multiplier
         ## Axis values
-        if not vertices:
-            raise ValueError("No vertices were provided")
         self.values = sorted(set(map(axis, vertices)), reverse=not axis)
         ## Axis value labels
         self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
         ## Label justify length
         self.just = max(map(lambda value: len(str(value)), self.labels))
-        differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
-        if differences:
-            minimum = min(differences)
-            if minimum < 0.001:
-                raise ValueError("Mesh contains floating point errors")
-            ## Axis value offsets
-            self.offsets = tuple(map(lambda d: round(d / minimum) * multiplier - 1, differences))
+        ## Value increments
+        self.differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
+        ## Minimal value increment
+        self.minimum = min(self.differences) if self.differences else sys.maxsize
+        if self.minimum < 0.0001:
+            raise ValueError("Mesh contains floating point errors")
+
+    def __call__(self, minimum: float) -> None:
+        """Settting the offsets between axis values by supplying an updated divisor (minimum increment)
+
+        Args:
+            minimum (float): Updated increment divisor
+        """
+        ## Axis value offsets
+        self.offsets = tuple(map(lambda d: round(d / minimum) * self.multiplier - 1, self.differences))
 
 
+########################################################################
 @makeImmutable
-class View:
+class _View:
     """Class for rendering a 3D mesh as text
     """
 
@@ -516,8 +525,12 @@ class Render:
         self.direction = direction
         ## Highlighted part of the render
         self.highlight = highlight
-        ## Render axis scale
-        self.scale = scale
+        ## Horizontal axis values
+        self.horizontal = Values(direction.horizontal, mesh["vertices"], 2)
+        ## Vertical axis values
+        self.vertical = Values(direction.vertical, mesh["vertices"])
+        self.horizontal(scale.increment(self.horizontal.minimum, self.vertical.minimum))
+        self.vertical(scale.increment(self.vertical.minimum, self.horizontal.minimum))
 
 
 @makeImmutable

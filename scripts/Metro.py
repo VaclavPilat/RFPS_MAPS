@@ -153,5 +153,5 @@ if __name__ == "__main__":
         # noinspection PyTypeChecker
         Blender.Objects.build(metro)
     else:
-        Grid(metro)()
+        Grid(metro, 1)()
         print(metro)
