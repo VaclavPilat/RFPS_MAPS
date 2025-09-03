@@ -281,6 +281,7 @@ class Header:
         return "\n".join(line + f"┐│{'┤' if self.info else '│'}│┘"[i] for i, line in enumerate(lines))
 
 
+## \todo Refactor
 class Values:
     """Class for containing detailed information on axis values
     """
@@ -323,189 +324,8 @@ class Values:
         self.offsets = tuple(map(lambda d: round(d / minimum) * self.multiplier - 1, self.differences))
 
 
-########################################################################
 @makeImmutable
-class _View:
-    """Class for rendering a 3D mesh as text
-    """
-
-    def __init__(self, grid: "Grid") -> None:
-        """Initializing a View instance
-
-        Args:
-            grid (Grid): Grid instance to visualise
-        """
-        ## Source grid
-        self.grid = grid
-        ## Transformed source data
-        self.data = self.transform(self.grid.obj, self.grid.depth)
-        ## Horizontal axis values
-        self.horizontal = Values(self.grid.direction.horizontal, self.data["vertices"], 2)
-        ## Vertical axis values
-        self.vertical = Values(self.grid.direction.vertical, self.data["vertices"], 1)
-        ## Matrix of vertex counts
-        self.vertexCounts = self.countVertices()
-        ## Vertical and horizontal line counts
-        self.verticalCounts, self.horizontalCounts = self.countLines()
-
-    def pointChar(self, vertical: int, horizontal: int) -> str:
-        """Getting a character representing point shape
-
-        Args:
-            vertical (int): Vertical vertex index
-            horizontal (int): Horizontal vertex index
-
-        Returns:
-            str: Character representing point shape
-        """
-        shape = Shape.NONE
-        if horizontal > 0 and self.horizontalCounts[vertical][horizontal - 1]:
-            shape |= Shape.LEFT
-        if vertical > 0 and self.verticalCounts[vertical - 1][horizontal]:
-            shape |= Shape.TOP
-        if horizontal < len(self.horizontal.values) - 1 and self.horizontalCounts[vertical][horizontal]:
-            shape |= Shape.RIGHT
-        if vertical < len(self.vertical.values) - 1 and self.verticalCounts[vertical][horizontal]:
-            shape |= Shape.BOTTOM
-        return str(shape)
-
-    def colorizePoint(self, vertical: int, horizontal: int) -> str:
-        """Colorizing a single point based on the number of vertices behind it
-
-        Args:
-            vertical (int): Vertical axis value index
-            horizontal (int): Horizontal axis value index
-
-        Returns:
-            str: ANSI colored box character representing the point
-        """
-        vertices = self.vertexCounts[vertical][horizontal]
-        left = 0 if horizontal == 0 else self.horizontalCounts[vertical][horizontal - 1]
-        top = 0 if vertical == 0 else self.verticalCounts[vertical - 1][horizontal]
-        right = 0 if horizontal >= len(self.horizontal.values) - 1 else self.horizontalCounts[vertical][horizontal]
-        bottom = 0 if vertical >= len(self.vertical.values) - 1 else self.verticalCounts[vertical][horizontal]
-        count = self.grid.highlight.point(vertices, top, right, bottom, left)
-        return f"{Colors.temperature(count)}{self.pointChar(vertical, horizontal)}{Colors.NONE}"
-
-    def colorizeHorizontal(self, vertical: int, horizontal: int) -> str:
-        """Colorizing a horizontal line based on the number of edges behind it
-
-        Args:
-            vertical (int): Vertical line value index
-            horizontal (int): Horizontal line value index
-
-        Returns:
-            str: ANSI colored string representing the line
-        """
-        count = self.horizontalCounts[vertical][horizontal]
-        chars = self.horizontal.offsets[horizontal]
-        return f"{Colors.temperature(self.grid.highlight.line(count))}{('━' if count else '╌') * chars}{Colors.NONE}"
-
-    def colorizeVertical(self, vertical: int, horizontal: int) -> str:
-        """Colorizing a vertical line based on the number of edges behind it
-
-        Args:
-            vertical (int): Vertical line value index
-            horizontal (int): Horizontal line value index
-
-        Returns:
-            str: ANSI colored character representing the line
-        """
-        count = self.verticalCounts[vertical][horizontal]
-        return f"{Colors.temperature(self.grid.highlight.line(count))}{'┃' if count else '┆'}{Colors.NONE}"
-
-    def countVertices(self) -> list:
-        """Counting vertices whose values match axis values
-
-        Returns:
-            list: 2D list of vertex counts
-        """
-        counts = [[0 for _ in self.horizontal.values] for _ in self.vertical.values]
-        for vertex in self.data["vertices"]:
-            counts[self.vertical.values.index(self.vertical.axis(vertex))] \
-                [self.horizontal.values.index(self.horizontal.axis(vertex))] += 1
-        return counts
-
-    def flattenLines(self, lines: set):
-        """Flattening lines (removing their third dimension)
-
-        Args:
-            lines (set): Subset of the object's lines
-        """
-        for line in lines:
-            try:
-                yield line(**{({"x", "y", "z"} - {str(self.horizontal.axis), str(self.vertical.axis)}).pop(): 0})
-            except ValueError:
-                pass
-
-    # noinspection DuplicatedCode
-    def countLines(self) -> tuple:
-        """Counting the number of lines for each axis value pair
-
-        Returns:
-            tuple: Tuple of 2D lists of line counts
-        """
-        verticalCounts = [[0 for _ in self.horizontal.values] for _ in range(len(self.vertical.values) - 1)]
-        horizontalCounts = [[0 for _ in range(len(self.horizontal.values) - 1)] for _ in self.vertical.values]
-        for line in self.flattenLines(self.data["edges"]):
-            if line | self.vertical.axis.line:
-                v1 = self.vertical.values.index(self.vertical.axis(line.a))
-                v2 = self.vertical.values.index(self.vertical.axis(line.b))
-                h = self.horizontal.values.index(self.horizontal.axis(line.a))
-                for i in range(min(v1, v2), max(v1, v2)):
-                    verticalCounts[i][h] += 1
-            elif line | self.horizontal.axis.line:
-                v = self.vertical.values.index(self.vertical.axis(line.a))
-                h1 = self.horizontal.values.index(self.horizontal.axis(line.a))
-                h2 = self.horizontal.values.index(self.horizontal.axis(line.b))
-                for i in range(min(h1, h2), max(h1, h2)):
-                    horizontalCounts[v][i] += 1
-        return verticalCounts, horizontalCounts
-
-    def __str__(self) -> str:
-        """Getting string representation of the grid mesh
-
-        Returns:
-            str: ANSI colored string representing the grid view
-        """
-        output = ""
-        # Header
-        for i in range(self.horizontal.just):
-            output += " " * (self.vertical.just + 1)
-            for j, h in enumerate(self.horizontal.labels):
-                if j > 0:
-                    output += " " * self.horizontal.offsets[j - 1]
-                output += str(h).rjust(self.horizontal.just)[i]
-            output += "\n"
-        # Body
-        for i, v in enumerate(self.vertical.labels):
-            if i > 0:
-                for j in range(self.vertical.offsets[i - 1]):
-                    output += " " * (self.vertical.just + 1)
-                    for k, h in enumerate(self.horizontal.labels):
-                        if k > 0:
-                            output += " " * self.horizontal.offsets[k - 1]
-                        output += self.colorizeVertical(i - 1, k)
-                    output += "\n"
-            output += str(v).rjust(self.vertical.just) + " "
-            for j, h in enumerate(self.horizontal.labels):
-                if j > 0:
-                    output += self.colorizeHorizontal(i, j - 1)
-                output += self.colorizePoint(i, j)
-            output += f" {v}\n"
-        # Footer
-        for i in range(self.horizontal.just):
-            output += " " * (self.vertical.just + 1)
-            for j, h in enumerate(self.horizontal.labels):
-                if j > 0:
-                    output += " " * self.horizontal.offsets[j - 1]
-                output += str(h).ljust(self.horizontal.just)[i]
-            output += "\n"
-        return output
-########################################################################
-
-
-@makeImmutable
+## \todo Refactor
 class Render:
     """Class for rendering 3D object(s) as a 2D view
     """
@@ -534,6 +354,7 @@ class Render:
 
 
 @makeImmutable
+## \todo Refactor
 class Grid:
     """Class for rendering 3D object(s) as a 2D text grid into stdout
     """
