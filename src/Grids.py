@@ -237,28 +237,63 @@ class Header:
     """Class for providing basic information on an Object that is being rendered
     """
 
-    def __init__(self, obj: Object, depth: int, counts: dict, direction: Direction, highlight: Highlight, scale: Scale) -> None:
+    def __init__(self, obj: Object, depth: int, direction: Direction, highlight: Highlight, scale: Scale) -> None:
         """Initializing a Header
 
         Args:
             obj (Object): Object that is being described
             depth (int): Maximum rendering depth
-            counts (dict): Dictionary of vertex, line and face counts
             direction (Direction): Direction from which the object is being rendered
             highlight (Highlight): What part of the object is to be highlighted
             scale (Scale): Render axis scale
         """
-        ## Render direction lines
-        self.direction = list(direction)
-        ## Info strings
-        self.info = (
-            # First column
-            f"{Color.BOLD(obj.name)}" + (f" (+{Temperature(depth)(depth)} layers deep)" if depth else ""),
-            " ".join(f"{temp(i if i != len(Temperature) - 1 else f'{i}+')}" for i, temp in enumerate(Temperature)),
-            # Second column
-            f"{direction.color(direction.name)} view of {highlight.color(highlight.name)} with {scale.color(scale.name)} scale",
-            ", ".join(f"{Temperature(value)(value)} {key if value != 1 else key[:-1]}" for key, value in counts.items()),
-        )
+        ## Object being rendered
+        self.obj = obj
+        ## Maximum traverse depth
+        self.depth = depth
+        ## Render direction
+        self.direction = direction
+        ## Highlight setting
+        self.highlight = highlight
+        ## Render axis scale
+        self.scale = scale
+
+    def __call__(self, obj: Object, depth: int = 0) -> tuple:
+        """Counting faces, edges and vertices of a specified object (recursively)
+
+        Args:
+            obj (Object): Object whose mesh structure is being counted
+            depth (int, optional): Current recursion depth. Defaults to 0.
+
+        Returns:
+            tuple: Maximum reached depth and dict with structural counts
+        """
+        counts = {
+            "objects": 1,
+            "vertices": len(set(vertex for face in obj.faces for vertex in face.points)),
+            "edges": len(set(line for face in obj.faces for line in face)),
+            "faces": len(obj.faces),
+            "triangles": sum(len(face) - 2 for face in obj.faces),
+        }
+        deepest = depth
+        if depth < self.depth:
+            for child in obj.objects:
+                childDepth, childCounts = self(child, depth + 1)
+                deepest = max(deepest, childDepth)
+                for key, value in childCounts.items():
+                    counts[key] += value
+        return deepest, counts
+
+    def __iter__(self):
+        """Yielding information strings to be shown in the header
+        """
+        depth, counts = self(self.obj)
+        # First column
+        yield f"{Color.BOLD(self.obj.name)}" + (f" (+{Temperature(depth)(depth)} layers deep)" if depth else "")
+        yield " ".join(f"{temp(i if i != len(Temperature) - 1 else f'{i}+')}" for i, temp in enumerate(Temperature))
+        # Second column
+        yield f"{self.direction.color(self.direction.name)} view of {self.highlight.color(self.highlight.name)} with {self.scale.color(self.scale.name)} scale"
+        yield ", ".join(f"{Temperature(value)(value)} {key if value != 1 else key[:-1]}" for key, value in counts.items())
 
     def __str__(self) -> str:
         """Getting a string representation of a grid header
@@ -266,19 +301,20 @@ class Header:
         Returns:
              str: ANSI colored string representation of a grid header
         """
-        lines = [f"┌{'─' * 7}", *(f"│{line}" for line in self.direction), f"└{'─' * 7}"]
-        for i in range((len(self.info) + 1) // 2):
-            just = max(map(alen, self.info[i * 2:i * 2 + 2]))
+        info = list(self)
+        lines = [f"┌{'─' * 7}", *(f"│{line}" for line in list(self.direction)), f"└{'─' * 7}"]
+        for i in range((len(info) + 1) // 2):
+            just = max(map(alen, info[i * 2:i * 2 + 2]))
             for j in range(5):
                 lines[j] += f"┬│{'┼' if i else '├'}│┴"[j]
                 index = i * 2 + j // 2
                 if j % 2 == 0:
                     lines[j] += "─" * (just + 2)
-                elif index < len(self.info):
-                    lines[j] += f" {self.info[index]}{' ' * (just - alen(self.info[index]) + 1)}"
+                elif index < len(info):
+                    lines[j] += f" {info[index]}{' ' * (just - alen(info[index]) + 1)}"
                 else:
                     lines[j] += " " * (just + 2)
-        return "\n".join(line + f"┐│{'┤' if self.info else '│'}│┘"[i] for i, line in enumerate(lines))
+        return "\n".join(line + f"┐│{'┤' if info else '│'}│┘"[i] for i, line in enumerate(lines))
 
 
 ## \todo Refactor
@@ -370,33 +406,8 @@ class Grid:
         self.obj = obj
         # Maximum rendering depth
         self.depth = depth
-        # Precalculated object counts
-        self.counts = self.count(obj, depth)
         # Pretransformed object mesh
         self.mesh = self.transform(obj, depth)
-
-    def count(self, obj: Object, depth: int) -> dict:
-        """Counting faces, edges and vertices of a specified object (recursively)
-
-        Args:
-            obj (Object): Object whose mesh structure is being counted
-            depth (int): Remaining recursion depth
-
-        Returns:
-            dict: Dictionary of Blender-like vertex, edge and face counts
-        """
-        counts = {
-            "objects": 1,
-            "vertices": len(set(vertex for face in obj.faces for vertex in face.points)),
-            "edges": len(set(line for face in obj.faces for line in face)),
-            "faces": len(obj.faces),
-            "triangles": sum(len(face) - 2 for face in obj.faces),
-        }
-        if depth > 0:
-            for child in obj.objects:
-                for key, value in self.count(child, depth - 1).items():
-                    counts[key] += value
-        return counts
 
     def transform(self, obj: Object, depth: int) -> dict:
         """Getting transformed mesh data of a specified object (recursively)
@@ -434,5 +445,5 @@ class Grid:
         for direction in Direction:
             if direction in directions:
                 if header:
-                    print(Header(self.obj, self.depth, self.counts, direction, highlight, scale))
+                    print(Header(self.obj, self.depth, direction, highlight, scale))
                 print(Render(self.mesh, direction, highlight, scale))
