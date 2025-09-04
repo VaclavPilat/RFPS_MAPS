@@ -9,7 +9,7 @@ from .Decorators import makeImmutable
 from .Mesh import Vector, Line, ZERO
 from .Objects import Object
 from .Colors import Color, Temperature, alen
-import enum, sys
+import enum
 
 
 class Shape (enum.IntFlag):
@@ -124,32 +124,32 @@ class Axis (enum.Enum):
         return getattr(vector, str(self).lower())
 
 
-class Direction (enum.IntFlag):
+## \todo Figure out how to render an object from multiple directions (possbly with some shenanigans in Grid.__new__?)
+class Direction (enum.Enum):
     """Flag representing the directions an Object can be rendered from
     """
 
     ## Top view direction
-    TOP = 1, -Axis.X, -Axis.Y, Color.Z
+    TOP = -Axis.X, -Axis.Y, Color.Z
     ## Front view direction
-    FRONT = 2, -Axis.Z, -Axis.Y, Color.X
+    FRONT = -Axis.Z, -Axis.Y, Color.X
     ## Side view direction
-    SIDE = 4, -Axis.Z, Axis.X, Color.Y
+    SIDE = -Axis.Z, Axis.X, Color.Y
 
-    def __new__(cls, value: int, vertical: Axis, horizontal: Axis, color: Color = Color.NONE) -> "Direction":
-        """Creating a new instance of Direction
+    def __init__(self, vertical: Axis, horizontal: Axis, color: Color = Color.NONE) -> None:
+        """Initialising a Direction instance
 
         Args:
-            value (int): Direction value
             vertical (Axis): Vertical axis
             horizontal (Axis): Horizontal axis
             color (Color, optional): Color representing the direction. Defaults to Color.NONE.
         """
-        member = int.__new__(cls, value)
-        member._value_ = value
-        member.vertical = vertical
-        member.horizontal = horizontal
-        member.color = color
-        return member
+        ## Vertical axis
+        self.vertical = vertical
+        ## Horizontal axis
+        self.horizontal = horizontal
+        ## Color representing the direction
+        self.color = color
 
     def __iter__(self):
         """Getting strings representing the direction.
@@ -233,30 +233,62 @@ class Scale (enum.Enum):
 
 
 @makeImmutable
+class Grid:
+    """Class for storing settings for rendering 3D objects as 2D views
+    """
+
+    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.TOP,
+                 highlight: Highlight = Highlight.EDGES, scale: Scale = Scale.INDEPENDENT, header: bool = True) -> None:
+        """Initialising a Grid instance
+
+        Args:
+            obj (Object): 3D object whose mesh will be rendered
+            depth (int, optional): Maximum object depth that will be rendered. Defaults to 0.
+            direction (Direction, optional): Direction(s) from which to render the object. Defaults to Direction.TOP.
+            highlight (Highlight, optional): Which part of the render to highlight? Defaults to Highlight.EDGES.
+            scale (Scale, optional): Render axis scale. Defaults to Scale.INDEPENDENT.
+            header (bool, optional): Should basic information about the render be included as a header in the print?
+        """
+        ## Object to render
+        self.obj = obj
+        ## Maximum rendering depth
+        self.depth = depth
+        ## Direction to render from
+        self.direction = direction
+        ## What part of the render to highlight
+        self.highlight = highlight
+        ## Axis value scale
+        self.scale = scale
+        ## Should a header be shown?
+        self.header = header
+
+    def __str__(self) -> str:
+        """Getting a string representing the grid render
+
+        Returns:
+            str: Grid render string with header (if enabled)
+        """
+        return (f'{Header(self)}\n' if self.header else '') + str(Render(self))
+
+    def __call__(self) -> None:
+        """Printing the object render into stdout
+        """
+        print(self)
+
+
+@makeImmutable
 class Header:
     """Class for providing basic information on an Object that is being rendered
     """
 
-    def __init__(self, obj: Object, depth: int, direction: Direction, highlight: Highlight, scale: Scale) -> None:
+    def __init__(self, grid: Grid) -> None:
         """Initializing a Header
 
         Args:
-            obj (Object): Object that is being described
-            depth (int): Maximum rendering depth
-            direction (Direction): Direction from which the object is being rendered
-            highlight (Highlight): What part of the object is to be highlighted
-            scale (Scale): Render axis scale
+            grid (Grid): Grid settings
         """
-        ## Object being rendered
-        self.obj = obj
-        ## Maximum traverse depth
-        self.depth = depth
-        ## Render direction
-        self.direction = direction
-        ## Highlight setting
-        self.highlight = highlight
-        ## Render axis scale
-        self.scale = scale
+        ## Grid settings to describe
+        self.grid = grid
 
     def __call__(self, obj: Object, depth: int = 0) -> tuple:
         """Counting faces, edges and vertices of a specified object (recursively)
@@ -275,24 +307,26 @@ class Header:
             "faces": len(obj.faces),
             "triangles": sum(len(face) - 2 for face in obj.faces),
         }
-        deepest = depth
-        if depth < self.depth:
+        maxDepth = depth
+        if depth < self.grid.depth:
             for child in obj.objects:
                 childDepth, childCounts = self(child, depth + 1)
-                deepest = max(deepest, childDepth)
+                maxDepth = max(maxDepth, childDepth)
                 for key, value in childCounts.items():
                     counts[key] += value
-        return deepest, counts
+        return maxDepth, counts
 
     def __iter__(self):
         """Yielding information strings to be shown in the header
         """
-        depth, counts = self(self.obj)
+        depth, counts = self(self.grid.obj)
         # First column
-        yield f"{Color.BOLD(self.obj.name)}" + (f" (+{Temperature(depth)(depth)} layers deep)" if depth else "")
+        yield f"{Color.BOLD(self.grid.obj.name)}" + (f" (+{Temperature(depth)(depth)} layers deep)" if depth else "")
         yield " ".join(f"{temp(i if i != len(Temperature) - 1 else f'{i}+')}" for i, temp in enumerate(Temperature))
         # Second column
-        yield f"{self.direction.color(self.direction.name)} view of {self.highlight.color(self.highlight.name)} with {self.scale.color(self.scale.name)} scale"
+        yield (f"{self.grid.direction.color(self.grid.direction.name)} view"
+               f" of {self.grid.highlight.color(self.grid.highlight.name)}"
+               f" with {self.grid.scale.color(self.grid.scale.name)} scale")
         yield ", ".join(f"{Temperature(value)(value)} {key if value != 1 else key[:-1]}" for key, value in counts.items())
 
     def __str__(self) -> str:
@@ -302,7 +336,7 @@ class Header:
              str: ANSI colored string representation of a grid header
         """
         info = list(self)
-        lines = [f"┌{'─' * 7}", *(f"│{line}" for line in list(self.direction)), f"└{'─' * 7}"]
+        lines = [f"┌{'─' * 7}", *(f"│{line}" for line in list(self.grid.direction)), f"└{'─' * 7}"]
         for i in range((len(info) + 1) // 2):
             just = max(map(alen, info[i * 2:i * 2 + 2]))
             for j in range(5):
@@ -317,133 +351,34 @@ class Header:
         return "\n".join(line + f"┐│{'┤' if info else '│'}│┘"[i] for i, line in enumerate(lines))
 
 
-## \todo Refactor
-class Values:
-    """Class for containing detailed information on axis values
-    """
-
-    def __init__(self, axis: Axis, vertices: tuple, multiplier: int = 1) -> None:
-        """Initializing Values instance.
-
-        Multiplier is needed due to the fact that monospaced fonts used in consoles have a size ratio of 1:2.
-        Using a multiplier makes sure that same-size shapes, like squares and circles do not look overtly stretched.
-
-        Args:
-            axis (Axis): Axis that these values belong to
-            vertices (tuple): Transformed vertex positions
-            multiplier (int, optional): Offset size multiplier. Defaults to 1.
-        """
-        ## Axis
-        self.axis = axis
-        ## Value offset multiplier
-        self.multiplier = multiplier
-        ## Axis values
-        self.values = sorted(set(map(axis, vertices)), reverse=not axis)
-        ## Axis value labels
-        self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
-        ## Label justify length
-        self.just = max(map(lambda value: len(str(value)), self.labels))
-        ## Value increments
-        self.differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
-        ## Minimal value increment
-        self.minimum = min(self.differences) if self.differences else sys.maxsize
-        if self.minimum < 0.0001:
-            raise ValueError("Mesh contains floating point errors")
-
-    def __call__(self, minimum: float) -> None:
-        """Settting the offsets between axis values by supplying an updated divisor (minimum increment)
-
-        Args:
-            minimum (float): Updated increment divisor
-        """
-        ## Axis value offsets
-        self.offsets = tuple(map(lambda d: round(d / minimum) * self.multiplier - 1, self.differences))
-
-
 @makeImmutable
 ## \todo Refactor
 class Render:
     """Class for rendering 3D object(s) as a 2D view
     """
 
-    def __init__(self, mesh: dict, direction: Direction, highlight: Highlight, scale: Scale) -> None:
+    def __init__(self, grid: Grid) -> None:
         """Initialising a Render instance
 
         Args:
-            mesh (dict): Transformed mesh vertices and edges
-            direction (Direction): Direction from which to render the mesh
-            highlight (Highlight): What part of the mesh will be highlighted
-            scale (Scale): Render axis scale
+            grid (Grid): Object with render settings
         """
-        ## Transformed object mesh
-        self.mesh = mesh
-        ## Render direction
-        self.direction = direction
-        ## Highlighted part of the render
-        self.highlight = highlight
-        ## Horizontal axis values
-        self.horizontal = Values(direction.horizontal, mesh["vertices"], 2)
-        ## Vertical axis values
-        self.vertical = Values(direction.vertical, mesh["vertices"])
-        self.horizontal(scale.increment(self.horizontal.minimum, self.vertical.minimum))
-        self.vertical(scale.increment(self.vertical.minimum, self.horizontal.minimum))
+        ## Render settings
+        self.grid = grid
 
-
-@makeImmutable
-## \todo Refactor
-class Grid:
-    """Class for rendering 3D object(s) as a 2D text grid into stdout
-    """
-
-    def __init__(self, obj: Object, depth: int = 0) -> None:
-        """Initialising a Grid instance
-
-        Args:
-            obj (Object): 3D object whose mesh will be rendered
-            depth (int, optional): Maximum object depth that will be rendered. Defaults to 0.
-        """
-        # Object to be rendered
-        self.obj = obj
-        # Maximum rendering depth
-        self.depth = depth
-        # Pretransformed object mesh
-        self.mesh = self.transform(obj, depth)
-
-    def transform(self, obj: Object, depth: int) -> dict:
+    def __call__(self, obj: Object, depth: int = 0) -> tuple:
         """Getting transformed mesh data of a specified object (recursively)
 
         Args:
             obj (Object): Object whose mesh is being transformed
-            depth (int): Remaining recursion depth
+            depth (int, optional): Current recursion depth. Defaults to 0.
 
         Returns:
-            dict: Dictionary of transformed Blender-like vertex and edge positions
+            tuple: Tuples of transformed mesh data (vertices, edges)
         """
-        data = {
-            "vertices": tuple(set(vertex for face in obj.faces for vertex in face.points)),
-            "edges": tuple(set(line for face in obj.faces for line in face)),
-        }
-        if depth > 0:
+        vertices = tuple(set(vertex for face in obj.faces for vertex in face.points))
+        edges = tuple(set(line for face in obj.faces for line in face))
+        if depth < self.grid.depth:
             for child in obj.objects:
-                for key, value in self.transform(child, depth - 1).items():
-                    data[key] += value
-        for key, value in data.items():
-            data[key] = tuple(map(obj.__matmul__, value))
-        return data
-
-    def __call__(self, directions: Direction = Direction.TOP | Direction.FRONT | Direction.SIDE,
-                 highlight: Highlight = Highlight.EDGES, scale: Scale = Scale.INDEPENDENT, header: bool = True) -> None:
-        """Printing the object render into stdout
-
-        Args:
-            directions (Direction, optional): Direction(s) from which to render the object.
-                Defaults to Direction.TOP | Direction.FRONT | Direction.SIDE.
-            highlight (Highlight, optional): Which part of the render to highlight? Defaults to Highlight.EDGES.
-            scale (Scale, optional): Render axis scale. Defaults to Scale.INDEPENDENT.
-            header (bool, optional): Should basic information about the render be included as a header in the print?
-        """
-        for direction in Direction:
-            if direction in directions:
-                if header:
-                    print(Header(self.obj, self.depth, direction, highlight, scale))
-                print(Render(self.mesh, direction, highlight, scale))
+                vertices, edges = (a+b for a, b in zip((vertices, edges), self(child, depth + 1)))
+        return tuple(map(obj.__matmul__, vertices)), tuple(map(obj.__matmul__, edges))
