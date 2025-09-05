@@ -353,7 +353,7 @@ class Header:
 
 @makeImmutable
 class Values:
-    """Class for containing coordinate values on a single axis
+    """Class for containing coordinate values for a given axis
     """
 
     def __init__(self, axis: Axis, vertices: tuple, multiplier: int = 1) -> None:
@@ -369,10 +369,6 @@ class Values:
         """
         ## Axis values, ordered by axis direction
         self.values = tuple(sorted(set(map(axis, vertices)), reverse=not axis))
-        ## Rounded axis values to be used as labels in the final render
-        self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
-        ## Maximal label length
-        self.length = max(map(len, self.labels))
         ## Absolute values of axis value differences
         self.differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
         ## Minimal axis value increment
@@ -382,18 +378,40 @@ class Values:
         ## Value offset multiplier
         self.multiplier = multiplier
 
-    def __call__(self, minimum: float = None) -> tuple:
-        """Generating offsets between axis values by supplying an updated divisor (minimum increment)
 
-        Offsets are the distances in between render rows/columns. +1 means they are 1 character further apart.
+@makeImmutable
+class Labels:
+    """Class for containing labels for axis values
+
+    While Values is meant for calculating values, Labels is meant for printing them out
+    """
+
+    def __init__(self, values: Values, scale: float) -> None:
+        """Initializing Labels instance
 
         Args:
-            minimum (float): Updated increment divisor
+            values (Values): Axis values
+            scale (float): Axis scale
+        """
+        ## Rounded axis values to be used as labels in the final render
+        self.labels = tuple(map(lambda value: str(round(value, 3)), values.values))
+        ## Maximal label length
+        self.just = max(map(len, self.labels))
+        ## Multiplied character-sized column/row offsets
+        self.offsets = (0,) + tuple(map(lambda d: round(d / scale) * values.multiplier - 1, values.differences))
+
+    def __iter__(self):
+        """Yielding offsets and labels
+        """
+        yield from zip(self.offsets, self.labels)
+
+    def __len__(self) -> int:
+        """Getting the number of o labels
 
         Returns:
-            tuple: Generated offsets integers
+            int: Number of labels
         """
-        return tuple(map(lambda d: round(d / minimum) * self.multiplier - 1, self.differences))
+        return len(self.labels)
 
 
 @makeImmutable
@@ -435,41 +453,33 @@ class Render:
             str: ANSI colored string of the grid render
         """
         vertices, edges = self(self.grid.obj)
-        vertical = Values(self.grid.direction.vertical, vertices)
-        horizontal = Values(self.grid.direction.horizontal, vertices, 2)
-        verticalOffsets = vertical(self.grid.scale(vertical.minimum, horizontal.minimum))
-        horizontalOffsets = horizontal(self.grid.scale(horizontal.minimum, vertical.minimum))
+        vv = Values(self.grid.direction.vertical, vertices)
+        hh = Values(self.grid.direction.horizontal, vertices, 2)
+        vertical = Labels(vv, self.grid.scale(vv.minimum, hh.minimum))
+        horizontal = Labels(hh, self.grid.scale(hh.minimum, vv.minimum))
         output = ""
         # Header
-        for i in range(horizontal.length):
-            output += " " * (vertical.length + 1)
-            for j, h in enumerate(horizontal.labels):
-                if j > 0:
-                    output += " " * horizontalOffsets[j - 1]
-                output += str(h).rjust(horizontal.length)[i]
+        for i in range(horizontal.just):
+            output += " " * (vertical.just + 1)
+            for offset, label in horizontal:
+                output += f"{' ' * offset}{label.rjust(horizontal.just)[i]}"
             output += "\n"
         # Body
-        for i, v in enumerate(vertical.labels):
-            if i > 0:
-                for j in range(verticalOffsets[i - 1]):
-                    output += " " * (vertical.length + 1)
-                    for k, h in enumerate(horizontal.labels):
-                        if k > 0:
-                            output += " " * horizontalOffsets[k - 1]
-                        output += "|"
-                    output += "\n"
-            output += f"{v.rjust(vertical.length)} "
-            for j, h in enumerate(horizontal.labels):
-                if j > 0:
-                    output += "-" * horizontalOffsets[j - 1]
-                output += "+"
-            output += f" {v}\n"
+        for i, label in enumerate(vertical.labels):
+            for j in range(vertical.offsets[i]):
+                output += " " * (vertical.just + 1)
+                for k in range(len(horizontal)):
+                    output += f"{' ' * horizontal.offsets[k]}|"
+                output += "\n"
+            output += f"{label.rjust(vertical.just)} "
+            for j in range(len(horizontal)):
+                output += f"{'-' * horizontal.offsets[j]}+"
+            output += f" {label}\n"
         # Footer
-        for i in range(horizontal.length):
-            output += " " * (vertical.length + 1)
-            for j, h in enumerate(horizontal.labels):
-                if j > 0:
-                    output += " " * horizontalOffsets[j - 1]
-                output += str(h).ljust(horizontal.length)[i]
-            output += "\n"
+        for i in range(horizontal.just):
+            if i > 0:
+                output += "\n"
+            output += " " * (vertical.just + 1)
+            for offset, label in horizontal:
+                output += f"{' ' * offset}{label.ljust(horizontal.just)[i]}"
         return output
