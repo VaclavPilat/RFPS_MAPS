@@ -237,7 +237,7 @@ class Grid:
     """Class for storing settings for rendering 3D objects as 2D views
     """
 
-    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.TOP,
+    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.SIDE,
                  highlight: Highlight = Highlight.EDGES, scale: Scale = Scale.INDEPENDENT, header: bool = True) -> None:
         """Initialising a Grid instance
 
@@ -439,8 +439,37 @@ class Render:
         horizontal = Values(self.grid.direction.horizontal, vertices, 2)
         verticalOffsets = vertical(self.grid.scale(vertical.minimum, horizontal.minimum))
         horizontalOffsets = horizontal(self.grid.scale(horizontal.minimum, vertical.minimum))
-        # Render body
         output = ""
-        for label in vertical.labels:
-            output += f"{label.rjust(vertical.length)}\n"
+        # Header
+        for i in range(horizontal.length):
+            output += " " * (vertical.length + 1)
+            for j, h in enumerate(horizontal.labels):
+                if j > 0:
+                    output += " " * horizontalOffsets[j - 1]
+                output += str(h).rjust(horizontal.length)[i]
+            output += "\n"
+        # Body
+        for i, v in enumerate(vertical.labels):
+            if i > 0:
+                for j in range(verticalOffsets[i - 1]):
+                    output += " " * (vertical.length + 1)
+                    for k, h in enumerate(horizontal.labels):
+                        if k > 0:
+                            output += " " * horizontalOffsets[k - 1]
+                        output += "|"
+                    output += "\n"
+            output += f"{v.rjust(vertical.length)} "
+            for j, h in enumerate(horizontal.labels):
+                if j > 0:
+                    output += "-" * horizontalOffsets[j - 1]
+                output += "+"
+            output += f" {v}\n"
+        # Footer
+        for i in range(horizontal.length):
+            output += " " * (vertical.length + 1)
+            for j, h in enumerate(horizontal.labels):
+                if j > 0:
+                    output += " " * horizontalOffsets[j - 1]
+                output += str(h).ljust(horizontal.length)[i]
+            output += "\n"
         return output
