@@ -9,7 +9,7 @@ from .Decorators import makeImmutable
 from .Mesh import Vector, Line, ZERO
 from .Objects import Object
 from .Colors import Color, Temperature, alen
-import enum
+import enum, sys
 
 
 class Shape (enum.IntFlag):
@@ -352,6 +352,51 @@ class Header:
 
 
 @makeImmutable
+class Values:
+    """Class for containing coordinate values on a single axis
+    """
+
+    def __init__(self, axis: Axis, vertices: tuple, multiplier: int = 1) -> None:
+        """Initializing Values instance
+
+        Multiplier is needed due to the fact that monospaced fonts used in consoles have a size ratio of 1:2.
+        Using a multiplier makes sure that same-size shapes, like squares and circles do not look overtly stretched.
+
+        Args:
+            axis (Axis): Axis that these values belong to
+            vertices (tuple): Transformed vertex positions
+            multiplier (int, optional): Offset size multiplier. Defaults to 1.
+        """
+        ## Axis values, ordered by axis direction
+        self.values = tuple(sorted(set(map(axis, vertices)), reverse=not axis))
+        ## Rounded axis values to be used as labels in the final render
+        self.labels = tuple(map(lambda value: str(round(value, 3)), self.values))
+        ## Maximal label length
+        self.length = max(map(len, self.labels))
+        ## Absolute values of axis value differences
+        self.differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
+        ## Minimal axis value increment
+        self.minimum = min(self.differences) if self.differences else sys.maxsize
+        if self.minimum < 0.001:
+            raise ValueError("Mesh most likely contains floating point errors")
+        ## Value offset multiplier
+        self.multiplier = multiplier
+
+    def __call__(self, minimum: float = None) -> tuple:
+        """Generating offsets between axis values by supplying an updated divisor (minimum increment)
+
+        Offsets are the distances in between render rows/columns. +1 means they are 1 character further apart.
+
+        Args:
+            minimum (float): Updated increment divisor
+
+        Returns:
+            tuple: Generated offsets integers
+        """
+        return tuple(map(lambda d: round(d / minimum) * self.multiplier - 1, self.differences))
+
+
+@makeImmutable
 ## \todo Refactor
 class Render:
     """Class for rendering 3D object(s) as a 2D view
@@ -382,3 +427,20 @@ class Render:
             for child in obj.objects:
                 vertices, edges = (a+b for a, b in zip((vertices, edges), self(child, depth + 1)))
         return tuple(map(obj.__matmul__, vertices)), tuple(map(obj.__matmul__, edges))
+
+    def __str__(self) -> str:
+        """Getting the text representation of a grid render
+
+        Returns:
+            str: ANSI colored string of the grid render
+        """
+        vertices, edges = self(self.grid.obj)
+        vertical = Values(self.grid.direction.vertical, vertices)
+        horizontal = Values(self.grid.direction.horizontal, vertices, 2)
+        verticalOffsets = vertical(self.grid.scale(vertical.minimum, horizontal.minimum))
+        horizontalOffsets = horizontal(self.grid.scale(horizontal.minimum, vertical.minimum))
+        # Render body
+        output = ""
+        for label in vertical.labels:
+            output += f"{label.rjust(vertical.length)}\n"
+        return output
