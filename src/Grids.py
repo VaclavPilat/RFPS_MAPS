@@ -237,7 +237,7 @@ class Grid:
     """Class for storing settings for rendering 3D objects as 2D views
     """
 
-    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.SIDE,
+    def __init__(self, obj: Object, depth: int = 0, direction: Direction = Direction.TOP,
                  highlight: Highlight = Highlight.EDGES, scale: Scale = Scale.INDEPENDENT, header: bool = True) -> None:
         """Initialising a Grid instance
 
@@ -363,17 +363,19 @@ class Values:
         Using a multiplier makes sure that same-size shapes, like squares and circles do not look overtly stretched.
 
         Args:
-            axis (Axis): Axis that these values belong to
+            axis (Axis): Axis that the values belong to
             vertices (tuple): Transformed vertex positions
             multiplier (int, optional): Offset size multiplier. Defaults to 1.
         """
+        ## Axis
+        self.axis = axis
         ## Axis values, ordered by axis direction
         self.values = tuple(sorted(set(map(axis, vertices)), reverse=not axis))
         ## Absolute values of axis value differences
         self.differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
         ## Minimal axis value increment
         self.minimum = min(self.differences) if self.differences else sys.maxsize
-        if self.minimum < 0.001:
+        if self.minimum < 0.0001:
             raise ValueError("Mesh most likely contains floating point errors")
         ## Value offset multiplier
         self.multiplier = multiplier
@@ -394,7 +396,7 @@ class Labels:
             scale (float): Axis scale
         """
         ## Rounded axis values to be used as labels in the final render
-        self.labels = tuple(map(lambda value: str(round(value, 3)), values.values))
+        self.labels = tuple(map(str, values.values))
         ## Maximal label length
         self.just = max(map(len, self.labels))
         ## Multiplied character-sized column/row offsets
@@ -452,13 +454,14 @@ class Render:
         Returns:
             str: ANSI colored string of the grid render
         """
+        # Calculating axis values
         vertices, edges = self(self.grid.obj)
-        vv = Values(self.grid.direction.vertical, vertices)
-        hh = Values(self.grid.direction.horizontal, vertices, 2)
-        vertical = Labels(vv, self.grid.scale(vv.minimum, hh.minimum))
-        horizontal = Labels(hh, self.grid.scale(hh.minimum, vv.minimum))
-        output = ""
+        vertical = Values(self.grid.direction.vertical, vertices)
+        horizontal = Values(self.grid.direction.horizontal, vertices, 2)
+        vertical, horizontal = Labels(vertical, self.grid.scale(vertical.minimum, horizontal.minimum)), \
+            Labels(horizontal, self.grid.scale(horizontal.minimum, vertical.minimum))
         # Header
+        output = ""
         for i in range(horizontal.just):
             output += " " * (vertical.just + 1)
             for offset, label in horizontal:
@@ -477,9 +480,8 @@ class Render:
             output += f" {label}\n"
         # Footer
         for i in range(horizontal.just):
-            if i > 0:
-                output += "\n"
             output += " " * (vertical.just + 1)
             for offset, label in horizontal:
                 output += f"{' ' * offset}{label.ljust(horizontal.just)[i]}"
+            output += "\n"
         return output
