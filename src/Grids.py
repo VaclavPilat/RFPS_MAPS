@@ -417,19 +417,23 @@ class Labels:
 
 
 @makeImmutable
-## \todo Refactor
-class Render:
-    """Class for rendering 3D object(s) as a 2D view
+class Counts:
+    """Class for counting occurrences of vertices and edges in an object
     """
 
     def __init__(self, grid: Grid) -> None:
-        """Initialising a Render instance
+        """Initializing Counts instance
 
         Args:
-            grid (Grid): Object with render settings
+            grid (Grid): Grid being counted
         """
-        ## Render settings
+        ## Grid being counted
         self.grid = grid
+        vertices, edges = self(grid.obj)
+        ## Values on the vertical axis
+        self.vertical = Values(grid.direction.vertical, vertices)
+        ## Values on the horizontal axis
+        self.horizontal = Values(grid.direction.horizontal, vertices, 2)
 
     def __call__(self, obj: Object, depth: int = 0) -> tuple:
         """Getting transformed mesh data of a specified object (recursively)
@@ -448,18 +452,39 @@ class Render:
                 vertices, edges = (a+b for a, b in zip((vertices, edges), self(child, depth + 1)))
         return tuple(map(obj.__matmul__, vertices)), tuple(map(obj.__matmul__, edges))
 
+    def labels(self) -> tuple:
+        """Transforming Values instances to Labels instances
+        
+        Returns:
+            tuple: Tuple of two Labels instances corresponding to both Values instances
+        """
+        return Labels(self.vertical, self.grid.scale(self.vertical.minimum, self.horizontal.minimum)), \
+            Labels(self.horizontal, self.grid.scale(self.horizontal.minimum, self.vertical.minimum))
+
+
+@makeImmutable
+class Render:
+    """Class for rendering 3D object(s) as a 2D view
+    """
+
+    def __init__(self, grid: Grid) -> None:
+        """Initialising a Render instance
+
+        Args:
+            grid (Grid): Object with render settings
+        """
+        ## Render settings
+        self.grid = grid
+
     def __str__(self) -> str:
         """Getting the text representation of a grid render
 
         Returns:
             str: ANSI colored string of the grid render
         """
-        # Calculating axis values
-        vertices, edges = self(self.grid.obj)
-        vertical = Values(self.grid.direction.vertical, vertices)
-        horizontal = Values(self.grid.direction.horizontal, vertices, 2)
-        vertical, horizontal = Labels(vertical, self.grid.scale(vertical.minimum, horizontal.minimum)), \
-            Labels(horizontal, self.grid.scale(horizontal.minimum, vertical.minimum))
+        # Calculating counts
+        counts = Counts(self.grid)
+        vertical, horizontal = counts.labels()
         # Header
         output = ""
         for i in range(horizontal.just):
