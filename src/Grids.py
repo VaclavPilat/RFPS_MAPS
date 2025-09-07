@@ -434,6 +434,8 @@ class Counts:
         self.vertical = Values(grid.direction.vertical, vertices)
         ## Values on the horizontal axis
         self.horizontal = Values(grid.direction.horizontal, vertices, 2)
+        ## Vertex counts
+        self.vertices = self.countVertices(vertices)
 
     def __call__(self, obj: Object, depth: int = 0) -> tuple:
         """Getting transformed mesh data of a specified object (recursively)
@@ -451,6 +453,21 @@ class Counts:
             for child in obj.objects:
                 vertices, edges = (a+b for a, b in zip((vertices, edges), self(child, depth + 1)))
         return tuple(map(obj.__matmul__, vertices)), tuple(map(obj.__matmul__, edges))
+
+    def countVertices(self, vertices: tuple) -> tuple:
+        """Counting vertex occurrences
+
+        Args:
+            vertices (tuple): Transformed vertex positions
+
+        Returns:
+            tuple: 2D tuple of vertex counts
+        """
+        counts = [[0 for _ in self.horizontal.values] for _ in self.vertical.values]
+        for vertex in vertices:
+            counts[self.vertical.values.index(self.vertical.axis(vertex))] \
+                [self.horizontal.values.index(self.horizontal.axis(vertex))] += 1
+        return tuple(row for row in counts)
 
     def labels(self) -> tuple:
         """Transforming Values instances to Labels instances
@@ -497,11 +514,11 @@ class Render:
             for j in range(vertical.offsets[i]):
                 output += " " * (vertical.just + 1)
                 for k in range(len(horizontal)):
-                    output += f"{' ' * horizontal.offsets[k]}|"
+                    output += f"{' ' * horizontal.offsets[k]}┃"
                 output += "\n"
             output += f"{label.rjust(vertical.just)} "
             for j in range(len(horizontal)):
-                output += f"{'-' * horizontal.offsets[j]}+"
+                output += f"{'━' * horizontal.offsets[j]}{Temperature(counts.vertices[i][j])('╋')}"
             output += f" {label}\n"
         # Footer
         for i in range(horizontal.just):
