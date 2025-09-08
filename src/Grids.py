@@ -356,7 +356,7 @@ class Values:
     """Class for containing coordinate values for a given axis
     """
 
-    def __init__(self, axis: Axis, vertices: tuple, multiplier: int = 1) -> None:
+    def __init__(self, axis: Axis, vertices: set, multiplier: int = 1) -> None:
         """Initializing Values instance
 
         Multiplier is needed due to the fact that monospaced fonts used in consoles have a size ratio of 1:2.
@@ -364,7 +364,7 @@ class Values:
 
         Args:
             axis (Axis): Axis that the values belong to
-            vertices (tuple): Transformed vertex positions
+            vertices (set): Transformed vertex positions
             multiplier (int, optional): Offset size multiplier. Defaults to 1.
         """
         ## Axis
@@ -417,66 +417,40 @@ class Labels:
 
 
 @makeImmutable
-class Counts:
-    """Class for counting occurrences of vertices and edges in an object
+class Vertices:
+    """Class for storing vertex counts for the object being rendered
     """
 
-    def __init__(self, grid: Grid) -> None:
+    def __init__(self, grid: Grid, vertical: Values, horizontal: Values) -> None:
         """Initializing Counts instance
 
         Args:
             grid (Grid): Grid being counted
         """
-        ## Grid being counted
-        self.grid = grid
-        vertices, edges = self(grid.obj)
-        ## Values on the vertical axis
-        self.vertical = Values(grid.direction.vertical, vertices)
-        ## Values on the horizontal axis
-        self.horizontal = Values(grid.direction.horizontal, vertices, 2)
-        ## Vertex counts
-        self.vertices = self.countVertices(vertices)
+        counts = [[0 for _ in horizontal.values] for _ in vertical.values]
+        for vertex in self(grid.obj, grid.depth):
+            counts[vertical.values.index(vertical.axis(vertex))][horizontal.values.index(horizontal.axis(vertex))] += 1
+        ## 2D array of vertex counts
+        self.counts = tuple(row for row in counts)
 
-    def __call__(self, obj: Object, depth: int = 0) -> tuple:
-        """Getting transformed mesh data of a specified object (recursively)
+    def __call__(self, obj: Object, depth: int) -> tuple:
+        """Getting transformed vertices in a specified object (recursively)
 
         Args:
             obj (Object): Object whose mesh is being transformed
-            depth (int, optional): Current recursion depth. Defaults to 0.
+            depth (int): Remaining recursion depth limit.
 
         Returns:
-            tuple: Tuples of transformed mesh data (vertices, edges)
+            tuple: Tuples of transformed vertex positions (Vector instances)
         """
         vertices = tuple(set(vertex for face in obj.faces for vertex in face.points))
-        edges = tuple(set(line for face in obj.faces for line in face))
-        if depth < self.grid.depth:
+        if depth > 0:
             for child in obj.objects:
-                vertices, edges = (a+b for a, b in zip((vertices, edges), self(child, depth + 1)))
-        return tuple(map(obj.__matmul__, vertices)), tuple(map(obj.__matmul__, edges))
+                vertices += self(child, depth - 1)
+        return tuple(map(obj.__matmul__, vertices))
 
-    def countVertices(self, vertices: tuple) -> tuple:
-        """Counting vertex occurrences
-
-        Args:
-            vertices (tuple): Transformed vertex positions
-
-        Returns:
-            tuple: 2D tuple of vertex counts
-        """
-        counts = [[0 for _ in self.horizontal.values] for _ in self.vertical.values]
-        for vertex in vertices:
-            counts[self.vertical.values.index(self.vertical.axis(vertex))] \
-                [self.horizontal.values.index(self.horizontal.axis(vertex))] += 1
-        return tuple(row for row in counts)
-
-    def labels(self) -> tuple:
-        """Transforming Values instances to Labels instances
-        
-        Returns:
-            tuple: Tuple of two Labels instances corresponding to both Values instances
-        """
-        return Labels(self.vertical, self.grid.scale(self.vertical.minimum, self.horizontal.minimum)), \
-            Labels(self.horizontal, self.grid.scale(self.horizontal.minimum, self.vertical.minimum))
+    def __getitem__(self, index: int) -> tuple:
+        return self.counts[index]
 
 
 @makeImmutable
@@ -490,8 +464,31 @@ class Render:
         Args:
             grid (Grid): Object with render settings
         """
-        ## Render settings
-        self.grid = grid
+        points = self(grid.obj, grid.depth)
+        vertical = Values(grid.direction.vertical, points)
+        horizontal = Values(grid.direction.horizontal, points, 2)
+        ## Vertex counts
+        self.vertices = Vertices(grid, vertical, horizontal)
+        ## Labels on the vertical axis
+        self.vertical = Labels(vertical, grid.scale(vertical.minimum, horizontal.minimum))
+        ## Labels on the horizontal axis
+        self.horizontal = Labels(horizontal, grid.scale(horizontal.minimum, vertical.minimum))
+
+    def __call__(self, obj: Object, depth: int) -> set:
+        """Getting a set of transformed vertex positions
+
+        Args:
+            obj (Object): Object whose mesh is being transformed
+            depth (int): Remaining recursion depth limit.
+
+        Returns:
+            set: Set of transformed vertex positions found within the object
+        """
+        vertices = set(vertex for face in obj.faces for vertex in face.points)
+        if depth > 0:
+            for child in obj.objects:
+                vertices |= self(child, depth - 1)
+        return set(map(obj.__matmul__, vertices))
 
     def __str__(self) -> str:
         """Getting the text representation of a grid render
@@ -499,31 +496,28 @@ class Render:
         Returns:
             str: ANSI colored string of the grid render
         """
-        # Calculating counts
-        counts = Counts(self.grid)
-        vertical, horizontal = counts.labels()
-        # Header
         output = ""
-        for i in range(horizontal.just):
-            output += " " * (vertical.just + 1)
-            for offset, label in horizontal:
-                output += f"{' ' * offset}{label.rjust(horizontal.just)[i]}"
+        # Header
+        for i in range(self.horizontal.just):
+            output += " " * (self.vertical.just + 1)
+            for offset, label in self.horizontal:
+                output += f"{' ' * offset}{label.rjust(self.horizontal.just)[i]}"
             output += "\n"
         # Body
-        for i, label in enumerate(vertical.labels):
-            for j in range(vertical.offsets[i]):
-                output += " " * (vertical.just + 1)
-                for k in range(len(horizontal)):
-                    output += f"{' ' * horizontal.offsets[k]}┃"
+        for i, label in enumerate(self.vertical.labels):
+            for j in range(self.vertical.offsets[i]):
+                output += " " * (self.vertical.just + 1)
+                for k in range(len(self.horizontal)):
+                    output += f"{' ' * self.horizontal.offsets[k]}┃"
                 output += "\n"
-            output += f"{label.rjust(vertical.just)} "
-            for j in range(len(horizontal)):
-                output += f"{'━' * horizontal.offsets[j]}{Temperature(counts.vertices[i][j])('╋')}"
+            output += f"{label.rjust(self.vertical.just)} "
+            for j in range(len(self.horizontal)):
+                output += f"{'━' * self.horizontal.offsets[j]}{Temperature(self.vertices[i][j])('╋')}"
             output += f" {label}\n"
         # Footer
-        for i in range(horizontal.just):
-            output += " " * (vertical.just + 1)
-            for offset, label in horizontal:
-                output += f"{' ' * offset}{label.ljust(horizontal.just)[i]}"
+        for i in range(self.horizontal.just):
+            output += " " * (self.vertical.just + 1)
+            for offset, label in self.horizontal:
+                output += f"{' ' * offset}{label.ljust(self.horizontal.just)[i]}"
             output += "\n"
         return output
