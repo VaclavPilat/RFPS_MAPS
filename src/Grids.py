@@ -422,10 +422,12 @@ class Vertices:
     """
 
     def __init__(self, grid: Grid, vertical: Values, horizontal: Values) -> None:
-        """Initializing Counts instance
+        """Initializing a Vertices instance
 
         Args:
-            grid (Grid): Grid being counted
+            grid (Grid): Grid settings
+            vertical (Values): Vertical axis values
+            horizontal (Values): Horizontal axis values
         """
         counts = [[0 for _ in horizontal.values] for _ in vertical.values]
         for vertex in self(grid.obj, grid.depth):
@@ -441,16 +443,13 @@ class Vertices:
             depth (int): Remaining recursion depth limit.
 
         Returns:
-            tuple: Tuples of transformed vertex positions (Vector instances)
+            tuple: Tuple of transformed vertex positions (Vector instances)
         """
         vertices = tuple(set(vertex for face in obj.faces for vertex in face.points))
         if depth > 0:
             for child in obj.objects:
                 vertices += self(child, depth - 1)
         return tuple(map(obj.__matmul__, vertices))
-
-    def __getitem__(self, index: int) -> tuple:
-        return self.counts[index]
 
 
 @makeImmutable
@@ -512,7 +511,7 @@ class Render:
                 output += "\n"
             output += f"{label.rjust(self.vertical.just)} "
             for j in range(len(self.horizontal)):
-                output += f"{'━' * self.horizontal.offsets[j]}{Temperature(self.vertices[i][j])('╋')}"
+                output += f"{'━' * self.horizontal.offsets[j]}{Temperature(self.vertices.counts[i][j])('╋')}"
             output += f" {label}\n"
         # Footer
         for i in range(self.horizontal.just):
