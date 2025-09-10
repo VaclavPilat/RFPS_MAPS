@@ -268,7 +268,14 @@ class Grid:
         Returns:
             str: Grid render string with header (if enabled)
         """
-        return (f'{Header(self)}\n' if self.header else '') + str(Render(self))
+        strings = []
+        if self.header:
+            strings.append(str(Header(self)))
+        try:
+            strings.append(str(Render(self)))
+        except ValueError:
+            pass
+        return "\n".join(strings)
 
     def __call__(self) -> None:
         """Printing the object render into stdout
@@ -432,8 +439,8 @@ class Vertices:
         counts = [[0 for _ in horizontal.values] for _ in vertical.values]
         for vertex in self(grid.obj, grid.depth):
             counts[vertical.values.index(vertical.axis(vertex))][horizontal.values.index(horizontal.axis(vertex))] += 1
-        ## 2D array of vertex counts
-        self.counts = tuple(row for row in counts)
+        ## Matrix of vertex counts
+        self.counts = tuple(tuple(row) for row in counts)
 
     def __call__(self, obj: Object, depth: int) -> tuple:
         """Getting transformed vertices in a specified object (recursively)
@@ -453,6 +460,58 @@ class Vertices:
 
 
 @makeImmutable
+class Edges:
+    """Class for storing (both vertical and horizontal) edge counts of the object being rendered
+    """
+
+    def __init__(self, grid: Grid, vertical: Values, horizontal: Values) -> None:
+        """Initializing an Edges instance
+
+        Args:
+            grid (Grid): Grid settings
+            vertical (Values): Vertical axis values
+            horizontal (Values): Horizontal axis values
+        """
+        verticalCounts = [[0 for _ in horizontal.values] for _ in range(len(vertical.values) - 1)]
+        horizontalCounts = [[0 for _ in range(len(horizontal.values) - 1)] for _ in vertical.values]
+        for line in self(grid.obj, grid.depth):
+            # Processing edges parallel to the vertical axis
+            if line | vertical.axis.line:
+                v1 = vertical.values.index(vertical.axis(line.a))
+                v2 = vertical.values.index(vertical.axis(line.b))
+                h = horizontal.values.index(horizontal.axis(line.a))
+                for i in range(min(v1, v2), max(v1, v2)):
+                    verticalCounts[i][h] += 1
+            # Processing edges parallel to the horizontal axis
+            elif line | horizontal.axis.line:
+                v = vertical.values.index(vertical.axis(line.a))
+                h1 = horizontal.values.index(horizontal.axis(line.a))
+                h2 = horizontal.values.index(horizontal.axis(line.b))
+                for i in range(min(h1, h2), max(h1, h2)):
+                    horizontalCounts[v][i] += 1
+        ## Matrix of vertical edge counts
+        self.vertical = tuple(tuple(row) for row in verticalCounts)
+        ## Matrix of horizontal edge counts
+        self.horizontal = tuple(tuple(row) for row in horizontalCounts)
+
+    def __call__(self, obj: Object, depth: int) -> tuple:
+        """Getting transformed edges of a specified object (recursively)
+
+        Args:
+            obj (Object): Object whose mesh is being transformed
+            depth (int): Remaining recursion depth limit.
+
+        Returns:
+            tuple: Tuple of transformed edges (Line instances)
+        """
+        edges = tuple(set(line for face in obj.faces for line in face))
+        if depth > 0:
+            for child in obj.objects:
+                edges += self(child, depth - 1)
+        return tuple(map(obj.__matmul__, edges))
+
+
+@makeImmutable
 class Render:
     """Class for rendering 3D object(s) as a 2D view
     """
@@ -468,6 +527,8 @@ class Render:
         horizontal = Values(grid.direction.horizontal, points, 2)
         ## Vertex counts
         self.vertices = Vertices(grid, vertical, horizontal)
+        ## Edge counts
+        self.edges = Edges(grid, vertical, horizontal)
         ## Labels on the vertical axis
         self.vertical = Labels(vertical, grid.scale(vertical.minimum, horizontal.minimum))
         ## Labels on the horizontal axis
