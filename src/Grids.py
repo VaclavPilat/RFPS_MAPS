@@ -525,6 +525,8 @@ class Render:
         points = self(grid.obj, grid.depth)
         vertical = Values(grid.direction.vertical, points)
         horizontal = Values(grid.direction.horizontal, points, 2)
+        ## Grid settings
+        self.grid = grid
         ## Vertex counts
         self.vertices = Vertices(grid, vertical, horizontal)
         ## Edge counts
@@ -550,6 +552,32 @@ class Render:
                 vertices |= self(child, depth - 1)
         return set(map(obj.__matmul__, vertices))
 
+    def point(self, i: int, j: int) -> str:
+        """Calculating the colorized character that represents a vertex
+
+        Args:
+            i (int): Vertical point index
+            j (int): Horizontal point index
+        """
+        # Getting the point shape character
+        shape = Shape.NONE
+        if j > 0 and self.edges.horizontal[i][j - 1]:
+            shape |= Shape.LEFT
+        if i > 0 and self.edges.vertical[i - 1][j]:
+            shape |= Shape.TOP
+        if j < len(self.horizontal) - 1 and self.edges.horizontal[i][j]:
+            shape |= Shape.RIGHT
+        if i < len(self.vertical) - 1 and self.edges.vertical[i][j]:
+            shape |= Shape.BOTTOM
+        # Colorizing the shape character
+        vertices = self.vertices.counts[i][j]
+        left = 0 if j == 0 else self.edges.horizontal[i][j - 1]
+        top = 0 if i == 0 else self.edges.vertical[i - 1][j]
+        right = 0 if j >= len(self.horizontal) - 1 else self.edges.horizontal[i][j]
+        bottom = 0 if i >= len(self.vertical) - 1 else self.edges.vertical[i][j]
+        count = self.grid.highlight.point(vertices, top, right, bottom, left)
+        return Temperature(count)(str(shape))
+
     def __str__(self) -> str:
         """Getting the text representation of a grid render
 
@@ -568,11 +596,11 @@ class Render:
             for j in range(self.vertical.offsets[i]):
                 output += " " * (self.vertical.just + 1)
                 for k in range(len(self.horizontal)):
-                    output += f"{' ' * self.horizontal.offsets[k]}┃"
+                    output += f"{' ' * self.horizontal.offsets[k]}{Temperature(0)('┃')}"
                 output += "\n"
             output += f"{label.rjust(self.vertical.just)} "
             for j in range(len(self.horizontal)):
-                output += f"{'━' * self.horizontal.offsets[j]}{Temperature(self.vertices.counts[i][j])('╋')}"
+                output += f"{Temperature(0)('━' * self.horizontal.offsets[j])}{self.point(i, j)}"
             output += f" {label}\n"
         # Footer
         for i in range(self.horizontal.just):
