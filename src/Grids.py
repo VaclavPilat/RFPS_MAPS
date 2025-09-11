@@ -475,6 +475,10 @@ class Edges:
         verticalCounts = [[0 for _ in horizontal.values] for _ in range(len(vertical.values) - 1)]
         horizontalCounts = [[0 for _ in range(len(horizontal.values) - 1)] for _ in vertical.values]
         for line in self(grid.obj, grid.depth):
+            # Flattening lines
+            depth = Axis["XYZ".replace(str(vertical.axis), "").replace(str(horizontal.axis), "")]
+            if line | depth.line:
+                continue
             # Processing edges parallel to the vertical axis
             if line | vertical.axis.line:
                 v1 = vertical.values.index(vertical.axis(line.a))
@@ -558,6 +562,9 @@ class Render:
         Args:
             i (int): Vertical point index
             j (int): Horizontal point index
+
+        Returns:
+            str: Colorized character representing a vertex
         """
         # Getting the point shape character
         shape = Shape.NONE
