@@ -407,20 +407,7 @@ class Labels:
         ## Maximal label length
         self.just = max(map(len, self.labels))
         ## Multiplied character-sized column/row offsets
-        self.offsets = (0,) + tuple(map(lambda d: round(d / scale) * values.multiplier - 1, values.differences))
-
-    def __iter__(self):
-        """Yielding offsets and labels
-        """
-        yield from zip(self.offsets, self.labels)
-
-    def __len__(self) -> int:
-        """Getting the number of o labels
-
-        Returns:
-            int: Number of labels
-        """
-        return len(self.labels)
+        self.offsets = tuple(map(lambda d: round(d / scale) * values.multiplier - 1, values.differences))
 
 
 @makeImmutable
@@ -572,16 +559,16 @@ class Render:
             shape |= Shape.LEFT
         if i > 0 and self.edges.vertical[i - 1][j]:
             shape |= Shape.TOP
-        if j < len(self.horizontal) - 1 and self.edges.horizontal[i][j]:
+        if j < len(self.horizontal.labels) - 1 and self.edges.horizontal[i][j]:
             shape |= Shape.RIGHT
-        if i < len(self.vertical) - 1 and self.edges.vertical[i][j]:
+        if i < len(self.vertical.labels) - 1 and self.edges.vertical[i][j]:
             shape |= Shape.BOTTOM
         # Colorizing the shape character
         vertices = self.vertices.counts[i][j]
         left = 0 if j == 0 else self.edges.horizontal[i][j - 1]
         top = 0 if i == 0 else self.edges.vertical[i - 1][j]
-        right = 0 if j >= len(self.horizontal) - 1 else self.edges.horizontal[i][j]
-        bottom = 0 if i >= len(self.vertical) - 1 else self.edges.vertical[i][j]
+        right = 0 if j >= len(self.horizontal.labels) - 1 else self.edges.horizontal[i][j]
+        bottom = 0 if i >= len(self.vertical.labels) - 1 else self.edges.vertical[i][j]
         count = self.grid.highlight.point(vertices, top, right, bottom, left)
         return Temperature(count)(str(shape))
 
@@ -595,24 +582,33 @@ class Render:
         # Header
         for i in range(self.horizontal.just):
             output += " " * (self.vertical.just + 1)
-            for offset, label in self.horizontal:
-                output += f"{' ' * offset}{label.rjust(self.horizontal.just)[i]}"
+            for j, h in enumerate(self.horizontal.labels):
+                if j > 0:
+                    output += ' ' * self.horizontal.offsets[j - 1]
+                output += h.rjust(self.horizontal.just)[i]
             output += "\n"
         # Body
-        for i, label in enumerate(self.vertical.labels):
-            for j in range(self.vertical.offsets[i]):
-                output += " " * (self.vertical.just + 1)
-                for k in range(len(self.horizontal)):
-                    output += f"{' ' * self.horizontal.offsets[k]}{Temperature(0)('┃')}"
-                output += "\n"
-            output += f"{label.rjust(self.vertical.just)} "
-            for j in range(len(self.horizontal)):
-                output += f"{Temperature(0)('━' * self.horizontal.offsets[j])}{self.point(i, j)}"
-            output += f" {label}\n"
+        for i, v in enumerate(self.vertical.labels):
+            if i > 0:
+                for j in range(self.vertical.offsets[i - 1]):
+                    output += " " * (self.vertical.just + 1)
+                    for k, h in enumerate(self.horizontal.labels):
+                        if k > 0:
+                            output += " " * self.horizontal.offsets[k - 1]
+                        output += Temperature(0)('┃')
+                    output += "\n"
+            output += f"{v.rjust(self.vertical.just)} "
+            for j in range(len(self.horizontal.labels)):
+                if j > 0:
+                    output += Temperature(0)('━' * self.horizontal.offsets[j - 1])
+                output += self.point(i, j)
+            output += f" {v}\n"
         # Footer
         for i in range(self.horizontal.just):
             output += " " * (self.vertical.just + 1)
-            for offset, label in self.horizontal:
-                output += f"{' ' * offset}{label.ljust(self.horizontal.just)[i]}"
+            for j, h in enumerate(self.horizontal.labels):
+                if j > 0:
+                    output += ' ' * self.horizontal.offsets[j - 1]
+                output += h.ljust(self.horizontal.just)[i]
             output += "\n"
         return output
