@@ -543,7 +543,7 @@ class Render:
                 vertices |= self(child, depth - 1)
         return set(map(obj.__matmul__, vertices))
 
-    def point(self, i: int, j: int) -> str:
+    def colorizePoint(self, i: int, j: int) -> str:
         """Calculating the colorized character that represents a vertex
 
         Args:
@@ -572,6 +572,33 @@ class Render:
         count = self.grid.highlight.point(vertices, top, right, bottom, left)
         return Temperature(count)(str(shape))
 
+    def colorizeHorizontal(self, i: int, j: int) -> str:
+        """Colorizing a horizontal line based on the number of edges behind it
+
+        Args:
+            i (int): Vertical line index
+            j (int): Horizontal line index
+
+        Returns:
+            str: ANSI colored string representing the line
+        """
+        count = self.edges.horizontal[i][j]
+        chars = self.horizontal.offsets[j]
+        return Temperature(self.grid.highlight.line(count))(('━' if count else '╌') * chars)
+
+    def colorizeVertical(self, i: int, j: int) -> str:
+        """Colorizing a vertical line based on the number of edges behind it
+
+        Args:
+            i (int): Vertical line index
+            j (int): Horizontal line index
+
+        Returns:
+            str: ANSI colored character representing the line
+        """
+        count = self.edges.vertical[i][j]
+        return Temperature(self.grid.highlight.line(count))('┃' if count else '┆')
+
     def __str__(self) -> str:
         """Getting the text representation of a grid render
 
@@ -595,13 +622,13 @@ class Render:
                     for k, h in enumerate(self.horizontal.labels):
                         if k > 0:
                             output += " " * self.horizontal.offsets[k - 1]
-                        output += Temperature(0)('┃')
+                        output += self.colorizeVertical(i - 1, k)
                     output += "\n"
             output += f"{v.rjust(self.vertical.just)} "
             for j in range(len(self.horizontal.labels)):
                 if j > 0:
-                    output += Temperature(0)('━' * self.horizontal.offsets[j - 1])
-                output += self.point(i, j)
+                    output += self.colorizeHorizontal(i, j - 1)
+                output += self.colorizePoint(i, j)
             output += f" {v}\n"
         # Footer
         for i in range(self.horizontal.just):
