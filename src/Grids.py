@@ -229,7 +229,7 @@ class Scale (enum.Enum):
         Returns:
             Resulting increment on the current axis
         """
-        return self.value[0](this, other)
+        return self.increment(this, other)
 
 
 @makeImmutable
@@ -297,7 +297,7 @@ class Header:
         ## Grid settings to describe
         self.grid = grid
 
-    def __call__(self, obj: Object, depth: int = 0) -> tuple:
+    def traverse(self, obj: Object, depth: int = 0) -> tuple:
         """Counting faces, edges and vertices of a specified object (recursively)
 
         Args:
@@ -317,7 +317,7 @@ class Header:
         maxDepth = depth
         if depth < self.grid.depth:
             for child in obj.objects:
-                childDepth, childCounts = self(child, depth + 1)
+                childDepth, childCounts = self.traverse(child, depth + 1)
                 maxDepth = max(maxDepth, childDepth)
                 for key, value in childCounts.items():
                     counts[key] += value
@@ -326,7 +326,7 @@ class Header:
     def __iter__(self):
         """Yielding information strings to be shown in the header
         """
-        depth, counts = self(self.grid.obj)
+        depth, counts = self.traverse(self.grid.obj)
         # First column
         yield f"{Color.BOLD(self.grid.obj.name)}" + (f" (+{Temperature(depth)(depth)} layers deep)" if depth else "")
         yield " ".join(f"{temp(i if i != len(Temperature) - 1 else f'{i}+')}" for i, temp in enumerate(Temperature))
@@ -424,12 +424,12 @@ class Vertices:
             horizontal (Values): Horizontal axis values
         """
         counts = [[0 for _ in horizontal.values] for _ in vertical.values]
-        for vertex in self(grid.obj, grid.depth):
+        for vertex in self.traverse(grid.obj, grid.depth):
             counts[vertical.values.index(vertical.axis(vertex))][horizontal.values.index(horizontal.axis(vertex))] += 1
         ## Matrix of vertex counts
         self.counts = tuple(tuple(row) for row in counts)
 
-    def __call__(self, obj: Object, depth: int) -> tuple:
+    def traverse(self, obj: Object, depth: int) -> tuple:
         """Getting transformed vertices in a specified object (recursively)
 
         Args:
@@ -442,7 +442,7 @@ class Vertices:
         vertices = tuple(set(vertex for face in obj.faces for vertex in face.points))
         if depth > 0:
             for child in obj.objects:
-                vertices += self(child, depth - 1)
+                vertices += self.traverse(child, depth - 1)
         return tuple(map(obj.__matmul__, vertices))
 
 
@@ -513,7 +513,7 @@ class Render:
         Args:
             grid (Grid): Object with render settings
         """
-        points = self(grid.obj, grid.depth)
+        points = self.traverse(grid.obj, grid.depth)
         vertical = Values(grid.direction.vertical, points)
         horizontal = Values(grid.direction.horizontal, points, 2)
         ## Grid settings
@@ -527,7 +527,7 @@ class Render:
         ## Labels on the horizontal axis
         self.horizontal = Labels(horizontal, grid.scale(horizontal.minimum, vertical.minimum))
 
-    def __call__(self, obj: Object, depth: int) -> set:
+    def traverse(self, obj: Object, depth: int) -> set:
         """Getting a set of transformed vertex positions
 
         Args:
@@ -540,7 +540,7 @@ class Render:
         vertices = set(vertex for face in obj.faces for vertex in face.points)
         if depth > 0:
             for child in obj.objects:
-                vertices |= self(child, depth - 1)
+                vertices |= self.traverse(child, depth - 1)
         return set(map(obj.__matmul__, vertices))
 
     def colorizePoint(self, i: int, j: int) -> str:
