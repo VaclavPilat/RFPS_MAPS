@@ -3,12 +3,12 @@ Implementation of circular intervals
 
 \internal
 Examples:
-    >>> list(I360.EMPTY[8])
+    >>> list(EMPTY[8])
     []
-    >>> list((I360.HALF1 | I360.HALF2)[8]) == list(I360.FULL[8])
+    >>> list((HALF1 | HALF2)[8]) == list(FULL[8])
     True
 """
-from . import Decorators
+from .Decorators import makeImmutable, addInitRepr, addCopyCall
 
 
 class Interval:
@@ -25,7 +25,7 @@ class Interval:
             Intersection: Created interval intersection
 
         Examples:
-            >>> list((I360(0, 180) & I360(90, 270))[8])
+            >>> list((Arc(0, 180) & Arc(90, 270))[8])
             [90.0, 135.0, 180.0]
         """
         return Intersection(self, other)
@@ -40,19 +40,19 @@ class Interval:
             Union: Created interval union
 
         Examples:
-            >>> list((I360(0, 180) | I360(90, 270))[8])
+            >>> list((Arc(0, 180) | Arc(90, 270))[8])
             [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0]
         """
         return Union(self, other)
 
 
-@Decorators.makeImmutable
-@Decorators.addInitRepr
+@makeImmutable
+@addInitRepr
 class Union(Interval):
     """Class for representing a union of intervals.
 
     Examples:
-        >>> Union(I360())
+        >>> Union(Arc())
         Traceback (most recent call last):
         ValueError: Union must contain at least 2 intervals
     """
@@ -78,13 +78,13 @@ class Union(Interval):
             bool: True if ANY interval contains this item.
 
         Examples:
-            >>> 300 in Union(I360(0, 180), I360(90, 270))
+            >>> 300 in Union(Arc(0, 180), Arc(90, 270))
             False
-            >>> 60 in Union(I360(0, 180), I360(90, 270))
+            >>> 60 in Union(Arc(0, 180), Arc(90, 270))
             True
-            >>> 200 in Union(I360(0, 180), I360(90, 270))
+            >>> 200 in Union(Arc(0, 180), Arc(90, 270))
             True
-            >>> 120 in Union(I360(0, 180), I360(90, 270))
+            >>> 120 in Union(Arc(0, 180), Arc(90, 270))
             True
         """
         return any(item in interval for interval in self.intervals)
@@ -101,18 +101,18 @@ class Union(Interval):
         Examples:
 
         """
-        for angle in I360.FULL[points]:
+        for angle in FULL[points]:
             if any(angle in interval[points] for interval in self.intervals):
                 yield angle
 
 
-@Decorators.makeImmutable
-@Decorators.addInitRepr
+@makeImmutable
+@addInitRepr
 class Intersection(Interval):
     """Class for representing an intersection of intervals.
 
     Examples:
-        >>> Intersection(I360())
+        >>> Intersection(Arc())
         Traceback (most recent call last):
         ValueError: Intersection must contain at least 2 intervals
     """
@@ -138,13 +138,13 @@ class Intersection(Interval):
             bool: True if ALL intervals contains this item.
 
         Examples:
-            >>> 300 in Intersection(I360(0, 180), I360(90, 270))
+            >>> 300 in Intersection(Arc(0, 180), Arc(90, 270))
             False
-            >>> 60 in Intersection(I360(0, 180), I360(90, 270))
+            >>> 60 in Intersection(Arc(0, 180), Arc(90, 270))
             False
-            >>> 200 in Intersection(I360(0, 180), I360(90, 270))
+            >>> 200 in Intersection(Arc(0, 180), Arc(90, 270))
             False
-            >>> 120 in Intersection(I360(0, 180), I360(90, 270))
+            >>> 120 in Intersection(Arc(0, 180), Arc(90, 270))
             True
         """
         return all(item in interval for interval in self.intervals)
@@ -161,23 +161,23 @@ class Intersection(Interval):
         Examples:
 
         """
-        for angle in I360.FULL[points]:
+        for angle in FULL[points]:
             if all(angle in interval[points] for interval in self.intervals):
                 yield angle
 
 
-@Decorators.makeImmutable
-@Decorators.addInitRepr
-@Decorators.addCopyCall("start", "end", "includeStart", "includeEnd")
-class I360(Interval):
+@makeImmutable
+@addInitRepr
+@addCopyCall("start", "end", "includeStart", "includeEnd")
+class Arc(Interval):
     """Class for generating values from within an interval.
 
     Examples:
-        >>> I360()
-        I360()
-        >>> I360()(end=180)
-        I360(start=0, end=180, includeStart=True, includeEnd=True)
-        >>> I360(-30, 60)
+        >>> Arc()
+        Arc()
+        >>> Arc()(end=180)
+        Arc(start=0, end=180, includeStart=True, includeEnd=True)
+        >>> Arc(-30, 60)
         Traceback (most recent call last):
         ValueError: Invalid angle bound values.
     """
@@ -212,13 +212,13 @@ class I360(Interval):
             bool: Whether the number is a part of the interval.
 
         Examples:
-            >>> 0 in I360()
+            >>> 0 in Arc()
             True
-            >>> 360 in I360()
+            >>> 360 in Arc()
             True
-            >>> 270 in I360(end=180)
+            >>> 270 in Arc(end=180)
             False
-            >>> 180 in I360(0, 180, True, False)
+            >>> 180 in Arc(0, 180, True, False)
             False
         """
         return (self.start <= item if self.includeStart else self.start < item) \
@@ -237,14 +237,14 @@ class I360(Interval):
             float: Angle value in degrees belonging to the interval
 
         Examples:
-            >>> list(I360()[0])
+            >>> list(Arc()[0])
             Traceback (most recent call last):
             ValueError: Invalid point count.
-            >>> list(I360()[1])
+            >>> list(Arc()[1])
             [0.0]
-            >>> list(I360()[3])
+            >>> list(Arc()[3])
             [0.0, 120.0, 240.0]
-            >>> list(I360(includeStart=False)[3])
+            >>> list(Arc(includeStart=False)[3])
             [120.0, 240.0, 360.0]
         """
         if points <= 0:
@@ -257,7 +257,7 @@ class I360(Interval):
                 yield angle
 
 
-I360.FULL = I360()
-I360.EMPTY = I360(0, 0, False, False)
-I360.HALF1 = I360(0, 180)
-I360.HALF2 = I360(180, 360)
+FULL = Arc()
+EMPTY = Arc(0, 0, False, False)
+HALF1 = Arc(0, 180)
+HALF2 = Arc(180, 360)
