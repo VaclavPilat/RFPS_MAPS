@@ -52,9 +52,9 @@ class Union(Interval):
     """Class for representing a union of intervals.
 
     Examples:
-        >>> Union(Arc())
+        >>> Union()
         Traceback (most recent call last):
-        ValueError: Union must contain at least 2 intervals
+        ValueError: Union cannot be empty
     """
 
     def __init__(self, *intervals) -> None:
@@ -64,7 +64,7 @@ class Union(Interval):
             *intervals: Interval arguments.
         """
         if len(intervals) < 2:
-            raise ValueError("Union must contain at least 2 intervals")
+            raise ValueError("Union cannot be empty")
         ## Tuple of interval arguments
         self.intervals = intervals
 
@@ -112,9 +112,9 @@ class Intersection(Interval):
     """Class for representing an intersection of intervals.
 
     Examples:
-        >>> Intersection(Arc())
+        >>> Intersection()
         Traceback (most recent call last):
-        ValueError: Intersection must contain at least 2 intervals
+        ValueError: Intersection cannot be empty
     """
 
     def __init__(self, *intervals) -> None:
@@ -123,8 +123,8 @@ class Intersection(Interval):
         Args:
             *intervals: Interval arguments.
         """
-        if len(intervals) < 2:
-            raise ValueError("Intersection must contain at least 2 intervals")
+        if len(intervals) == 0:
+            raise ValueError("Intersection cannot be empty")
         ## Tuple of interval arguments
         self.intervals = intervals
 
@@ -177,10 +177,36 @@ class Arc(Interval):
         Arc()
         >>> Arc()(end=180)
         Arc(start=0, end=180, includeStart=True, includeEnd=True)
-        >>> Arc(-30, 60)
-        Traceback (most recent call last):
-        ValueError: Invalid angle bound values.
     """
+
+    def __new__(cls, start: int = 0, end: int = 360, includeStart: bool = True, includeEnd: bool = True) -> Interval:
+        """Creating a new interval by clamping its arguments
+
+        Args:
+            start (int, optional): The starting angle of the interval. Defaults to 0.
+            end (int, optional): The ending angle of the interval. Defaults to 360.
+            includeStart (bool, optional): If True, include the start of the interval. Defaults to True.
+            includeEnd (bool, optional): If True, include the end of the interval. Defaults to True.
+
+        Returns:
+            Interval: Either an Arc instance or a union of them
+
+        Examples:
+            >>> 100 in Arc(90, 180)
+            True
+            >>> 60 in Arc(-90, 90)
+            True
+            >>> 180 in Arc(-30, 30)
+            False
+            >>> 360 in Arc(270, 90)
+            True
+        """
+        if 0 <= start <= end <= 360:
+            return super().__new__(cls)
+        start, end = (x if 0 <= x <= 360 else x % 360 for x in (start, end))
+        if start < end:
+            return Union(Arc(start, end, includeStart, includeEnd))
+        return Arc(start, 360, includeStart, True) | Arc(0, end, False, includeEnd)
 
     def __init__(self, start: int = 0, end: int = 360, includeStart: bool = True, includeEnd: bool = True) -> None:
         """Initialising a circular interval.
