@@ -3,6 +3,10 @@ Implementation of circular intervals
 
 \internal
 Examples:
+    >>> bool(FULL)
+    True
+    >>> bool(EMPTY)
+    False
     >>> list(EMPTY[8])
     []
     >>> list((HALF1 | HALF2)[8]) == list(FULL[8])
@@ -246,6 +250,8 @@ class Arc(Interval):
             False
             >>> 180 in Arc(0, 180, True, False)
             False
+            >>> 90 in Arc(90, 90, False, True)
+            False
         """
         return (self.start <= item if self.includeStart else self.start < item) \
             and (item <= self.end if self.includeEnd else item < self.end)
@@ -281,6 +287,22 @@ class Arc(Interval):
                 if angle == 360 and 0 in self:
                     continue
                 yield angle
+
+    def __bool__(self) -> bool:
+        """Checking whether an interval is not empty
+
+        Returns:
+            bool: True if there is a value that belongs to this interval
+
+        Examples:
+            >>> bool(Arc(0, 90))
+            True
+            >>> bool(Arc(0, 0))
+            True
+            >>> bool(Arc(0, 0, False))
+            False
+        """
+        return (self.start < self.end) or (self.includeStart and self.includeEnd)
 
 
 FULL = Arc()
