@@ -67,7 +67,7 @@ class Union(Interval):
         Args:
             *intervals: Interval arguments.
         """
-        if len(intervals) < 2:
+        if not intervals:
             raise ValueError("Union cannot be empty")
         ## Tuple of interval arguments
         self.intervals = intervals
@@ -93,6 +93,7 @@ class Union(Interval):
         """
         return any(item in interval for interval in self.intervals)
 
+    ## \todo Make the implementation type agnostic
     def __getitem__(self, points: int):
         """Generating angle values that belong to an interval Union.
 
@@ -103,15 +104,33 @@ class Union(Interval):
             float: Angle value in degrees belonging to the interval
 
         Examples:
-
+            >>> list(Union(Arc())[8]) == list(Arc()[8])
+            True
+            >>> list(Union(Arc(0, 180), Arc(90, 270))[8])
+            [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0]
         """
         for angle in FULL[points]:
             if any(angle in interval[points] for interval in self.intervals):
                 yield angle
 
+    def __bool__(self) -> bool:
+        """Checking whether this union is non-empty
+
+        Returns:
+            bool: True if any inner interval is non-empty
+
+        Examples:
+            >>> bool(Union(Arc()))
+            True
+            >>> bool(Union(Arc(90, 90, False, False), Arc(120, 120, False, False)))
+            False
+        """
+        return any(map(bool, self.intervals))
+
 
 @makeImmutable
 @addInitRepr
+## \todo Add an implementation of bool()
 class Intersection(Interval):
     """Class for representing an intersection of intervals.
 
@@ -127,7 +146,7 @@ class Intersection(Interval):
         Args:
             *intervals: Interval arguments.
         """
-        if len(intervals) == 0:
+        if not intervals:
             raise ValueError("Intersection cannot be empty")
         ## Tuple of interval arguments
         self.intervals = intervals
@@ -163,10 +182,13 @@ class Intersection(Interval):
             float: Angle value in degrees belonging to the interval
 
         Examples:
-
+            >>> list(Intersection(Arc())[8]) == list(Arc()[8])
+            True
+            >>> list(Intersection(Arc(0, 180), Arc(90, 270))[8])
+            [90.0, 135.0, 180.0]
         """
-        for angle in FULL[points]:
-            if all(angle in interval[points] for interval in self.intervals):
+        for angle in self.intervals[0][points]:
+            if all(angle in interval[points] for interval in self.intervals[1:]):
                 yield angle
 
 
