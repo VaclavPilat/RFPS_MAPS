@@ -72,23 +72,22 @@ class Object(metaclass=Repr):
         """
         return (structure >> self.rotation) + self.position
 
-    def load(self, obj: type, *args, **kwargs) -> "Object":
-        """Creating an object instance using Object type and its constructor arguments
+    def __iadd__(self, other) -> "Object":
+        """Adding another Object or Face to self
 
         Args:
-            obj (type): Object type to create
+            other (Object | Face): Face or Object instance to add
 
         Returns:
-            Object: Created object instance
+            Object: Self reference
         """
-        instance = obj(*args, **kwargs)
-        self.objects.append(instance)
-        return instance
-
-    def face(self, *points, **kwargs) -> None:
-        """Creating a new face
-        """
-        self.faces.add(Face(*points, **kwargs))
+        if isinstance(other, Object):
+            self.objects.append(other)
+        elif isinstance(other, Face):
+            self.faces.add(other)
+        else:
+            raise TypeError(f"Unexpected argument type: {type(other)}")
+        return self
 
     def __str__(self, current: str = "", children: str = "", layer: int = 0) -> None:
         """Getting the string representation of object hierarchy

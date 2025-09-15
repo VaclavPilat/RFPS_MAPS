@@ -13,7 +13,7 @@ if __name__ == "__main__":
     except ImportError:
         BLENDER = False
 
-from src.Mesh import FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN, ZERO
+from src.Mesh import FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN, ZERO, Face
 from src.Grids import Grid
 
 from src import Tiles, Helpers
@@ -59,15 +59,15 @@ def Stairs(self, D: float, G: int, H: float, L: float) -> None:
     I = set(int(i / G * HF) for i in range(1, G))  # Resting place indices
     for i in range(HF):
         if i == HF - 1:  # Final horizontal face
-            self.face(self.bounds.TR(z=TL.z), TL, BL, self.bounds.BR(z=BL.z))
+            self += Face(self.bounds.TR(z=TL.z), TL, BL, self.bounds.BR(z=BL.z))
             break
         # Making a horizontal face
         TL1, BL1 = map(lambda v: v + RIGHT * (R if i in I else L), (TL, BL))
-        self.face(TL1, TL, BL, BL1)
+        self += Face(TL1, TL, BL, BL1)
         # Making a vertical face
         z = (self.bounds.TL + DOWN * D * (i + 1) / VF).z
         TL2, BL2 = map(lambda v: v(z=z), (TL1, BL1))
-        self.face(TL2, TL1, BL1, BL2)
+        self += Face(TL2, TL1, BL1, BL2)
         TL, BL = (TL2, BL2)
 
 
@@ -89,14 +89,14 @@ def Slopes(self, D: float, S: int, R: float) -> None:
     C = 1 if S == 1 else S - 1  # Resting place count
     for i in range(S + C):
         if i > 0 and i == S + C - 1:  # Final face, whatever it might be
-            self.face(TL, BL, *map(lambda v: v + DOWN * D, (self.bounds.BR, self.bounds.TR)))
+            self += Face(TL, BL, *map(lambda v: v + DOWN * D, (self.bounds.BR, self.bounds.TR)))
             break
         if i % 2 == 0:  # Making a slope face
             z = (self.bounds.TL + DOWN * D * (i // 2 + 1) / S).z
             TL1, BL1 = map(lambda v: (v + RIGHT * (TL.z - z) * R)(z=z), (TL, BL))
         else:  # Making a horizontal face
             TL1, BL1 = map(lambda v: v + RIGHT * G, (TL, BL))
-        self.face(TL1, TL, BL, BL1)
+        self += Face(TL1, TL, BL, BL1)
         TL, BL = (TL1, BL1)
 
 
@@ -114,20 +114,20 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
     TL1, TR1, BL1, BR1 = map(lambda v: v + UP * METRO.UECH,
                              (self.bounds.TL, self.bounds.TR, self.bounds.BL, self.bounds.BR))
     TLI1, TRI1, BLI1, BRI1 = map(lambda v: v + UP * METRO.UECH, (TLI, TRI, BLI, BRI))
-    self.face(TR1, TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1)  # Top face
+    self += Face(TR1, TL1, TLI1, TRI1, BRI1, BLI1, BL1, BR1)  # Top face
     # Outer faces
-    self.face(TR1, BR1, self.bounds.BR, self.bounds.TR)
-    self.face(TL1, TR1, self.bounds.TR, self.bounds.TL)
-    self.face(BR1, BL1, self.bounds.BL, self.bounds.BR)
-    self.face(TLI1, TL1, self.bounds.TL, TLI)
-    self.face(BL1, BLI1, BLI, self.bounds.BL)
+    self += Face(TR1, BR1, self.bounds.BR, self.bounds.TR)
+    self += Face(TL1, TR1, self.bounds.TR, self.bounds.TL)
+    self += Face(BR1, BL1, self.bounds.BL, self.bounds.BR)
+    self += Face(TLI1, TL1, self.bounds.TL, TLI)
+    self += Face(BL1, BLI1, BLI, self.bounds.BL)
     # Inner faces
-    self.face(BLI1, BRI1, BRI, BLI)
-    self.face(BRI1, TRI1, TRI, BRI)
-    self.face(TRI1, TLI1, TLI, TRI)
+    self += Face(BLI1, BRI1, BRI, BLI)
+    self += Face(BRI1, TRI1, TRI, BRI)
+    self += Face(TRI1, TLI1, TLI, TRI)
     # Generating descending mesh
     if C is not None:
-        self.load(C, f"Underpass {str(C).lower()}", Tiles.Anchor(TLI, BRI), D=METRO.UHDP + METRO.UHHG, **kwargs)
+        self += C(f"Underpass {str(C).lower()}", Tiles.Anchor(TLI, BRI), D=METRO.UHDP + METRO.UHHG, **kwargs)
 
 
 # noinspection PyUnresolvedReferences
@@ -135,9 +135,9 @@ def UnderpassEntrance(self, C: type = None, **kwargs) -> None:
 def Metro(self) -> None:
     """Generating the Metro station
     """
-    self.load(UnderpassEntrance, "Underpass stair entrance", Tiles.Box(ZERO, METRO.USCL, METRO.UEWD),
+    self += UnderpassEntrance("Underpass stair entrance", Tiles.Box(ZERO, METRO.USCL, METRO.UEWD),
               C=Stairs, G=METRO.USTG, H=METRO.USTH, L=METRO.USTL)
-    #self.load(UnderpassEntrance, "Underpass slope entrance", Tiles.Box(BACKWARD * METRO.UEWD + RIGHT *
+    #self += UnderpassEntrance("Underpass slope entrance", Tiles.Box(BACKWARD * METRO.UEWD + RIGHT *
     #    (METRO.USCL + METRO.UHWD + METRO.USLL), METRO.USLL, METRO.UEWD, rotation=180),
     #    C=Slopes, S=METRO.USLC, R=METRO.USLR)
 
