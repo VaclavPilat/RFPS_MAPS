@@ -1,4 +1,7 @@
-from .Decorators import *
+"""! \file
+Classes for representing a model.
+"""
+from .Decorators import addInitRepr, makeImmutable
 from .Mesh import Vector, Line, Face, ZERO
 from .Colors import Hierarchy
 from .Helpers import Repr
@@ -7,16 +10,18 @@ from .Helpers import Repr
 @addInitRepr
 @makeImmutable
 class Object(metaclass=Repr):
-    """Class for containing own mesh and/or other objects
+    """Class for containing own mesh and/or other Object instances.
+
+    This class is meant to be a base class, as shown the exception being thrown in Object.__call__.
     """
 
-    def __init__(self, name: str = "New object", position: Vector = ZERO, rotation: int|float = 0, *args, **kwargs) -> None:
+    def __init__(self, name: str = "New object", position: Vector = ZERO, rotation: int = 0, *args, **kwargs) -> None:
         """Creating a new object
 
         Args:
             name (str, optional): Object name. Defaults to "New object".
             position (Vector, optional): Object location. Defaults to ZERO.
-            rotation (int | float, optional): Object rotation in degrees (Z-value only). Defaults to 0.
+            rotation (int, optional): Object rotation in degrees (Z-value only). Defaults to 0.
         """
         ## Object name
         self.name = name
@@ -28,8 +33,23 @@ class Object(metaclass=Repr):
         self.objects = []
         ## List of mesh faces
         self.faces = set()
-        # noinspection PyArgumentList
-        self.generate(*args, **kwargs)
+        # Generating mesh
+        self(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs) -> None:
+        """Generating the model mesh.
+
+        Gets automatically called from the constructor.
+
+        Raises:
+            NotImplementedError: Thrown when not overridden
+
+        Examples:
+            >>> Object()
+            Traceback (most recent call last):
+            NotImplementedError: Object generation method was not overwritten
+        """
+        raise NotImplementedError("Object generation method was not overwritten")
 
     def __iter__(self):
         """Iterating over objects
@@ -64,14 +84,6 @@ class Object(metaclass=Repr):
         instance = obj(*args, **kwargs)
         self.objects.append(instance)
         return instance
-
-    def generate(self) -> None:
-        """Generating the object
-
-        Raises:
-            NotImplementedError: Thrown when not overridden
-        """
-        raise NotImplementedError("Object generation method was not overridden")
 
     def face(self, *points, **kwargs) -> None:
         """Creating a new face
@@ -111,7 +123,7 @@ def createObjectSubclass(cls: type = Object):
         class Wrapped(cls):
             pass
 
-        Wrapped.generate = func
+        Wrapped.__call__ = func
         Wrapped.__name__ = func.__name__
         return Wrapped
 

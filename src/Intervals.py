@@ -327,7 +327,11 @@ class Arc(Interval):
         return (self.start < self.end) or (self.includeStart and self.includeEnd)
 
 
+## Empty arc
 FULL = Arc()
+## Full arc
 EMPTY = Arc(0, 0, False, False)
+## First half of an arc
 HALF1 = Arc(0, 180)
+## Second half of an arc
 HALF2 = Arc(180, 360)
