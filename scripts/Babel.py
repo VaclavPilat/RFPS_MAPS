@@ -1,6 +1,10 @@
+"""! \file
+Implementation of the Tower of Babel map.
+"""
 from src.Decorators import makeImmutable
 from src.Intervals import Interval, FULL
-from src.Mesh import Vector, ZERO, FORWARD, RIGHT
+from src.Mesh import Vector, ZERO, FORWARD, RIGHT, Face
+from src.Objects import createObjectSubclass
 import math
 
 
@@ -34,9 +38,21 @@ class Circle:
         ## Cosinus direction
         self.cos = cos
 
+    ## \todo Figure out how to do this with Decimal and float trap or fixed decimal place count
     def __iter__(self):
-        """Generating points on a circle
+        """Generating points on a circle.
+
+        Sinus and cosinus outputs are currently rounded to 5 decimal places.
         """
         for angle in self.arc[self.points]:
             radians = math.radians(angle)
-            yield self.origin + self.sin * math.sin(radians) + self.cos * math.cos(radians)
+            yield self.origin + self.sin * round(math.sin(radians), 5) + self.cos * round(math.cos(radians), 5)
+
+
+@createObjectSubclass()
+def CircleTest(self):
+    self += Face(*list(Circle()))
+
+
+from src.Grids import Grid, Highlight, Scale
+Grid(CircleTest("Circle test"), 100, highlight=Highlight.VERTICES, scale=Scale.JOINT)()

@@ -38,8 +38,8 @@ class Shape (enum.IntFlag):
             str: String representation of vertex point
 
         Examples:
-            >>> str(Shape.NONE)
-            '┼'
+            >>> str(Shape.LEFT)
+            '╸'
         """
         return "┼╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"[self]
 
@@ -403,7 +403,7 @@ class Labels:
             scale (float): Axis scale
         """
         ## Rounded axis values to be used as labels in the final render
-        self.labels = tuple(map(str, values.values))
+        self.labels = tuple(map(lambda value: str(value).rstrip("0").rstrip("."), values.values))
         ## Maximal label length
         self.just = max(map(len, self.labels))
         ## Multiplied character-sized column/row offsets
