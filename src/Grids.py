@@ -466,6 +466,7 @@ class Edges:
             depth = Axis["XYZ".replace(str(vertical.axis), "").replace(str(horizontal.axis), "")]
             if line | depth.line:
                 continue
+            line = line(**{str(depth).lower(): 0})
             # Processing edges parallel to the vertical axis
             if line | vertical.axis.line:
                 v1 = vertical.values.index(vertical.axis(line.a))
@@ -584,7 +585,7 @@ class Render:
         """
         count = self.edges.horizontal[i][j]
         chars = self.horizontal.offsets[j]
-        return Temperature(self.grid.highlight.line(count))(('━' if count else '╌') * chars)
+        return Temperature(self.grid.highlight.line(count))(('━' if count else '─') * chars)
 
     def colorizeVertical(self, i: int, j: int) -> str:
         """Colorizing a vertical line based on the number of edges behind it
@@ -597,7 +598,7 @@ class Render:
             str: ANSI colored character representing the line
         """
         count = self.edges.vertical[i][j]
-        return Temperature(self.grid.highlight.line(count))('┃' if count else '┆')
+        return Temperature(self.grid.highlight.line(count))('┃' if count else '│')
 
     def __str__(self) -> str:
         """Getting the text representation of a grid render
