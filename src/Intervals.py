@@ -49,6 +49,14 @@ class Interval:
         """
         return Union(self, other)
 
+    def __getitem__(self, index: int):
+        """Generating value belonging to the interval
+
+        Raises:
+            NotImplementedError: Thrown when not overwritten
+        """
+        raise NotImplementedError
+
 
 @makeImmutable
 @addInitRepr

@@ -1,5 +1,5 @@
 """! \file
-Classes for representing a model.
+Classes for representing a 3D model.
 """
 from .Decorators import addInitRepr, makeImmutable
 from .Mesh import Vector, Line, Face, ZERO
@@ -47,9 +47,9 @@ class Object(metaclass=Repr):
         Examples:
             >>> Object()
             Traceback (most recent call last):
-            NotImplementedError: Object generation method was not overwritten
+            NotImplementedError
         """
-        raise NotImplementedError("Object generation method was not overwritten")
+        raise NotImplementedError
 
     def __iter__(self):
         """Iterating over objects

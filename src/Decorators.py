@@ -125,6 +125,7 @@ def addCopyCall(*fields):
 
 
 # noinspection PyUnresolvedReferences
+## \todo Add "right" opeators (for example, __add__ -> __radd__)
 def mirrorOperators(cls: type) -> type:
     """A class decorator for adding counterparts of already defined math operators.
     Some predefined "mirror operations" will be added.
