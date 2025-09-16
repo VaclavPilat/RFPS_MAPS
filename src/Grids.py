@@ -570,7 +570,7 @@ class Render:
         right = 0 if j >= len(self.horizontal.labels) - 1 else self.edges.horizontal[i][j]
         bottom = 0 if i >= len(self.vertical.labels) - 1 else self.edges.vertical[i][j]
         count = self.grid.highlight.point(vertices, top, right, bottom, left)
-        return Temperature(count)(str(shape))
+        return Temperature(count)("•" if shape == Shape.NONE and count > 0 else str(shape))
 
     def colorizeHorizontal(self, i: int, j: int) -> str:
         """Colorizing a horizontal line based on the number of edges behind it

@@ -1,7 +1,7 @@
 """! \file
 Implementation of the Tower of Babel map.
 """
-from src.Decorators import makeImmutable
+from src.Decorators import makeImmutable, addInitRepr, addCopyCall
 from src.Intervals import Interval, FULL
 from src.Mesh import Vector, ZERO, FORWARD, RIGHT, Face
 from src.Objects import createObjectSubclass
@@ -9,6 +9,8 @@ import math
 
 
 @makeImmutable
+@addInitRepr
+@addCopyCall("origin", "radius", "arc", "points", "sin", "cos")
 class Circle:
     """Class for storing information necessary to render a simple circle.
     """
@@ -51,7 +53,7 @@ class Circle:
 
 @createObjectSubclass()
 def CircleTest(self):
-    self += Face(*list(Circle()))
+    self += Face(*Circle())
 
 
 from src.Grids import Grid, Highlight, Scale
