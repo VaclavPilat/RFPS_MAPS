@@ -9,7 +9,7 @@ from .Decorators import makeImmutable
 from .Mesh import Vector, Line, ZERO
 from .Objects import Object
 from .Colors import Color, Temperature, alen
-import enum, sys
+import enum, sys, decimal
 
 
 class Shape (enum.IntFlag):
@@ -271,10 +271,7 @@ class Grid:
         strings = []
         if self.header:
             strings.append(str(Header(self)))
-        try:
-            strings.append(str(Render(self)))
-        except ValueError:
-            pass
+        strings.append(str(Render(self)))
         return "\n".join(strings)
 
     def __call__(self) -> None:
@@ -382,7 +379,7 @@ class Values:
         self.differences = tuple(map(lambda pair: abs(pair[0] - pair[1]), zip(self.values, self.values[1:])))
         ## Minimal axis value increment
         self.minimum = min(self.differences) if self.differences else sys.maxsize
-        if self.minimum < 0.0001:
+        if self.minimum < decimal.Decimal("0.0001"):
             raise ValueError("Mesh most likely contains floating point errors")
         ## Value offset multiplier
         self.multiplier = multiplier
