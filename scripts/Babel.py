@@ -77,6 +77,5 @@ def Atrium(self):
     self += Face(*Circle(points=AWC, radius=AFR))
 
 
-## \internal
 from src.Grids import Grid, Highlight, Scale, Direction
 Grid(Atrium("Atrium"), 100, highlight=Highlight.VERTICES, scale=Scale.JOINT, direction=Direction.TOP)()

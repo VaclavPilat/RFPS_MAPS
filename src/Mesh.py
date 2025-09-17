@@ -515,6 +515,20 @@ class Face:
         """
         return Face(*(point >> other for point in self.points))
 
+    def __invert__(self) -> "Face":
+        """Reversing the order of vertices in a face
+
+        Returns:
+            Face: Face with reversed order of vertices
+
+        Examples:
+            >>> ~Face(ZERO, ONE, UP) == Face(ZERO, ONE, UP)
+            False
+            >>> ~Face(ZERO, ONE, UP) == Face(ZERO, UP, ONE)
+            True
+        """
+        return Face(*reversed(self.points))
+
 
 ## Zero-filled vector, equals to Vector(0, 0, 0)
 ZERO = Vector()
