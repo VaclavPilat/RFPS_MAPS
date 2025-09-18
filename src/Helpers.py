@@ -1,7 +1,6 @@
-## \file
-# Small helpful constructs that don't fit anywhere else.
-# \todo Add tests and better docstrings
-from . import Decorators
+"""! \file
+Small helpful constructs that don't fit anywhere else.
+"""
 import time
 
 
@@ -25,34 +24,14 @@ class Repr(type):
         return cls.__name__
 
 
-@Decorators.makeImmutable
-class Settings:
-    """Class for containing readonly object settings
-
-    Examples:
-        >>> Settings(VALUE=10).VALUE
-        10
-        >>> Settings().VALUE
-        Traceback (most recent call last):
-        AttributeError: 'Settings' object has no attribute 'VALUE'
-        >>> Settings(VALUE=10).VALUE = 15
-        Traceback (most recent call last):
-            ...
-        AttributeError: Attempting to modify Settings.VALUE
-    """
-
-    def __init__(self, **kwargs) -> None:
-        """Initialising a Settings instance with kwarg values
-        """
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-
 def stopwatch(function):
     """Decorator for measuring time spent on a function call and printing it out
 
     Args:
         function (function): Function whose calls are being examined
+
+    Returns:
+        function: Wrapped function
     """
 
     def wrapped(*args, **kwargs):

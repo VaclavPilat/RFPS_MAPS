@@ -6,7 +6,6 @@ Each Object may contain multiple Face objects.
 Face objects are represented by Vector points.
 Iterating over a Face instance yields Line objects.
 
-\todo Use Decimal everywhere with float trap set to True (but leave Vector without type restrictions)
 \todo Add multiple axis rotation: `Vector >> Vector`
 """
 from .Decorators import addCopyCall, addInitRepr, makeImmutable, mirrorOperators
