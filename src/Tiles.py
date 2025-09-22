@@ -2,6 +2,7 @@
 # Implementation of a Tile mesh object.
 # Tiles are Objects that are rectangle-shaped (without specifying height).
 # \todo Refactor and add tests
+# \deprecated This whole file is being replaced by the new Tile implementation being done in Metro.py
 from .Mesh import *
 from .Objects import Object
 from . import Decorators

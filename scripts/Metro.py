@@ -1,3 +1,73 @@
+"""! \file
+Implementation of the Metro station map
+"""
+from src.Decorators import addInitRepr
+from src.Mesh import Vector, Face, ZERO, ONE, FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN
+from src.Objects import Object, createObjectSubclass
+import decimal, enum
+
+
+# Setting up decimal
+decimal.getcontext().prec = 6 # Setting precision to 6 decimal places
+decimal.getcontext().Emin = 0 # Disabling negative exponents, meaning that all values will be rounded to the preset precision
+decimal.getcontext().traps[decimal.FloatOperation] = True # Forbidding interactions between decimals and floats
+
+
+@addInitRepr
+class Tile(Object):
+    """Object subclass representing a tile.
+    """
+
+    def __init__(self, name: str = "New tile", position: Vector = ZERO, size: Vector = ONE, pivot: Vector = ZERO,
+                 rotation: int = 0, *args, **kwargs) -> None:
+        """Initializing a Tile instance
+
+        Args:
+            name (str, optional): Object name. Defaults to "New tile".
+            position (Vector, optional): Object position. Defaults to ZERO.
+            size (Vector, optional): Object size in meters. Defaults to ONE.
+            pivot (Vector, optional): Relative pivot position within the object, with values from -1 to 1. Defaults to CENTER.
+        """
+        if any(map(lambda value: value < 0, size)):
+            raise ValueError("Tile size cannot be negative")
+        if size == ZERO:
+            raise ValueError("Tile size cannot be zero")
+        if not all(map(lambda value: -1 <= value <= 1, pivot)):
+            raise ValueError("Pivot values must be between -1 and 1")
+        normalized = Vector(*map(lambda value: (value + 1) / decimal.Decimal(2), pivot))
+        midpoint = size ** normalized
+        ## Tile bound sizes, from the object position (pivot)
+        self.bounds = tuple(zip(midpoint, size - midpoint))
+        # noinspection PyArgumentList
+        super().__init__(name, position, rotation, *args, **kwargs)
+
+    def __getitem__(self, point: Vector) -> Vector:
+        """Getting the positions of a point from within the tile size
+
+        Args:
+            point (Vector): Relative pivot position within the bounding box
+
+        Returns:
+            Vector: Position of the point
+        """
+        if not all(map(lambda value: -1 <= value <= 1, point)):
+            raise ValueError("Point values must be between -1 and 1")
+        return Vector(*map(lambda axis: axis[0] * axis[1][axis[0] >= 0], zip(point, self.bounds)))
+
+
+@createObjectSubclass(Tile)
+def Test(self):
+    self += Face(self[FORWARD+RIGHT], self[FORWARD+LEFT], self[BACKWARD+LEFT], self[BACKWARD+RIGHT])
+
+
+from src.Grids import Grid
+Grid(Test())()
+
+
+import sys
+sys.exit()
+
+
 ## \file
 # Implementation of the Metro station map.
 # \todo Refactor

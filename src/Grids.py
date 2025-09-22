@@ -271,7 +271,10 @@ class Grid:
         strings = []
         if self.header:
             strings.append(str(Header(self)))
-        strings.append(str(Render(self)))
+        try:
+            strings.append(str(Render(self)))
+        except Exception as e:
+            strings.append(str(e))
         return "\n".join(strings)
 
     def __call__(self) -> None:
@@ -400,7 +403,7 @@ class Labels:
             scale (float): Axis scale
         """
         ## Rounded axis values to be used as labels in the final render
-        self.labels = tuple(map(lambda value: str(value).rstrip("0").rstrip("."), values.values))
+        self.labels = tuple(map(lambda value: str(value).rstrip("0").rstrip(".") if value != 0 else str(value), values.values))
         ## Maximal label length
         self.just = max(map(len, self.labels))
         ## Multiplied character-sized column/row offsets
@@ -512,6 +515,8 @@ class Render:
             grid (Grid): Object with render settings
         """
         points = self.traverse(grid.obj, grid.depth)
+        if len(points) < 3:
+            raise ValueError("Cannot render an object without vertices")
         vertical = Values(grid.direction.vertical, points)
         horizontal = Values(grid.direction.horizontal, points, 2)
         ## Grid settings

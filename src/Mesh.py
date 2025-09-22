@@ -244,6 +244,17 @@ class Vector:
         """
         return self.x != 0 or self.y != 0 or self.z != 0
 
+    def __pow__(self, other: "Vector") -> "Vector":
+        """Calculating the element-wise product of two vectors
+
+        Args:
+            other (Vector): Other vector
+
+        Returns:
+            Vector: Product of the two vectors
+        """
+        return Vector(self.x * other.x, self.y * other.y, self.z * other.z)
+
 
 @mirrorOperators
 @makeImmutable
