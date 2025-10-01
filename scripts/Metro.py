@@ -128,4 +128,4 @@ if __name__ == "__main__":
     except ImportError:
         from src.Grids import Grid, Direction, Highlight, Scale
         for direction in Direction:
-            Grid(metro, 5, direction=direction, scale=Scale.INDEPENDENT, highlight=Highlight.EDGES)()
+            Grid(metro, 5, direction=direction, scale=Scale.NONE, highlight=Highlight.EDGES)()

@@ -198,24 +198,27 @@ class Highlight (enum.Enum):
 
 class Scale (enum.Enum):
     """Enum for the scale of axis values.
-
-    Members are one-value tuples due to the fact that lambdas as enum values alone don't work.
     """
 
     ## Both axis have independent scales
-    INDEPENDENT = lambda this, other: this, Color.YELLOW
+    INDEPENDENT = lambda this, other: this, lambda distance, scale: round(distance / scale), Color.YELLOW
     ## Both axis have the same scales
-    JOINT = lambda this, other: min(this, other), Color.GREEN
+    JOINT = lambda this, other: min(this, other), lambda distance, scale: round(distance / scale), Color.GREEN
+    ## Nonexistent scale (all axis labels are right next to each other)
+    NONE = lambda this, other: 1, lambda distance, scale: 1, Color.BLACK
 
-    def __init__(self, increment, color: Color = Color.NONE) -> None:
+    def __init__(self, increment, offset, color: Color = Color.NONE) -> None:
         """Initialising a Scale instance
 
         Args:
             increment: Function for selecting a scale increment
+            offset: Function for calculating the correct character offset
             color (Color, optional): Color representing the scale. Defaults to Color.NONE.
         """
         ## Function for selecting a scale increment
         self.increment = increment
+        ## Function for calculating an offset between axis labels
+        self.offset = offset
         ## Color representing the scale
         self.color = color
 
@@ -395,19 +398,20 @@ class Labels:
     While Values is meant for calculating values, Labels is meant for printing them out
     """
 
-    def __init__(self, values: Values, scale: float) -> None:
+    def __init__(self, values: Values, scale: float, offset) -> None:
         """Initializing Labels instance
 
         Args:
             values (Values): Axis values
-            scale (float): Axis scale
+            scale (float): Axis scale (usually minimal distance between axis values)
+            offset: Function for calculating character offset between axis labels
         """
         ## Rounded axis values to be used as labels in the final render
         self.labels = tuple(map(lambda value: str(value).rstrip("0").rstrip(".") if value != 0 else str(value), values.values))
         ## Maximal label length
         self.just = max(map(len, self.labels))
         ## Multiplied character-sized column/row offsets
-        self.offsets = tuple(map(lambda d: round(d / scale) * values.multiplier - 1, values.differences))
+        self.offsets = tuple(map(lambda distance: offset(distance, scale) * values.multiplier - 1, values.differences))
 
 
 @makeImmutable
@@ -526,9 +530,9 @@ class Render:
         ## Edge counts
         self.edges = Edges(grid, vertical, horizontal)
         ## Labels on the vertical axis
-        self.vertical = Labels(vertical, grid.scale(vertical.minimum, horizontal.minimum))
+        self.vertical = Labels(vertical, grid.scale(vertical.minimum, horizontal.minimum), grid.scale.offset)
         ## Labels on the horizontal axis
-        self.horizontal = Labels(horizontal, grid.scale(horizontal.minimum, vertical.minimum))
+        self.horizontal = Labels(horizontal, grid.scale(horizontal.minimum, vertical.minimum), grid.scale.offset)
 
     def traverse(self, obj: Object, depth: int) -> set:
         """Getting a set of transformed vertex positions
@@ -546,6 +550,27 @@ class Render:
                 vertices |= self.traverse(child, depth - 1)
         return set(map(obj.__matmul__, vertices))
 
+    def pointShape(self, i: int, j: int) -> str:
+        """Getting a box character that represents shape of a point
+
+        Args:
+            i (int): Vertical point index
+            j (int): Horizontal point index
+
+        Returns:
+            str: Character representing a vertex shape
+        """
+        shape = Shape.NONE
+        if j > 0 and self.edges.horizontal[i][j - 1]:
+            shape |= Shape.LEFT
+        if i > 0 and self.edges.vertical[i - 1][j]:
+            shape |= Shape.TOP
+        if j < len(self.horizontal.labels) - 1 and self.edges.horizontal[i][j]:
+            shape |= Shape.RIGHT
+        if i < len(self.vertical.labels) - 1 and self.edges.vertical[i][j]:
+            shape |= Shape.BOTTOM
+        return shape
+
     def colorizePoint(self, i: int, j: int) -> str:
         """Calculating the colorized character that represents a vertex
 
@@ -556,17 +581,7 @@ class Render:
         Returns:
             str: Colorized character representing a vertex
         """
-        # Getting the point shape character
-        shape = Shape.NONE
-        if j > 0 and self.edges.horizontal[i][j - 1]:
-            shape |= Shape.LEFT
-        if i > 0 and self.edges.vertical[i - 1][j]:
-            shape |= Shape.TOP
-        if j < len(self.horizontal.labels) - 1 and self.edges.horizontal[i][j]:
-            shape |= Shape.RIGHT
-        if i < len(self.vertical.labels) - 1 and self.edges.vertical[i][j]:
-            shape |= Shape.BOTTOM
-        # Colorizing the shape character
+        shape = self.pointShape(i, j)
         vertices = self.vertices.counts[i][j]
         left = 0 if j == 0 else self.edges.horizontal[i][j - 1]
         top = 0 if i == 0 else self.edges.vertical[i - 1][j]
