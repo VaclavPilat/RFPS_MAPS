@@ -71,54 +71,57 @@ class Tile(Object):
         return Vector(*map(lambda axis: axis[0] * axis[1][axis[0] >= 0], zip(point, self.bounds)))
 
 
-## Underpass hallway depth, in meters
-UHD = decimal.Decimal("1")
-## Underpass hallway height, in meters
-UHH = decimal.Decimal("3")
-## Underpass hallway width, in meters
-UHW = decimal.Decimal("3")
-## Underpass entrance width, in meters
-UEW = decimal.Decimal("3")
-## Underpass stair entrance length, in meters
-UST = decimal.Decimal("5")
-## Underpass slope entrance length, in meters
-USL = decimal.Decimal("15")
-## Underpass curb width, in meters
-UCW = decimal.Decimal("0.3")
-## Underpass curb height, in meters
-UCH = decimal.Decimal("0.2")
+class METRO:
+    """Class for containing various constants related to the Metro station map
+    """
 
-
-ULF = UP + LEFT + FORWARD
-ULB = UP + LEFT + BACKWARD
-URF = UP + RIGHT + FORWARD
-URB = UP + RIGHT + BACKWARD
-DLF = DOWN + LEFT + FORWARD
-DLB = DOWN + LEFT + BACKWARD
-DRF = DOWN + RIGHT + FORWARD
-DRB = DOWN + RIGHT + BACKWARD
+    ## Underpass hallway depth, in meters
+    UHD = decimal.Decimal("1")
+    ## Underpass hallway height, in meters
+    UHH = decimal.Decimal("3")
+    ## Underpass hallway width, in meters
+    UHW = decimal.Decimal("3")
+    ## Underpass entrance width, in meters
+    UEW = decimal.Decimal("3")
+    ## Underpass stair entrance length, in meters
+    UST = decimal.Decimal("5")
+    ## Underpass slope entrance length, in meters
+    USL = decimal.Decimal("15")
+    ## Underpass curb width, in meters
+    UCW = decimal.Decimal("0.3")
+    ## Underpass curb height, in meters
+    UCH = decimal.Decimal("0.2")
 
 
 @createObjectSubclass(Tile)
-def UnderpassEntrance(self):
-    # Outer faces
-    self += Face(self[ULF], self[URF], self[DRF], self[DLF])
-    self += Face(self[URF], self[URB], self[DRB], self[DRF])
-    self += Face(self[URB], self[ULB], self[DLB], self[DRB])
-    self += Face(self[ULB], self[ULB]+FORWARD*UCW, self[DLB]+FORWARD*UCW, self[DLB])
-    self += Face(self[ULF]+BACKWARD*UCW, self[ULF], self[DLF], self[DLF]+BACKWARD*UCW)
-    # Inner faces
-    self += Face(self[ULB]+FORWARD*UCW, self[URB]+(FORWARD+LEFT)*UCW, self[DRB]+(FORWARD+LEFT)*UCW, self[DLB]+FORWARD*UCW)
-    self += Face(self[URF]+(BACKWARD+LEFT)*UCW, self[ULF]+BACKWARD*UCW, self[DLF]+BACKWARD*UCW, self[DRF]+(BACKWARD+LEFT)*UCW)
-    self += Face(self[URB]+(FORWARD+LEFT)*UCW, self[URF]+(BACKWARD+LEFT)*UCW, self[DRF]+(BACKWARD+LEFT)*UCW, self[DRB]+(FORWARD+LEFT)*UCW)
-    # Upper face
-    self += Face(self[ULB], self[URB], self[URF], self[ULF], self[ULF]+BACKWARD*UCW,
-                 self[URF]+(BACKWARD+LEFT)*UCW, self[URB]+(FORWARD+LEFT)*UCW, self[ULB]+FORWARD*UCW)
+def UnderpassEntrance(self, width: decimal.Decimal = METRO.UCW):
+    # Getting point coordinates
+    ULF = self[UP + LEFT + FORWARD]
+    ULB = self[UP + LEFT + BACKWARD]
+    URF = self[UP + RIGHT + FORWARD]
+    URB = self[UP + RIGHT + BACKWARD]
+    DLF = self[DOWN + LEFT + FORWARD]
+    DLB = self[DOWN + LEFT + BACKWARD]
+    DRF = self[DOWN + RIGHT + FORWARD]
+    DRB = self[DOWN + RIGHT + BACKWARD]
+    ULFI, DLFI, URFI, DRFI = [point + BACKWARD * width for point in (ULF, DLF, URF, DRF)]
+    ULBI, DLBI, URBI, DRBI = [point + FORWARD * width for point in (ULB, DLB, URB, DRB)]
+    URFI, DRFI, URBI, DRBI = [point + LEFT * width for point in (URFI, DRFI, URBI, DRBI)]
+    # Creating faces
+    self += Face(ULF, URF, DRF, DLF)
+    self += Face(URF, URB, DRB, DRF)
+    self += Face(URB, ULB, DLB, DRB)
+    self += Face(ULB, ULBI, DLBI, DLB)
+    self += Face(ULFI, ULF, DLF, DLFI)
+    self += Face(ULBI, URBI, DRBI, DLBI)
+    self += Face(URFI, ULFI, DLFI, DRFI)
+    self += Face(URBI, URFI, DRFI, DRBI)
+    self += Face(ULB, URB, URF, ULF, ULFI, URFI, URBI, ULBI)
 
 
 if __name__ == "__main__":
     # noinspection PyNoneFunctionAssignment
-    metro = UnderpassEntrance(pivot=DOWN+FORWARD+LEFT, size=Vector(UEW, UST, UCH))
+    metro = UnderpassEntrance(pivot=DOWN+FORWARD+LEFT, size=Vector(METRO.UEW, METRO.UST, METRO.UCH))
     try:
         from src.Blender import Setup, Objects
         Setup.purge()
