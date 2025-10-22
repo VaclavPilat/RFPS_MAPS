@@ -1,6 +1,18 @@
 """! \file
 Implementation of the Tower of Babel map.
 """
+if __name__ == "__main__":
+    # Enabling module imports when the script is being run from Blender. DO NOT REMOVE.
+    try:
+        # noinspection PyUnresolvedReferences
+        import bpy, os, sys
+        directory = os.path.dirname(bpy.data.filepath)
+        if not directory in sys.path:
+            sys.path.append(directory)
+    except ImportError:
+        pass
+
+
 from src.Decorators import makeImmutable, addInitRepr, addCopyCall
 from src.Intervals import Interval, FULL
 from src.Mesh import Vector, Face, ZERO, ONE, FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN
@@ -14,22 +26,32 @@ decimal.getcontext().Emin = 0 # Disabling negative exponents, meaning that all v
 decimal.getcontext().traps[decimal.FloatOperation] = True # Forbidding interactions between decimals and floats
 
 
-## Babel team side count
-BTC = 3
-assert 2 <= BTC
-## Babel floor height
-BFH = decimal.Decimal("5")
-## Babel doorway height
-BDH = decimal.Decimal("3")
-## Atrium wall segment count (including doorways)
-AWC: int = 12
-assert AWC % BTC == 0
-## Atrium doorway count (could be either a hallway or entrance to team side)
-ADC = 6
-assert AWC % ADC == 0
-assert ADC % BTC == 0
-## Atrium floor radius (in meters)
-AFR = decimal.Decimal("15")
+class BABEL:
+    """Various constants related to the Tower of Babel map
+    """
+
+    ## Team side count
+    teamCount: int = 3
+    assert 2 <= teamCount
+    ## Babel floor height, in meters
+    floorHeight: decimal.Decimal = decimal.Decimal("5")
+    ## Babel doorway height, in meters
+    doorHeight: decimal.Decimal = decimal.Decimal("3")
+
+    ## Atrium wall segment count (including doorways)
+    atriumWalls: int = 12
+    assert atriumWalls % teamCount == 0
+    ## Atrium doorway count (could be either a hallway or entrance to team side)
+    atriumDoors: int = 6
+    assert atriumWalls % atriumDoors == 0
+    assert atriumDoors % teamCount == 0
+    ## Atrium floor radius, in meters
+    atriumRadius: decimal.Decimal = decimal.Decimal("15")
+
+    ## Pillar radius, in meters
+    pillarRadius: decimal.Decimal = decimal.Decimal("0.5")
+    ## Pillar face count
+    pillarSegments: int = 16
 
 
 @makeImmutable
@@ -76,6 +98,9 @@ class Circle:
             cos = decimal.getcontext().create_decimal_from_float(math.cos(radians))
             yield self.origin + (self.sin * sin + self.cos * cos) * self.radius
 
+    def __getitem__(self, i: int) -> Vector:
+        return tuple(self)[i % self.points]
+
 
 @createObjectSubclass()
 def Pillar(self, radius: decimal.Decimal, height: decimal.Decimal, segments: int) -> None:
@@ -88,12 +113,27 @@ def Pillar(self, radius: decimal.Decimal, height: decimal.Decimal, segments: int
     """
     lower = Circle(radius=radius, points=segments)
     upper = lower(origin=UP * height)
+    for i in range(segments):
+        self += Face(upper[i], upper[i-1], lower[i-1], lower[i])
 
 
 @createObjectSubclass()
 def Atrium(self):
-    self += Face(*Circle(points=AWC, radius=AFR))
+    lower = Circle(points=BABEL.atriumWalls, radius=BABEL.atriumRadius)
+    upper = lower(origin=UP*BABEL.floorHeight)
+    self += Face(*lower)
+    for i in range(BABEL.atriumWalls):
+        if i % BABEL.atriumDoors > 0:
+            self += Face(upper[i-1], upper[i], lower[i], lower[i-1])
 
 
-from src.Grids import Grid, Highlight, Scale, Direction
-Grid(Atrium("Atrium"), 100, highlight=Highlight.VERTICES, scale=Scale.JOINT, direction=Direction.TOP)()
+if __name__ == "__main__":
+    map = Atrium("Atrium")
+    try:
+        from src.Blender import Setup, Objects
+        Setup.purge()
+        Setup.development()
+        Objects.build(map)
+    except ImportError:
+        from src.Grids import Grid, Highlight, Scale, Direction
+        Grid(map, 100, highlight=Highlight.VERTICES, scale=Scale.JOINT, direction=Direction.TOP)()
