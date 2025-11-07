@@ -1,10 +1,10 @@
 # RFPS_MAPS v0.2
 
-This repository is a part of the *RFPS* project. It is used for generating meshes of 3D models that are then used in the *RFPS* repository. Instead of *modelling them by hand*, they are created using parametrized scripts. There are a few pros of doing it this way:
+This repository is a part of the *RFPS* project. It is used for generating 3D models that are then used in the *RFPS* repository. Instead of *modelling them by hand*, they are created using parametrized scripts. There are a few pros of doing it this way:
 
 - Meshes tend to be more optimized, since what you don't code, you won't have.
 - The risk of leaving in misaligned/duplicated vertices is smaller due to builtin checks.
-- Scripts are easier to modify with when size changes are required.
+- Scripts are easier to modify when size changes are required.
 
 This project consists of Python scripts that are meant to be run within the Blender program to generate Blender files. They can also be run outside the Blender context, in order to create simple 2D renders in console.
 
