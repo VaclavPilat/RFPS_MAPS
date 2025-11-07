@@ -37,6 +37,8 @@ class BABEL:
     floorHeight: decimal.Decimal = decimal.Decimal("5")
     ## Babel doorway height, in meters
     doorHeight: decimal.Decimal = decimal.Decimal("3")
+    ## Babel wall thickness
+    wallThickness: decimal.Decimal = decimal.Decimal("0.5")
 
     ## Atrium wall segment count (including doorways)
     atriumWalls: int = 12
@@ -119,12 +121,19 @@ def Pillar(self, radius: decimal.Decimal, height: decimal.Decimal, segments: int
 
 @createObjectSubclass()
 def Atrium(self):
+    # Inner walls
     lower = Circle(points=BABEL.atriumWalls, radius=BABEL.atriumRadius)
     upper = lower(origin=UP*BABEL.floorHeight)
     self += Face(*lower)
     for i in range(BABEL.atriumWalls):
         if i % BABEL.atriumDoors > 0:
             self += Face(upper[i-1], upper[i], lower[i], lower[i-1])
+    # Outer walls
+    lower = lower(radius=BABEL.atriumRadius+BABEL.wallThickness)
+    upper = lower(origin=UP*BABEL.floorHeight)
+    for i in range(BABEL.atriumWalls):
+        if i % BABEL.atriumDoors > 0:
+            self += Face(upper[i], upper[i-1], lower[i-1], lower[i])
 
 
 if __name__ == "__main__":
